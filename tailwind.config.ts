@@ -47,6 +47,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        checkout: {
+          trust: "hsl(var(--checkout-trust))",
+          "trust-foreground": "hsl(var(--checkout-trust-foreground))",
+          warning: "hsl(var(--checkout-warning))",
+          info: "hsl(var(--checkout-info))",
+          surface: "hsl(var(--checkout-surface))",
+          highlight: "hsl(var(--checkout-highlight))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
