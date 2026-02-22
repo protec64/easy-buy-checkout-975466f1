@@ -5,6 +5,7 @@ import { QRCodeSVG } from "qrcode.react";
 import ProofUpload from "./ProofUpload";
 import BANKS from "./BankLogos";
 import { checkPaymentStatus } from "@/lib/checkout-api";
+import { useToast } from "@/hooks/use-toast";
 
 interface PixPaymentProps {
   pixData: {
@@ -25,6 +26,7 @@ interface PixPaymentProps {
 
 
 const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixPaymentProps) => {
+  const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ min: "00", sec: "00" });
   const [expired, setExpired] = useState(false);
@@ -58,6 +60,10 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
     const code = pixData.copia_e_cola || pixData.qr_code_base64;
     await navigator.clipboard.writeText(code);
     setCopied(true);
+    toast({
+      title: "✅ Código PIX copiado!",
+      description: "Agora cole no app do seu banco para finalizar o pagamento.",
+    });
     setTimeout(() => setCopied(false), 2500);
   }, [pixData]);
 
