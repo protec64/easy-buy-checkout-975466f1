@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, Check, Clock, QrCode, RefreshCw, Loader2, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import ProofUpload from "./ProofUpload";
-import BankLogos from "./BankLogos";
+import BANKS from "./BankLogos";
 import { checkPaymentStatus } from "@/lib/checkout-api";
 
 interface PixPaymentProps {
@@ -21,17 +21,8 @@ interface PixPaymentProps {
   total?: number;
 }
 
-const BANKS = [
-  { name: "Nubank", key: "nubank" },
-  { name: "Banco Inter", key: "inter" },
-  { name: "Itaú", key: "itau" },
-  { name: "Bradesco", key: "bradesco" },
-  { name: "Banco do Brasil", key: "bb" },
-  { name: "Caixa", key: "caixa" },
-  { name: "Santander", key: "santander" },
-  { name: "Mercado Pago", key: "mercadopago" },
-  { name: "PicPay", key: "picpay" },
-];
+
+
 
 const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixPaymentProps) => {
   const [copied, setCopied] = useState(false);
@@ -232,23 +223,24 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
       <div>
         <p className="mb-3 text-sm font-semibold text-foreground">Pague com seu banco:</p>
         <div className="space-y-2">
-          {BANKS.slice(0, showAllBanks ? BANKS.length : 4).map((bank) => {
-            const Logo = BankLogos[bank.key];
-            return (
-              <button
-                key={bank.key}
-                onClick={handleCopy}
-                className="flex w-full items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50 active:bg-muted"
-              >
-                {Logo && <Logo className="h-8 w-8 shrink-0" />}
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">{bank.name}</p>
-                  <p className="text-[10px] text-muted-foreground">Pode precisar colar manualmente</p>
-                </div>
-                <Copy className="h-4 w-4 text-muted-foreground" />
-              </button>
-            );
-          })}
+          {BANKS.slice(0, showAllBanks ? BANKS.length : 4).map((bank) => (
+            <button
+              key={bank.name}
+              onClick={handleCopy}
+              className="flex w-full items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50 active:bg-muted"
+            >
+              <img
+                src={bank.logo}
+                alt={bank.name}
+                className="h-8 w-auto max-w-[80px] shrink-0 object-contain"
+              />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">{bank.name}</p>
+                <p className="text-[10px] text-muted-foreground">Pode precisar colar manualmente</p>
+              </div>
+              <Copy className="h-4 w-4 text-muted-foreground" />
+            </button>
+          ))}
         </div>
         <button
           onClick={() => setShowAllBanks(!showAllBanks)}
