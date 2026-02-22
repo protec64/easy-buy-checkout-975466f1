@@ -29,6 +29,8 @@ const BANKS = [
   { name: "Banco do Brasil", key: "bb" },
   { name: "Caixa", key: "caixa" },
   { name: "Santander", key: "santander" },
+  { name: "Mercado Pago", key: "mercadopago" },
+  { name: "PicPay", key: "picpay" },
 ];
 
 const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixPaymentProps) => {
