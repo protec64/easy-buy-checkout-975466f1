@@ -151,11 +151,6 @@ const Checkout = () => {
   };
 
   const validateStep3 = (): boolean => {
-    if (!termsAccepted) {
-      setTermsError("Aceite os termos para continuar");
-      return false;
-    }
-    setTermsError("");
     return true;
   };
 
@@ -385,22 +380,8 @@ const Checkout = () => {
                   cpf={customer.cpf}
                 />
 
-                <div className="rounded-xl border border-border bg-card p-5 checkout-shadow">
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                      id="terms"
-                      checked={termsAccepted}
-                      onCheckedChange={(v) => { setTermsAccepted(v === true); setTermsError(""); }}
-                      className="mt-0.5"
-                    />
-                    <label htmlFor="terms" className="text-sm text-muted-foreground">
-                      Li e concordo com os{" "}
-                      <a href="#" className="text-primary underline">Termos de Uso</a>{" "}e{" "}
-                      <a href="#" className="text-primary underline">Política de Privacidade</a>.
-                    </label>
-                  </div>
-                  {termsError && <p className="mt-2 text-xs text-destructive">{termsError}</p>}
-                </div>
+
+
 
                 <p className="text-center text-xs text-muted-foreground">
                   Você receberá atualizações do pedido no email.
