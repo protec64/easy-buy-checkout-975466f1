@@ -20,10 +20,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { customer, shipping_address, order, payment } = body;
-
-    // Build FreePay payload
-    const amountInCents = Math.round(order.total * 100);
+    const { customer, shipping_address, order } = body;
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -71,34 +68,43 @@ Deno.serve(async (req) => {
 
     await supabase.from("order_items").insert(itemInserts);
 
-    // Call FreePay API
+    // Build FreePay payload
+    const amountInCents = Math.round(order.total * 100);
+    const cleanCpf = customer.cpf.replace(/\D/g, "");
     const authToken = btoa(`${FREEPAY_PUBLIC_KEY}:${FREEPAY_SECRET_KEY}`);
 
-    const freepayPayload: any = {
-      amount: amountInCents,
-      payment_method: "pix",
-      postback_url: `${SUPABASE_URL}/functions/v1/freepay-webhook`,
-      customer: {
-        name: customer.full_name,
-        email: customer.email,
-        document: customer.cpf.replace(/\D/g, ""),
-        phone: customer.phone ? customer.phone.replace(/\D/g, "") : undefined,
-      },
-      items: order.items.map((item: any) => ({
-        title: item.name,
-        quantity: item.qty,
-        unit_price: Math.round(item.price * 100),
-        tangible: true,
-      })),
-      pix: {
-        expires_in: 900, // 15 minutes
-      },
-      metadata: {
-        provider_name: "Lovable Checkout",
-        order_id: orderData.id,
-        order_number: orderData.order_number,
+    const freepayPayload = {
+      request: {
+        amount: amountInCents,
+        payment_method: "pix",
+        postback_url: `${SUPABASE_URL}/functions/v1/freepay-webhook`,
+        customer: {
+          name: customer.full_name,
+          email: customer.email,
+          document: {
+            type: cleanCpf.length <= 11 ? "cpf" : "cnpj",
+            number: cleanCpf,
+          },
+          phone: customer.phone ? customer.phone.replace(/\D/g, "") : undefined,
+        },
+        items: order.items.map((item: any) => ({
+          title: item.name,
+          quantity: item.qty,
+          unit_price: Math.round(item.price * 100),
+          tangible: true,
+        })),
+        pix: {
+          expires_in: 900,
+        },
+        metadata: {
+          provider_name: "Lovable Checkout",
+          order_id: orderData.id,
+          order_number: orderData.order_number,
+        },
       },
     };
+
+    console.log("FreePay request:", JSON.stringify(freepayPayload));
 
     const freepayRes = await fetch(
       "https://api.freepaybrasil.com/v1/payment-transaction/create",
@@ -120,6 +126,8 @@ Deno.serve(async (req) => {
         `FreePay API error [${freepayRes.status}]: ${JSON.stringify(freepayData)}`
       );
     }
+
+    console.log("FreePay response:", JSON.stringify(freepayData));
 
     // Update order with FreePay payment info
     const pixCode = freepayData.pix?.qr_code || freepayData.qr_code || "";
