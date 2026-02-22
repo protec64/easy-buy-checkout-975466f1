@@ -124,12 +124,27 @@ Deno.serve(async (req) => {
 
     console.log(`Payment ${paymentId}: raw=${rawStatus}, mapped=${paymentStatus}`);
 
+    // Generate order number only when approved
+    const updateData: Record<string, any> = {
+      mp_status: status,
+      payment_status: paymentStatus,
+    };
+
+    if (paymentStatus === "approved") {
+      const now = new Date();
+      const seq = now.getFullYear().toString().slice(2) +
+        String(now.getMonth() + 1).padStart(2, "0") +
+        String(now.getDate()).padStart(2, "0") +
+        String(now.getHours()).padStart(2, "0") +
+        String(now.getMinutes()).padStart(2, "0") +
+        String(now.getSeconds()).padStart(2, "0");
+      const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+      updateData.order_number = `PED-${seq}-${rand}`;
+    }
+
     const { error } = await supabase
       .from("orders")
-      .update({
-        mp_status: status,
-        payment_status: paymentStatus,
-      })
+      .update(updateData)
       .eq("mp_payment_id", paymentId);
 
     if (error) {
