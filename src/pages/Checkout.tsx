@@ -6,7 +6,9 @@ import CustomerForm from "@/components/checkout/CustomerForm";
 import ShippingForm from "@/components/checkout/ShippingForm";
 import PaymentSection from "@/components/checkout/PaymentSection";
 import TrustBadges from "@/components/checkout/TrustBadges";
+import CheckoutStepper from "@/components/checkout/CheckoutStepper";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import { customerSchema, shippingSchema, cardSchema } from "@/lib/validators";
 import {
   createPixPayment,
@@ -15,8 +17,9 @@ import {
   type OrderPayload,
 } from "@/lib/checkout-api";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
-// Mock product data — substituir por dados reais
+// Mock product data
 const MOCK_ITEMS = [
   {
     id: "prod_001",
@@ -30,6 +33,7 @@ const SHIPPING_COST = 19.9;
 const DISCOUNT = 0;
 
 const STORAGE_KEY = "checkout_form_draft";
+const STEPS = ["Dados pessoais", "Entrega e Pagamento"];
 
 function loadDraft() {
   try {
@@ -44,6 +48,8 @@ const Checkout = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const draft = loadDraft();
+
+  const [step, setStep] = useState(1);
 
   // Customer
   const [customer, setCustomer] = useState({
@@ -115,8 +121,8 @@ const Checkout = () => {
   const subtotal = MOCK_ITEMS.reduce((s, i) => s + i.price * i.qty, 0);
   const total = subtotal + SHIPPING_COST - DISCOUNT;
 
-  const validateBase = (): boolean => {
-    let valid = true;
+  // Validate step 1
+  const validateStep1 = (): boolean => {
     const cResult = customerSchema.safeParse(customer);
     if (!cResult.success) {
       const errs: Record<string, string> = {};
@@ -124,10 +130,19 @@ const Checkout = () => {
         errs[e.path[0] as string] = e.message;
       });
       setCustomerErrors(errs);
-      valid = false;
-    } else {
-      setCustomerErrors({});
+      setTimeout(() => {
+        const el = document.querySelector(".border-destructive");
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+      return false;
     }
+    setCustomerErrors({});
+    return true;
+  };
+
+  // Validate step 2 (shipping + terms)
+  const validateStep2 = (): boolean => {
+    let valid = true;
 
     const sResult = shippingSchema.safeParse(shipping);
     if (!sResult.success) {
@@ -149,7 +164,6 @@ const Checkout = () => {
     }
 
     if (!valid) {
-      // Scroll to first error
       setTimeout(() => {
         const el = document.querySelector(".border-destructive");
         el?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -157,6 +171,18 @@ const Checkout = () => {
     }
 
     return valid;
+  };
+
+  const handleNextStep = () => {
+    if (validateStep1()) {
+      setStep(2);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handlePrevStep = () => {
+    setStep(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const buildPayload = (method: "pix" | "card"): OrderPayload => ({
@@ -189,7 +215,7 @@ const Checkout = () => {
   });
 
   const handleGeneratePix = async () => {
-    if (!validateBase()) return;
+    if (!validateStep2()) return;
     setPixLoading(true);
     try {
       const result = await createPixPayment(buildPayload("pix"));
@@ -201,7 +227,7 @@ const Checkout = () => {
   };
 
   const handleCardSubmit = async () => {
-    if (!validateBase()) return;
+    if (!validateStep2()) return;
     const cResult = cardSchema.safeParse(cardValues);
     if (!cResult.success) {
       const errs: Record<string, string> = {};
@@ -232,6 +258,8 @@ const Checkout = () => {
       <CheckoutHeader />
 
       <main className="mx-auto max-w-5xl px-4 py-6">
+        <CheckoutStepper currentStep={step} steps={STEPS} />
+
         {/* Mobile Summary */}
         {isMobile && (
           <div className="mb-4">
@@ -248,65 +276,102 @@ const Checkout = () => {
         <div className="flex flex-col gap-6 lg:flex-row">
           {/* Left: Form */}
           <div className="flex-1 space-y-5">
-            <CustomerForm
-              values={customer}
-              errors={customerErrors}
-              onChange={handleCustomerChange}
-            />
-
-            <ShippingForm
-              values={shipping}
-              errors={shippingErrors}
-              onChange={handleShippingChange}
-            />
-
-            <PaymentSection
-              method={paymentMethod}
-              onMethodChange={setPaymentMethod}
-              pixData={pixData}
-              pixLoading={pixLoading}
-              onGeneratePix={handleGeneratePix}
-              cardValues={cardValues}
-              cardErrors={cardErrors}
-              onCardChange={handleCardChange}
-              onCardSubmit={handleCardSubmit}
-              cardLoading={cardLoading}
-              cardApiError={cardApiError}
-              total={total}
-            />
-
-            {/* Terms */}
-            <div className="rounded-xl border border-border bg-card p-5 checkout-shadow">
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  id="terms"
-                  checked={termsAccepted}
-                  onCheckedChange={(v) => {
-                    setTermsAccepted(v === true);
-                    setTermsError("");
-                  }}
-                  className="mt-0.5"
+            {/* STEP 1: Dados pessoais */}
+            {step === 1 && (
+              <>
+                <CustomerForm
+                  values={customer}
+                  errors={customerErrors}
+                  onChange={handleCustomerChange}
                 />
-                <label htmlFor="terms" className="text-sm text-muted-foreground">
-                  Li e concordo com os{" "}
-                  <a href="#" className="text-primary underline">
-                    Termos de Uso
-                  </a>{" "}
-                  e{" "}
-                  <a href="#" className="text-primary underline">
-                    Política de Privacidade
-                  </a>
-                  .
-                </label>
-              </div>
-              {termsError && (
-                <p className="mt-2 text-xs text-destructive">{termsError}</p>
-              )}
-            </div>
 
-            <p className="text-center text-xs text-muted-foreground">
-              Você receberá atualizações do pedido no email.
-            </p>
+                <Button
+                  onClick={handleNextStep}
+                  className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold"
+                >
+                  Continuar para Entrega
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+
+            {/* STEP 2: Endereço + Pagamento */}
+            {step === 2 && (
+              <>
+                {/* Resumo dos dados pessoais */}
+                <div className="rounded-xl border border-border bg-card p-4 checkout-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{customer.fullName}</p>
+                      <p className="text-xs text-muted-foreground">{customer.email}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handlePrevStep}
+                      className="text-xs text-primary gap-1"
+                    >
+                      <ArrowLeft className="h-3 w-3" />
+                      Editar
+                    </Button>
+                  </div>
+                </div>
+
+                <ShippingForm
+                  values={shipping}
+                  errors={shippingErrors}
+                  onChange={handleShippingChange}
+                />
+
+                <PaymentSection
+                  method={paymentMethod}
+                  onMethodChange={setPaymentMethod}
+                  pixData={pixData}
+                  pixLoading={pixLoading}
+                  onGeneratePix={handleGeneratePix}
+                  cardValues={cardValues}
+                  cardErrors={cardErrors}
+                  onCardChange={handleCardChange}
+                  onCardSubmit={handleCardSubmit}
+                  cardLoading={cardLoading}
+                  cardApiError={cardApiError}
+                  total={total}
+                />
+
+                {/* Terms */}
+                <div className="rounded-xl border border-border bg-card p-5 checkout-shadow">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="terms"
+                      checked={termsAccepted}
+                      onCheckedChange={(v) => {
+                        setTermsAccepted(v === true);
+                        setTermsError("");
+                      }}
+                      className="mt-0.5"
+                    />
+                    <label htmlFor="terms" className="text-sm text-muted-foreground">
+                      Li e concordo com os{" "}
+                      <a href="#" className="text-primary underline">
+                        Termos de Uso
+                      </a>{" "}
+                      e{" "}
+                      <a href="#" className="text-primary underline">
+                        Política de Privacidade
+                      </a>
+                      .
+                    </label>
+                  </div>
+                  {termsError && (
+                    <p className="mt-2 text-xs text-destructive">{termsError}</p>
+                  )}
+                </div>
+
+                <p className="text-center text-xs text-muted-foreground">
+                  Você receberá atualizações do pedido no email.
+                </p>
+              </>
+            )}
           </div>
 
           {/* Right: Summary (desktop) */}
