@@ -105,7 +105,8 @@ Deno.serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const paymentId = String(body.Id || body.id || body.transaction_id || "");
-    const status = body.Status || body.status || body.current_status || "";
+    const rawStatus = body.Status || body.status || body.current_status || "";
+    const status = rawStatus.toLowerCase();
 
     if (!paymentId) {
       throw new Error("No payment ID in webhook payload");
@@ -120,6 +121,8 @@ Deno.serve(async (req) => {
     } else if (status === "refunded" || status === "chargedback") {
       paymentStatus = "refunded";
     }
+
+    console.log(`Payment ${paymentId}: raw=${rawStatus}, mapped=${paymentStatus}`);
 
     const { error } = await supabase
       .from("orders")
