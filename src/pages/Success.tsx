@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import TrustBadges from "@/components/checkout/TrustBadges";
 import { supabase } from "@/integrations/supabase/client";
-import { trackPurchase } from "@/lib/meta-pixel";
+import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
 
 interface OrderData {
   order_number: string;
@@ -59,6 +59,7 @@ const Success = () => {
     fired.current = true;
 
     (async () => {
+      initMetaPixel();
       try {
         const { data: orderData } = await supabase
           .from("orders")
