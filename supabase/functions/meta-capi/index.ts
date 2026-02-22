@@ -1,6 +1,3 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createHash } from "https://deno.land/std@0.224.0/crypto/mod.ts";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -25,10 +22,17 @@ interface CAPIPayload {
   event_time?: number;
   event_source_url?: string;
   action_source: string;
+  event_id?: string;
   user_data: {
     email?: string;
     phone?: string;
     cpf?: string;
+    first_name?: string;
+    last_name?: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
+    country?: string;
     client_ip_address?: string;
     client_user_agent?: string;
     fbc?: string;
@@ -40,11 +44,12 @@ interface CAPIPayload {
     content_ids?: string[];
     contents?: Array<{ id: string; quantity: number; item_price: number }>;
     content_type?: string;
+    content_name?: string;
+    content_category?: string;
     num_items?: number;
     order_id?: string;
     payment_method?: string;
   };
-  event_id?: string;
 }
 
 Deno.serve(async (req) => {
@@ -60,32 +65,82 @@ Deno.serve(async (req) => {
 
     const body: CAPIPayload = await req.json();
 
-    // Build user_data with hashed PII
-    const userData: Record<string, string> = {};
+    // Get client IP from request headers
+    const clientIp =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("x-real-ip") ||
+      "";
 
+    // Build user_data with hashed PII per Meta docs
+    const userData: Record<string, any> = {};
+
+    // em - Email (hash required)
     if (body.user_data.email) {
       userData.em = await sha256(body.user_data.email);
     }
+
+    // ph - Phone (hash required, include country code)
     if (body.user_data.phone) {
-      // Remove non-digits, add country code if missing
       let phone = body.user_data.phone.replace(/\D/g, "");
       if (!phone.startsWith("55")) phone = "55" + phone;
       userData.ph = await sha256(phone);
     }
+
+    // fn - First Name (hash required)
+    if (body.user_data.first_name) {
+      userData.fn = await sha256(body.user_data.first_name);
+    }
+
+    // ln - Last Name (hash required)
+    if (body.user_data.last_name) {
+      userData.ln = await sha256(body.user_data.last_name);
+    }
+
+    // ct - City (hash required, no spaces, lowercase)
+    if (body.user_data.city) {
+      userData.ct = await sha256(body.user_data.city.replace(/\s/g, ""));
+    }
+
+    // st - State (hash required, 2-char lowercase)
+    if (body.user_data.state) {
+      userData.st = await sha256(body.user_data.state.toLowerCase().slice(0, 2));
+    }
+
+    // zp - Zip/CEP (hash required, digits only)
+    if (body.user_data.zip_code) {
+      userData.zp = await sha256(body.user_data.zip_code.replace(/\D/g, ""));
+    }
+
+    // country - Country code (hash required)
+    if (body.user_data.country) {
+      userData.country = await sha256(body.user_data.country.toLowerCase());
+    }
+
+    // external_id - CPF as unique identifier (hash recommended)
     if (body.user_data.cpf) {
-      // Hash CPF as external_id
       const cleanCpf = body.user_data.cpf.replace(/\D/g, "");
       userData.external_id = await sha256(cleanCpf);
     }
-    if (body.user_data.client_ip_address) {
+
+    // client_ip_address - Do NOT hash
+    if (clientIp) {
+      userData.client_ip_address = clientIp;
+    } else if (body.user_data.client_ip_address) {
       userData.client_ip_address = body.user_data.client_ip_address;
     }
+
+    // client_user_agent - Do NOT hash
     if (body.user_data.client_user_agent) {
       userData.client_user_agent = body.user_data.client_user_agent;
     }
+
+    // fbc - Click ID cookie - Do NOT hash
     if (body.user_data.fbc) {
       userData.fbc = body.user_data.fbc;
     }
+
+    // fbp - Browser ID cookie - Do NOT hash
     if (body.user_data.fbp) {
       userData.fbp = body.user_data.fbp;
     }
@@ -107,15 +162,7 @@ Deno.serve(async (req) => {
     }
 
     if (body.custom_data) {
-      event.custom_data = {};
-      if (body.custom_data.value !== undefined) event.custom_data.value = body.custom_data.value;
-      if (body.custom_data.currency) event.custom_data.currency = body.custom_data.currency;
-      if (body.custom_data.content_ids) event.custom_data.content_ids = body.custom_data.content_ids;
-      if (body.custom_data.contents) event.custom_data.contents = body.custom_data.contents;
-      if (body.custom_data.content_type) event.custom_data.content_type = body.custom_data.content_type;
-      if (body.custom_data.num_items !== undefined) event.custom_data.num_items = body.custom_data.num_items;
-      if (body.custom_data.order_id) event.custom_data.order_id = body.custom_data.order_id;
-      if (body.custom_data.payment_method) event.custom_data.payment_method = body.custom_data.payment_method;
+      event.custom_data = { ...body.custom_data };
     }
 
     const metaPayload = {
@@ -137,7 +184,9 @@ Deno.serve(async (req) => {
 
     if (!metaRes.ok) {
       console.error("Meta CAPI error:", JSON.stringify(metaData));
-      throw new Error(`Meta CAPI error [${metaRes.status}]: ${JSON.stringify(metaData)}`);
+      throw new Error(
+        `Meta CAPI error [${metaRes.status}]: ${JSON.stringify(metaData)}`
+      );
     }
 
     console.log("Meta CAPI response:", JSON.stringify(metaData));
