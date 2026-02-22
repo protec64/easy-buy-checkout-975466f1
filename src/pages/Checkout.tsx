@@ -6,6 +6,7 @@ import CustomerForm from "@/components/checkout/CustomerForm";
 import ShippingForm from "@/components/checkout/ShippingForm";
 import PaymentSection from "@/components/checkout/PaymentSection";
 import TrustBadges from "@/components/checkout/TrustBadges";
+import ShippingOptions, { SHIPPING_OPTIONS } from "@/components/checkout/ShippingOptions";
 import CheckoutStepper from "@/components/checkout/CheckoutStepper";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,6 @@ const MOCK_ITEMS = [
     price: 129.9,
   },
 ];
-const SHIPPING_COST = 19.9;
 const DISCOUNT = 0;
 
 const STORAGE_KEY = "checkout_form_draft";
@@ -68,6 +68,7 @@ const Checkout = () => {
     reference: draft?.reference || "",
   });
 
+  const [shippingOption, setShippingOption] = useState("free");
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card">("pix");
   const [cardValues, setCardValues] = useState({
     cardNumber: "",
@@ -109,7 +110,9 @@ const Checkout = () => {
   }, []);
 
   const subtotal = MOCK_ITEMS.reduce((s, i) => s + i.price * i.qty, 0);
-  const total = subtotal + SHIPPING_COST - DISCOUNT;
+  const selectedShipping = SHIPPING_OPTIONS.find((o) => o.id === shippingOption)!;
+  const shippingCost = selectedShipping.price;
+  const total = subtotal + shippingCost - DISCOUNT;
 
   const validateStep1 = (): boolean => {
     const cResult = customerSchema.safeParse(customer);
@@ -186,7 +189,7 @@ const Checkout = () => {
     },
     order: {
       items: MOCK_ITEMS,
-      shipping_cost: SHIPPING_COST,
+      shipping_cost: shippingCost,
       discount: DISCOUNT,
       total,
     },
@@ -272,7 +275,7 @@ const Checkout = () => {
           <div className="mb-4">
             <OrderSummary
               items={MOCK_ITEMS}
-              shippingCost={SHIPPING_COST}
+              shippingCost={shippingCost}
               discount={DISCOUNT}
               installments={paymentMethod === "card" ? parseInt(cardValues.installments) : undefined}
               isMobile
@@ -303,6 +306,7 @@ const Checkout = () => {
                   onEdit={() => goToStep(1)}
                 />
                 <ShippingForm values={shipping} errors={shippingErrors} onChange={handleShippingChange} />
+                <ShippingOptions selected={shippingOption} onChange={setShippingOption} />
                 <Button onClick={handleNextFromStep2} className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold">
                   Continuar para Pagamento
                   <ArrowRight className="h-4 w-4" />
@@ -369,7 +373,7 @@ const Checkout = () => {
             <div className="w-full lg:w-[360px]">
               <OrderSummary
                 items={MOCK_ITEMS}
-                shippingCost={SHIPPING_COST}
+                shippingCost={shippingCost}
                 discount={DISCOUNT}
                 installments={paymentMethod === "card" ? parseInt(cardValues.installments) : undefined}
               />
