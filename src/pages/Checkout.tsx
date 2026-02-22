@@ -358,7 +358,7 @@ const Checkout = ({ productId }: { productId?: string }) => {
       <CheckoutHeader checkoutId={checkoutId} />
 
       <main className="mx-auto max-w-5xl px-3 sm:px-4 py-4 sm:py-6">
-        <CheckoutStepper currentStep={step} steps={STEPS} />
+        
 
         {isMobile && (
           <div className="mb-4">
