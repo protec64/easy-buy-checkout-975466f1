@@ -17,9 +17,8 @@ import {
   type OrderPayload,
 } from "@/lib/checkout-api";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, User, MapPin } from "lucide-react";
 
-// Mock product data
 const MOCK_ITEMS = [
   {
     id: "prod_001",
@@ -33,7 +32,7 @@ const SHIPPING_COST = 19.9;
 const DISCOUNT = 0;
 
 const STORAGE_KEY = "checkout_form_draft";
-const STEPS = ["Dados pessoais", "Entrega e Pagamento"];
+const STEPS = ["Dados", "Endereço", "Pagamento"];
 
 function loadDraft() {
   try {
@@ -51,7 +50,6 @@ const Checkout = () => {
 
   const [step, setStep] = useState(1);
 
-  // Customer
   const [customer, setCustomer] = useState({
     email: draft?.email || "",
     fullName: draft?.fullName || "",
@@ -59,7 +57,6 @@ const Checkout = () => {
     phone: draft?.phone || "",
   });
 
-  // Shipping
   const [shipping, setShipping] = useState({
     cep: draft?.cep || "",
     street: draft?.street || "",
@@ -71,7 +68,6 @@ const Checkout = () => {
     reference: draft?.reference || "",
   });
 
-  // Payment
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card">("pix");
   const [cardValues, setCardValues] = useState({
     cardNumber: "",
@@ -81,22 +77,16 @@ const Checkout = () => {
     installments: "1",
   });
 
-  // Terms
   const [termsAccepted, setTermsAccepted] = useState(false);
-
-  // Errors
   const [customerErrors, setCustomerErrors] = useState<Record<string, string>>({});
   const [shippingErrors, setShippingErrors] = useState<Record<string, string>>({});
   const [cardErrors, setCardErrors] = useState<Record<string, string>>({});
   const [termsError, setTermsError] = useState("");
-
-  // States
   const [pixData, setPixData] = useState<PixPaymentResult | null>(null);
   const [pixLoading, setPixLoading] = useState(false);
   const [cardLoading, setCardLoading] = useState(false);
   const [cardApiError, setCardApiError] = useState("");
 
-  // Persist draft
   useEffect(() => {
     const data = { ...customer, ...shipping };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -121,7 +111,6 @@ const Checkout = () => {
   const subtotal = MOCK_ITEMS.reduce((s, i) => s + i.price * i.qty, 0);
   const total = subtotal + SHIPPING_COST - DISCOUNT;
 
-  // Validate step 1
   const validateStep1 = (): boolean => {
     const cResult = customerSchema.safeParse(customer);
     if (!cResult.success) {
@@ -131,8 +120,7 @@ const Checkout = () => {
       });
       setCustomerErrors(errs);
       setTimeout(() => {
-        const el = document.querySelector(".border-destructive");
-        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        document.querySelector(".border-destructive")?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 100);
       return false;
     }
@@ -140,10 +128,7 @@ const Checkout = () => {
     return true;
   };
 
-  // Validate step 2 (shipping + terms)
   const validateStep2 = (): boolean => {
-    let valid = true;
-
     const sResult = shippingSchema.safeParse(shipping);
     if (!sResult.success) {
       const errs: Record<string, string> = {};
@@ -151,38 +136,35 @@ const Checkout = () => {
         errs[e.path[0] as string] = e.message;
       });
       setShippingErrors(errs);
-      valid = false;
-    } else {
-      setShippingErrors({});
+      setTimeout(() => {
+        document.querySelector(".border-destructive")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+      return false;
     }
+    setShippingErrors({});
+    return true;
+  };
 
+  const validateStep3 = (): boolean => {
     if (!termsAccepted) {
       setTermsError("Aceite os termos para continuar");
-      valid = false;
-    } else {
-      setTermsError("");
+      return false;
     }
-
-    if (!valid) {
-      setTimeout(() => {
-        const el = document.querySelector(".border-destructive");
-        el?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 100);
-    }
-
-    return valid;
+    setTermsError("");
+    return true;
   };
 
-  const handleNextStep = () => {
-    if (validateStep1()) {
-      setStep(2);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
-  const handlePrevStep = () => {
-    setStep(1);
+  const goToStep = (target: number) => {
+    setStep(target);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleNextFromStep1 = () => {
+    if (validateStep1()) goToStep(2);
+  };
+
+  const handleNextFromStep2 = () => {
+    if (validateStep2()) goToStep(3);
   };
 
   const buildPayload = (method: "pix" | "card"): OrderPayload => ({
@@ -215,7 +197,7 @@ const Checkout = () => {
   });
 
   const handleGeneratePix = async () => {
-    if (!validateStep2()) return;
+    if (!validateStep3()) return;
     setPixLoading(true);
     try {
       const result = await createPixPayment(buildPayload("pix"));
@@ -227,7 +209,7 @@ const Checkout = () => {
   };
 
   const handleCardSubmit = async () => {
-    if (!validateStep2()) return;
+    if (!validateStep3()) return;
     const cResult = cardSchema.safeParse(cardValues);
     if (!cResult.success) {
       const errs: Record<string, string> = {};
@@ -253,6 +235,32 @@ const Checkout = () => {
     setCardLoading(false);
   };
 
+  // Summary card for completed steps
+  const StepSummaryCard = ({ icon: Icon, title, lines, onEdit }: {
+    icon: React.ElementType;
+    title: string;
+    lines: string[];
+    onEdit: () => void;
+  }) => (
+    <div className="rounded-xl border border-border bg-card p-4 checkout-shadow">
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-3">
+          <Icon className="h-4 w-4 mt-0.5 text-primary" />
+          <div>
+            <p className="text-sm font-medium text-foreground">{title}</p>
+            {lines.map((line, i) => (
+              <p key={i} className="text-xs text-muted-foreground">{line}</p>
+            ))}
+          </div>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onEdit} className="text-xs text-primary gap-1">
+          <ArrowLeft className="h-3 w-3" />
+          Editar
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <CheckoutHeader />
@@ -260,7 +268,6 @@ const Checkout = () => {
       <main className="mx-auto max-w-5xl px-4 py-6">
         <CheckoutStepper currentStep={step} steps={STEPS} />
 
-        {/* Mobile Summary */}
         {isMobile && (
           <div className="mb-4">
             <OrderSummary
@@ -274,53 +281,49 @@ const Checkout = () => {
         )}
 
         <div className="flex flex-col gap-6 lg:flex-row">
-          {/* Left: Form */}
           <div className="flex-1 space-y-5">
-            {/* STEP 1: Dados pessoais */}
+            {/* STEP 1 */}
             {step === 1 && (
               <>
-                <CustomerForm
-                  values={customer}
-                  errors={customerErrors}
-                  onChange={handleCustomerChange}
-                />
-
-                <Button
-                  onClick={handleNextStep}
-                  className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold"
-                >
-                  Continuar para Entrega
+                <CustomerForm values={customer} errors={customerErrors} onChange={handleCustomerChange} />
+                <Button onClick={handleNextFromStep1} className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold">
+                  Continuar para Endereço
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </>
             )}
 
-            {/* STEP 2: Endereço + Pagamento */}
+            {/* STEP 2 */}
             {step === 2 && (
               <>
-                {/* Resumo dos dados pessoais */}
-                <div className="rounded-xl border border-border bg-card p-4 checkout-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{customer.fullName}</p>
-                      <p className="text-xs text-muted-foreground">{customer.email}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handlePrevStep}
-                      className="text-xs text-primary gap-1"
-                    >
-                      <ArrowLeft className="h-3 w-3" />
-                      Editar
-                    </Button>
-                  </div>
-                </div>
+                <StepSummaryCard
+                  icon={User}
+                  title={customer.fullName}
+                  lines={[customer.email, customer.cpf]}
+                  onEdit={() => goToStep(1)}
+                />
+                <ShippingForm values={shipping} errors={shippingErrors} onChange={handleShippingChange} />
+                <Button onClick={handleNextFromStep2} className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold">
+                  Continuar para Pagamento
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </>
+            )}
 
-                <ShippingForm
-                  values={shipping}
-                  errors={shippingErrors}
-                  onChange={handleShippingChange}
+            {/* STEP 3 */}
+            {step === 3 && (
+              <>
+                <StepSummaryCard
+                  icon={User}
+                  title={customer.fullName}
+                  lines={[customer.email]}
+                  onEdit={() => goToStep(1)}
+                />
+                <StepSummaryCard
+                  icon={MapPin}
+                  title={`${shipping.street}, ${shipping.number}`}
+                  lines={[`${shipping.neighborhood} — ${shipping.city}/${shipping.state}`, `CEP ${shipping.cep}`]}
+                  onEdit={() => goToStep(2)}
                 />
 
                 <PaymentSection
@@ -338,33 +341,21 @@ const Checkout = () => {
                   total={total}
                 />
 
-                {/* Terms */}
                 <div className="rounded-xl border border-border bg-card p-5 checkout-shadow">
                   <div className="flex items-start gap-3">
                     <Checkbox
                       id="terms"
                       checked={termsAccepted}
-                      onCheckedChange={(v) => {
-                        setTermsAccepted(v === true);
-                        setTermsError("");
-                      }}
+                      onCheckedChange={(v) => { setTermsAccepted(v === true); setTermsError(""); }}
                       className="mt-0.5"
                     />
                     <label htmlFor="terms" className="text-sm text-muted-foreground">
                       Li e concordo com os{" "}
-                      <a href="#" className="text-primary underline">
-                        Termos de Uso
-                      </a>{" "}
-                      e{" "}
-                      <a href="#" className="text-primary underline">
-                        Política de Privacidade
-                      </a>
-                      .
+                      <a href="#" className="text-primary underline">Termos de Uso</a>{" "}e{" "}
+                      <a href="#" className="text-primary underline">Política de Privacidade</a>.
                     </label>
                   </div>
-                  {termsError && (
-                    <p className="mt-2 text-xs text-destructive">{termsError}</p>
-                  )}
+                  {termsError && <p className="mt-2 text-xs text-destructive">{termsError}</p>}
                 </div>
 
                 <p className="text-center text-xs text-muted-foreground">
@@ -374,18 +365,13 @@ const Checkout = () => {
             )}
           </div>
 
-          {/* Right: Summary (desktop) */}
           {!isMobile && (
             <div className="w-full lg:w-[360px]">
               <OrderSummary
                 items={MOCK_ITEMS}
                 shippingCost={SHIPPING_COST}
                 discount={DISCOUNT}
-                installments={
-                  paymentMethod === "card"
-                    ? parseInt(cardValues.installments)
-                    : undefined
-                }
+                installments={paymentMethod === "card" ? parseInt(cardValues.installments) : undefined}
               />
             </div>
           )}
