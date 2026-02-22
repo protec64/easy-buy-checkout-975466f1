@@ -73,114 +73,113 @@ const ShippingForm = ({ values, errors, onChange }: ShippingFormProps) => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_120px]">
-          <div>
-            <Label htmlFor="street" className="text-xs text-muted-foreground">
-              Rua *
-            </Label>
-            <Input
-              id="street"
-              value={values.street}
-              onChange={(e) => onChange("street", e.target.value)}
-              className={fieldClass("street")}
-            />
-            {errors.street && (
-              <p className="mt-1 text-xs text-destructive">{errors.street}</p>
-            )}
-          </div>
-          <div>
-            <Label htmlFor="number" className="text-xs text-muted-foreground">
-              Número *
-            </Label>
-            <Input
-              id="number"
-              value={values.number}
-              onChange={(e) => onChange("number", e.target.value)}
-              className={fieldClass("number")}
-            />
-            {errors.number && (
-              <p className="mt-1 text-xs text-destructive">{errors.number}</p>
-            )}
-          </div>
-        </div>
+        {values.cep.replace(/\D/g, "").length === 8 && (
+          <>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_120px]">
+              <div>
+                <Label htmlFor="street" className="text-xs text-muted-foreground">
+                  Rua *
+                </Label>
+                <Input
+                  id="street"
+                  value={values.street}
+                  onChange={(e) => onChange("street", e.target.value)}
+                  className={fieldClass("street")}
+                />
+                {errors.street && (
+                  <p className="mt-1 text-xs text-destructive">{errors.street}</p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="number" className="text-xs text-muted-foreground">
+                  Número *
+                </Label>
+                <Input
+                  id="number"
+                  value={values.number}
+                  onChange={(e) => onChange("number", e.target.value)}
+                  className={fieldClass("number")}
+                />
+                {errors.number && (
+                  <p className="mt-1 text-xs text-destructive">{errors.number}</p>
+                )}
+              </div>
+            </div>
 
-        <div>
-          <Label htmlFor="complement" className="text-xs text-muted-foreground">
-            Complemento
-          </Label>
-          <Input
-            id="complement"
-            placeholder="Apto, bloco, etc."
-            value={values.complement}
-            onChange={(e) => onChange("complement", e.target.value)}
-          />
-        </div>
+            <div>
+              <Label htmlFor="complement" className="text-xs text-muted-foreground">
+                Complemento
+              </Label>
+              <Input
+                id="complement"
+                placeholder="Apto, bloco, etc."
+                value={values.complement}
+                onChange={(e) => onChange("complement", e.target.value)}
+              />
+            </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div>
-            <Label
-              htmlFor="neighborhood"
-              className="text-xs text-muted-foreground"
-            >
-              Bairro *
-            </Label>
-            <Input
-              id="neighborhood"
-              value={values.neighborhood}
-              onChange={(e) => onChange("neighborhood", e.target.value)}
-              className={fieldClass("neighborhood")}
-            />
-            {errors.neighborhood && (
-              <p className="mt-1 text-xs text-destructive">
-                {errors.neighborhood}
-              </p>
-            )}
-          </div>
-          <div>
-            <Label htmlFor="city" className="text-xs text-muted-foreground">
-              Cidade *
-            </Label>
-            <Input
-              id="city"
-              value={values.city}
-              onChange={(e) => onChange("city", e.target.value)}
-              className={fieldClass("city")}
-            />
-            {errors.city && (
-              <p className="mt-1 text-xs text-destructive">{errors.city}</p>
-            )}
-          </div>
-          <div>
-            <Label htmlFor="state" className="text-xs text-muted-foreground">
-              UF *
-            </Label>
-            <Input
-              id="state"
-              placeholder="SP"
-              maxLength={2}
-              value={values.state}
-              onChange={(e) =>
-                onChange("state", e.target.value.toUpperCase().slice(0, 2))
-              }
-              className={fieldClass("state")}
-            />
-            {errors.state && (
-              <p className="mt-1 text-xs text-destructive">{errors.state}</p>
-            )}
-          </div>
-        </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="neighborhood" className="text-xs text-muted-foreground">
+                  Bairro *
+                </Label>
+                <Input
+                  id="neighborhood"
+                  value={values.neighborhood}
+                  onChange={(e) => onChange("neighborhood", e.target.value)}
+                  className={fieldClass("neighborhood")}
+                />
+                {errors.neighborhood && (
+                  <p className="mt-1 text-xs text-destructive">{errors.neighborhood}</p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="city" className="text-xs text-muted-foreground">
+                  Cidade *
+                </Label>
+                <Input
+                  id="city"
+                  value={values.city}
+                  onChange={(e) => onChange("city", e.target.value)}
+                  className={fieldClass("city")}
+                />
+                {errors.city && (
+                  <p className="mt-1 text-xs text-destructive">{errors.city}</p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="state" className="text-xs text-muted-foreground">
+                  UF *
+                </Label>
+                <Input
+                  id="state"
+                  placeholder="SP"
+                  maxLength={2}
+                  value={values.state}
+                  onChange={(e) =>
+                    onChange("state", e.target.value.toUpperCase().slice(0, 2))
+                  }
+                  className={fieldClass("state")}
+                />
+                {errors.state && (
+                  <p className="mt-1 text-xs text-destructive">{errors.state}</p>
+                )}
+              </div>
+            </div>
 
-        <div>
-          <Label htmlFor="reference" className="text-xs text-muted-foreground">
-            Referência
-          </Label>
-          <Input
-            id="reference"
-            placeholder="Próximo a..."
-            value={values.reference}
-            onChange={(e) => onChange("reference", e.target.value)}
-          />
-        </div>
+            <div>
+              <Label htmlFor="reference" className="text-xs text-muted-foreground">
+                Referência
+              </Label>
+              <Input
+                id="reference"
+                placeholder="Próximo a..."
+                value={values.reference}
+                onChange={(e) => onChange("reference", e.target.value)}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
