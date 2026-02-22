@@ -47,10 +47,10 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
   useEffect(() => {
     if (!pixData) return;
-    // Use expires_at from API, or fallback to 15 min from generation
-    const expiresAt = pixData.expires_at
-      ? new Date(pixData.expires_at).getTime()
-      : pixGeneratedAt + 15 * 60 * 1000;
+    // Use expires_at from API only if it's in the future; otherwise fallback to 15 min from now
+    const apiExpires = pixData.expires_at ? new Date(pixData.expires_at).getTime() : 0;
+    const fallback = pixGeneratedAt + 15 * 60 * 1000;
+    const expiresAt = apiExpires > Date.now() ? apiExpires : fallback;
 
     const timer = setInterval(() => {
       const diff = expiresAt - Date.now();
