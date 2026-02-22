@@ -21,15 +21,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft, ArrowRight, User, MapPin } from "lucide-react";
 
-const MOCK_ITEMS = [
-  {
-    id: "prod_001",
-    name: "Camiseta Premium Algodão",
-    variation: "Preta — Tamanho M",
-    qty: 1,
-    price: 129.9,
-  },
-];
 const DISCOUNT = 0;
 
 const STORAGE_KEY = "checkout_form_draft";
@@ -49,7 +40,28 @@ const Checkout = () => {
   const isMobile = useIsMobile();
   const draft = loadDraft();
 
+  const [items, setItems] = useState<Array<{id: string; name: string; variation?: string; qty: number; price: number; image?: string}>>([]);
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id, name, price, images, variations")
+        .eq("active", true);
+      if (data && data.length > 0) {
+        setItems(data.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          qty: 1,
+          price: Number(p.price),
+          variation: p.variations?.[0]?.name || undefined,
+          image: p.images?.[0] || undefined,
+        })));
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const [customer, setCustomer] = useState({
     email: draft?.email || "",
@@ -111,7 +123,7 @@ const Checkout = () => {
     setCardApiError("");
   }, []);
 
-  const subtotal = MOCK_ITEMS.reduce((s, i) => s + i.price * i.qty, 0);
+  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const selectedShipping = SHIPPING_OPTIONS.find((o) => o.id === shippingOption)!;
   const shippingCost = selectedShipping.price;
   const total = subtotal + shippingCost - DISCOUNT;
@@ -189,7 +201,7 @@ const Checkout = () => {
       reference: shipping.reference || undefined,
     },
     order: {
-      items: MOCK_ITEMS,
+      items,
       shipping_cost: shippingCost,
       discount: DISCOUNT,
       total,
@@ -287,7 +299,7 @@ const Checkout = () => {
         {isMobile && (
           <div className="mb-4">
             <OrderSummary
-              items={MOCK_ITEMS}
+              items={items}
               shippingCost={shippingCost}
               discount={DISCOUNT}
               installments={paymentMethod === "card" ? parseInt(cardValues.installments) : undefined}
@@ -397,7 +409,7 @@ const Checkout = () => {
           {!isMobile && (
             <div className="w-full lg:w-[360px]">
               <OrderSummary
-                items={MOCK_ITEMS}
+                items={items}
                 shippingCost={shippingCost}
                 discount={DISCOUNT}
                 installments={paymentMethod === "card" ? parseInt(cardValues.installments) : undefined}
