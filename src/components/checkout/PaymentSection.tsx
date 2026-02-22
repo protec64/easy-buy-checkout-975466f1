@@ -44,7 +44,7 @@ const PaymentSection = ({
   cpf,
 }: PaymentSectionProps) => {
   return (
-    <div className="rounded-xl border border-border bg-card p-5 checkout-shadow">
+    <div className="rounded-xl border border-border bg-card p-4 sm:p-5 checkout-shadow">
       <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-foreground">
         <CreditCard className="h-4 w-4 text-primary" />
         Pagamento
