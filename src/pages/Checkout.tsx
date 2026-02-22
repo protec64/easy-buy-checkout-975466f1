@@ -306,11 +306,16 @@ const Checkout = () => {
                   onEdit={() => goToStep(1)}
                 />
                 <ShippingForm values={shipping} errors={shippingErrors} onChange={handleShippingChange} />
-                <ShippingOptions selected={shippingOption} onChange={setShippingOption} />
-                <Button onClick={handleNextFromStep2} className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold">
-                  Continuar para Pagamento
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+                {shipping.cep.replace(/\D/g, "").length === 8 &&
+                  shipping.street && shipping.number && shipping.neighborhood && shipping.city && shipping.state && (
+                  <>
+                    <ShippingOptions selected={shippingOption} onChange={setShippingOption} />
+                    <Button onClick={handleNextFromStep2} className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold">
+                      Continuar para Pagamento
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
               </>
             )}
 
