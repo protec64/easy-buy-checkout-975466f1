@@ -74,33 +74,31 @@ Deno.serve(async (req) => {
     const authToken = btoa(`${FREEPAY_PUBLIC_KEY}:${FREEPAY_SECRET_KEY}`);
 
     const freepayPayload = {
-      request: {
-        amount: amountInCents,
-        payment_method: "pix",
-        postback_url: `${SUPABASE_URL}/functions/v1/freepay-webhook`,
-        customer: {
-          name: customer.full_name,
-          email: customer.email,
-          document: {
-            type: cleanCpf.length <= 11 ? "cpf" : "cnpj",
-            number: cleanCpf,
-          },
-          phone: customer.phone ? customer.phone.replace(/\D/g, "") : undefined,
+      amount: amountInCents,
+      payment_method: "pix",
+      postback_url: `${SUPABASE_URL}/functions/v1/freepay-webhook`,
+      customer: {
+        name: customer.full_name,
+        email: customer.email,
+        document: {
+          type: cleanCpf.length <= 11 ? "cpf" : "cnpj",
+          number: cleanCpf,
         },
-        items: order.items.map((item: any) => ({
-          title: item.name,
-          quantity: item.qty,
-          unit_price: Math.round(item.price * 100),
-          tangible: true,
-        })),
-        pix: {
-          expires_in: 900,
-        },
-        metadata: {
-          provider_name: "Lovable Checkout",
-          order_id: orderData.id,
-          order_number: orderData.order_number,
-        },
+        phone: customer.phone ? customer.phone.replace(/\D/g, "") : "00000000000",
+      },
+      items: order.items.map((item: any) => ({
+        title: item.name,
+        quantity: item.qty,
+        unit_price: Math.round(item.price * 100),
+        tangible: true,
+      })),
+      pix: {
+        expires_in: 900,
+      },
+      metadata: {
+        provider_name: "Lovable Checkout",
+        order_id: orderData.id,
+        order_number: orderData.order_number,
       },
     };
 
