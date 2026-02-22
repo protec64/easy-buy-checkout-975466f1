@@ -228,9 +228,10 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
         <p className="mb-3 text-sm font-semibold text-foreground">Pague com seu banco:</p>
         <div className="space-y-2">
           {BANK_LOGOS.slice(0, showAllBanks ? BANK_LOGOS.length : 4).map((bank) => (
-            <div
+            <button
               key={bank.name}
-              className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3"
+              onClick={handleCopy}
+              className="flex w-full items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50 active:bg-muted"
             >
               <div
                 className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-primary-foreground"
@@ -242,7 +243,8 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
                 <p className="text-sm font-medium text-foreground">{bank.name}</p>
                 <p className="text-[10px] text-muted-foreground">Pode precisar colar manualmente</p>
               </div>
-            </div>
+              <Copy className="h-4 w-4 text-muted-foreground" />
+            </button>
           ))}
         </div>
         <button
