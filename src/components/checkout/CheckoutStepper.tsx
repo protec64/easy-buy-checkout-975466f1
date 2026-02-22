@@ -9,7 +9,7 @@ const CheckoutStepper = ({ currentStep, steps }: CheckoutStepperProps) => {
   const progressPercent = ((currentStep - 1) / (steps.length - 1)) * 100;
 
   return (
-    <div className="mb-6 space-y-3">
+    <div className="mb-4 sm:mb-6 space-y-2 sm:space-y-3">
       {/* Progress bar */}
       <div className="relative h-1.5 w-full rounded-full bg-muted overflow-hidden">
         <div
@@ -27,8 +27,8 @@ const CheckoutStepper = ({ currentStep, steps }: CheckoutStepperProps) => {
 
           return (
             <div key={label} className="flex flex-col items-center gap-1.5">
-              <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
+                <div
+                className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-[11px] sm:text-xs font-semibold transition-all duration-300 ${
                   isCompleted
                     ? "bg-primary text-primary-foreground"
                     : isCurrent

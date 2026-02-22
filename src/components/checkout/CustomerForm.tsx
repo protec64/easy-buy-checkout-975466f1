@@ -16,7 +16,7 @@ interface CustomerFormProps {
 
 const CustomerForm = ({ values, errors, onChange }: CustomerFormProps) => {
   return (
-    <div className="space-y-4 rounded-xl border border-border bg-card p-5 checkout-shadow">
+    <div className="space-y-3 sm:space-y-4 rounded-xl border border-border bg-card p-4 sm:p-5 checkout-shadow">
       <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
         <User className="h-4 w-4 text-primary" />
         Dados pessoais

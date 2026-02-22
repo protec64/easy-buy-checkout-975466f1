@@ -171,11 +171,11 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
   const formattedTotal = total ? `R$ ${total.toFixed(2).replace(".", ",")}` : "";
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* Header */}
       <div className="text-center">
-        <h3 className="text-xl font-bold text-foreground">Já é quase seu...</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h3 className="text-lg sm:text-xl font-bold text-foreground">Já é quase seu...</h3>
+        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
           Pague seu pix dentro de{" "}
           <span className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold text-primary-foreground ${expired ? "bg-destructive" : "bg-primary"}`}>
             {timeLeft.min}:{timeLeft.sec}
@@ -263,7 +263,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
       </div>
 
       {/* Security Warning */}
-      <div className="rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-4">
+      <div className="rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
         <div className="flex items-start gap-3">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--checkout-warning))]">
             <AlertTriangle className="h-4 w-4 text-primary-foreground" />
