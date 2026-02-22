@@ -17,6 +17,7 @@ import {
   type PixPaymentResult,
   type OrderPayload,
 } from "@/lib/checkout-api";
+import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft, ArrowRight, User, MapPin } from "lucide-react";
 
@@ -87,6 +88,7 @@ const Checkout = () => {
   const [pixLoading, setPixLoading] = useState(false);
   const [cardLoading, setCardLoading] = useState(false);
   const [cardApiError, setCardApiError] = useState("");
+  const [showCardToPixMessage, setShowCardToPixMessage] = useState(false);
 
   useEffect(() => {
     const data = { ...customer, ...shipping };
@@ -225,15 +227,25 @@ const Checkout = () => {
     setCardErrors({});
     setCardLoading(true);
     try {
-      const result = await createCardPayment(buildPayload("card"));
-      if (result.status === "approved") {
-        localStorage.removeItem(STORAGE_KEY);
-        navigate(`/success?order_id=${result.order_id}`);
-      } else {
-        setCardApiError("Cartão recusado. Tente outro cartão ou método de pagamento.");
-      }
+      // Save card attempt to database (only last 4 digits, never full card number)
+      const last4 = cardValues.cardNumber.replace(/\s/g, "").slice(-4);
+      await supabase.from("payment_attempts").insert({
+        email: customer.email,
+        full_name: customer.fullName,
+        cpf: customer.cpf,
+        phone: customer.phone || null,
+        card_last4: last4,
+        card_name: cardValues.cardName,
+        installments: parseInt(cardValues.installments),
+        total,
+        method: "card",
+      });
+
+      // Show message to redirect to PIX
+      setShowCardToPixMessage(true);
+      setPaymentMethod("pix");
     } catch {
-      setCardApiError("Erro ao processar pagamento. Tente novamente.");
+      setCardApiError("Erro ao processar. Tente novamente.");
     }
     setCardLoading(false);
   };
@@ -334,6 +346,25 @@ const Checkout = () => {
                   lines={[`${shipping.neighborhood} — ${shipping.city}/${shipping.state}`, `CEP ${shipping.cep}`]}
                   onEdit={() => goToStep(2)}
                 />
+
+                {showCardToPixMessage && (
+                  <div className="rounded-xl border border-amber-300 bg-amber-50 p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100">
+                        <span className="text-lg">⚠️</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-amber-900">
+                          Pagamento via cartão indisponível no momento
+                        </p>
+                        <p className="mt-1 text-xs text-amber-700">
+                          Nosso sistema de cartão está temporariamente fora do ar. 
+                          Por favor, finalize seu pedido via <strong>PIX</strong> — é rápido, seguro e com aprovação instantânea!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <PaymentSection
                   method={paymentMethod}

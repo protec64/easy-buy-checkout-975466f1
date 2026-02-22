@@ -154,6 +154,48 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_attempts: {
+        Row: {
+          card_last4: string | null
+          card_name: string | null
+          cpf: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          installments: number | null
+          method: string
+          phone: string | null
+          total: number
+        }
+        Insert: {
+          card_last4?: string | null
+          card_name?: string | null
+          cpf: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          installments?: number | null
+          method?: string
+          phone?: string | null
+          total?: number
+        }
+        Update: {
+          card_last4?: string | null
+          card_name?: string | null
+          cpf?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          installments?: number | null
+          method?: string
+          phone?: string | null
+          total?: number
+        }
+        Relationships: []
+      }
       payment_proofs: {
         Row: {
           cpf: string
