@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, Clock, QrCode, RefreshCw, Loader2, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -27,6 +28,7 @@ interface PixPaymentProps {
 
 const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixPaymentProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ min: "00", sec: "00" });
   const [expired, setExpired] = useState(false);
@@ -55,6 +57,32 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
   useEffect(() => {
     if (pixData) setStatus(pixData.status);
   }, [pixData]);
+
+  // Auto-poll payment status every 5 seconds
+  useEffect(() => {
+    if (!pixData?.payment_id || expired || status === "approved") return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await checkPaymentStatus(pixData.payment_id);
+        if (res.status === "approved") {
+          setStatus("approved");
+          clearInterval(interval);
+          toast({
+            title: "✅ Pagamento confirmado!",
+            description: "Seu pagamento foi aprovado com sucesso.",
+          });
+          setTimeout(() => {
+            navigate("/success");
+          }, 1500);
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [pixData?.payment_id, expired, status, navigate, toast]);
 
   const handleCopy = useCallback(async () => {
     if (!pixData) return;

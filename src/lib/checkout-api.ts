@@ -185,6 +185,15 @@ export async function uploadPaymentProof(
 export async function checkPaymentStatus(
   payment_id: string
 ): Promise<{ status: string }> {
-  await new Promise((r) => setTimeout(r, 1000));
-  return { status: "pending" };
+  const { data, error } = await supabase
+    .from("orders")
+    .select("payment_status")
+    .eq("mp_payment_id", payment_id)
+    .single();
+
+  if (error || !data) {
+    return { status: "pending" };
+  }
+
+  return { status: data.payment_status };
 }
