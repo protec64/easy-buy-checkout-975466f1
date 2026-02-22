@@ -58,7 +58,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
     if (pixData) setStatus(pixData.status);
   }, [pixData]);
 
-  // Auto-poll payment status every 5 seconds
+  // Auto-poll payment status every 5 seconds + check on tab focus (mobile)
   useEffect(() => {
     if (!pixData?.payment_id || status === "approved") return;
 
@@ -83,11 +83,32 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
       }
     };
 
+    // Check immediately when user returns to the tab (critical for mobile)
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        console.log("Tab became visible, checking payment...");
+        poll();
+      }
+    };
+
+    // Also check on window focus (some browsers use this instead)
+    const handleFocus = () => {
+      console.log("Window focused, checking payment...");
+      poll();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", handleFocus);
+
     // Initial check immediately
     poll();
 
     const interval = setInterval(poll, 5000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [pixData?.payment_id, status, navigate, toast]);
 
   const handleCopy = useCallback(async () => {
