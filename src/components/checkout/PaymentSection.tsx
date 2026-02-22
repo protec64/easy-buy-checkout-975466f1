@@ -23,6 +23,8 @@ interface PaymentSectionProps {
   cardLoading: boolean;
   cardApiError?: string;
   total: number;
+  email: string;
+  cpf: string;
 }
 
 const PaymentSection = ({
@@ -38,6 +40,8 @@ const PaymentSection = ({
   cardLoading,
   cardApiError,
   total,
+  email,
+  cpf,
 }: PaymentSectionProps) => {
   return (
     <div className="rounded-xl border border-border bg-card p-5 checkout-shadow">
@@ -69,6 +73,8 @@ const PaymentSection = ({
             pixData={pixData}
             loading={pixLoading}
             onGeneratePix={onGeneratePix}
+            email={email}
+            cpf={cpf}
           />
         </TabsContent>
 
