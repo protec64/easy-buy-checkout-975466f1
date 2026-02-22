@@ -1,4 +1,5 @@
 import { Lock, Shield } from "lucide-react";
+import mercadopagoLogo from "@/assets/mercadopago-logo.png";
 
 const CheckoutHeader = () => {
   return (
@@ -6,7 +7,7 @@ const CheckoutHeader = () => {
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <img
-            src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/6.6.92/mercadopago/logo__large@2x.png"
+            src={mercadopagoLogo}
             alt="Mercado Pago"
             className="h-7"
           />
