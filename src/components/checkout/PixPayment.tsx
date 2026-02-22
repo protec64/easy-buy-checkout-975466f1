@@ -75,7 +75,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
             description: "Seu pagamento foi aprovado com sucesso.",
           });
           setTimeout(() => {
-            navigate("/success");
+            navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`);
           }, 1500);
         }
       } catch (err) {
