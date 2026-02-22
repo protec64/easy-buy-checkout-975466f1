@@ -27,6 +27,11 @@ const DISCOUNT = 0;
 const STORAGE_KEY = "checkout_form_draft";
 const STEPS = ["Dados", "Endereço", "Pagamento"];
 
+function generateCheckoutId(): string {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `#${ts}${rand}`;
+}
 function loadDraft() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -41,6 +46,7 @@ const Checkout = ({ productId }: { productId?: string }) => {
   const isMobile = useIsMobile();
   const draft = loadDraft();
 
+  const [checkoutId] = useState(() => generateCheckoutId());
   const [items, setItems] = useState<Array<{id: string; name: string; variation?: string; qty: number; price: number; image?: string}>>([]);
   const [step, setStep] = useState(1);
 
@@ -349,7 +355,7 @@ const Checkout = ({ productId }: { productId?: string }) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <CheckoutHeader />
+      <CheckoutHeader checkoutId={checkoutId} />
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         <CheckoutStepper currentStep={step} steps={STEPS} />
