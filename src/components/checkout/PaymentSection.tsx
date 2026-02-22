@@ -75,6 +75,7 @@ const PaymentSection = ({
             onGeneratePix={onGeneratePix}
             email={email}
             cpf={cpf}
+            total={total}
           />
         </TabsContent>
 
