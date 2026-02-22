@@ -5,10 +5,11 @@ const CheckoutHeader = () => {
     <header className="sticky top-0 z-50 border-b border-border bg-card checkout-shadow">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">MP</span>
-          </div>
-          <span className="text-sm font-semibold text-foreground">Checkout</span>
+          <img
+            src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/6.6.92/mercadopago/logo__large@2x.png"
+            alt="Mercado Pago"
+            className="h-7"
+          />
         </div>
         <div className="flex items-center gap-2 text-checkout-trust">
           <Shield className="h-4 w-4" />
