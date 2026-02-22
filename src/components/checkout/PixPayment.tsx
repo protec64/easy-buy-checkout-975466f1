@@ -21,11 +21,13 @@ interface PixPaymentProps {
 }
 
 const BANK_LOGOS = [
-  { name: "Nubank", color: "hsl(280, 80%, 40%)", letter: "N" },
-  { name: "Banco Inter", color: "hsl(25, 95%, 50%)", letter: "I" },
-  { name: "Itaú", color: "hsl(220, 80%, 35%)", letter: "I" },
-  { name: "Bradesco", color: "hsl(0, 75%, 45%)", letter: "B" },
-  { name: "Banco do Brasil", color: "hsl(45, 90%, 50%)", letter: "BB" },
+  { name: "Nubank", logo: "/images/banks/nubank.png" },
+  { name: "Banco Inter", logo: "/images/banks/inter.png" },
+  { name: "Itaú", logo: "/images/banks/itau.png" },
+  { name: "Bradesco", logo: "/images/banks/bradesco.png" },
+  { name: "Banco do Brasil", logo: "/images/banks/bb.png" },
+  { name: "Caixa", logo: "/images/banks/caixa.png" },
+  { name: "Santander", logo: "/images/banks/santander.png" },
 ];
 
 const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixPaymentProps) => {
@@ -233,12 +235,11 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
               onClick={handleCopy}
               className="flex w-full items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50 active:bg-muted"
             >
-              <div
-                className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-primary-foreground"
-                style={{ backgroundColor: bank.color }}
-              >
-                {bank.letter}
-              </div>
+              <img
+                src={bank.logo}
+                alt={bank.name}
+                className="h-8 w-8 rounded-full object-contain"
+              />
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">{bank.name}</p>
                 <p className="text-[10px] text-muted-foreground">Pode precisar colar manualmente</p>
