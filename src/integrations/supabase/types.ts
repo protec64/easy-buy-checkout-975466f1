@@ -14,7 +14,193 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          unit_price: number
+          variation: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id: string
+          product_name: string
+          quantity?: number
+          unit_price: number
+          variation?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          unit_price?: number
+          variation?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address_number: string
+          cep: string
+          city: string
+          complement: string | null
+          coupon_code: string | null
+          cpf: string
+          created_at: string
+          discount: number
+          email: string
+          full_name: string
+          id: string
+          installments: number | null
+          mp_copia_e_cola: string | null
+          mp_expires_at: string | null
+          mp_payment_id: string | null
+          mp_qr_code: string | null
+          mp_status: string | null
+          neighborhood: string
+          order_number: string
+          payment_id: string | null
+          payment_method: string
+          payment_status: string
+          phone: string | null
+          reference: string | null
+          shipping_cost: number
+          state: string
+          street: string
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          address_number: string
+          cep: string
+          city: string
+          complement?: string | null
+          coupon_code?: string | null
+          cpf: string
+          created_at?: string
+          discount?: number
+          email: string
+          full_name: string
+          id?: string
+          installments?: number | null
+          mp_copia_e_cola?: string | null
+          mp_expires_at?: string | null
+          mp_payment_id?: string | null
+          mp_qr_code?: string | null
+          mp_status?: string | null
+          neighborhood: string
+          order_number?: string
+          payment_id?: string | null
+          payment_method: string
+          payment_status?: string
+          phone?: string | null
+          reference?: string | null
+          shipping_cost?: number
+          state: string
+          street: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          address_number?: string
+          cep?: string
+          city?: string
+          complement?: string | null
+          coupon_code?: string | null
+          cpf?: string
+          created_at?: string
+          discount?: number
+          email?: string
+          full_name?: string
+          id?: string
+          installments?: number | null
+          mp_copia_e_cola?: string | null
+          mp_expires_at?: string | null
+          mp_payment_id?: string | null
+          mp_qr_code?: string | null
+          mp_status?: string | null
+          neighborhood?: string
+          order_number?: string
+          payment_id?: string | null
+          payment_method?: string
+          payment_status?: string
+          phone?: string | null
+          reference?: string | null
+          shipping_cost?: number
+          state?: string
+          street?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_proofs: {
+        Row: {
+          cpf: string
+          created_at: string
+          email: string
+          file_name: string
+          file_url: string
+          id: string
+          note: string | null
+          order_id: string
+          payment_id: string
+          status: string
+        }
+        Insert: {
+          cpf: string
+          created_at?: string
+          email: string
+          file_name: string
+          file_url: string
+          id?: string
+          note?: string | null
+          order_id: string
+          payment_id: string
+          status?: string
+        }
+        Update: {
+          cpf?: string
+          created_at?: string
+          email?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          note?: string | null
+          order_id?: string
+          payment_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_proofs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
