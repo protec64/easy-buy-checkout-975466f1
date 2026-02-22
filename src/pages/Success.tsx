@@ -159,8 +159,8 @@ const Success = () => {
     <div className="min-h-screen bg-background">
       {/* Success banner */}
       <div className="bg-accent/10 border-b border-accent/20">
-        <div className="mx-auto flex max-w-lg flex-col items-center px-4 py-8 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/20">
+        <div className="mx-auto flex max-w-lg flex-col items-center px-4 py-8 text-center animate-fade-in">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/20 animate-scale-in">
             <CheckCircle2 className="h-9 w-9 text-accent" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
@@ -174,7 +174,7 @@ const Success = () => {
 
       <div className="mx-auto max-w-lg px-4 py-6 space-y-4">
         {/* Order number + date */}
-        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3 animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Package className="h-4 w-4" />
@@ -204,7 +204,7 @@ const Success = () => {
         </div>
 
         {/* Products */}
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 animate-fade-in" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
           <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
             <ShoppingBag className="h-4 w-4 text-primary" />
             Produtos
@@ -262,7 +262,7 @@ const Success = () => {
         </div>
 
         {/* Customer info */}
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 animate-fade-in" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
           <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
             <User className="h-4 w-4 text-primary" />
             Dados do cliente
@@ -292,7 +292,7 @@ const Success = () => {
         </div>
 
         {/* Shipping address */}
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 animate-fade-in" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
           <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
             <MapPin className="h-4 w-4 text-primary" />
             Endereço de entrega
@@ -301,7 +301,7 @@ const Success = () => {
         </div>
 
         {/* Email notice */}
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 p-4">
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 p-4 animate-fade-in" style={{ animationDelay: "500ms", animationFillMode: "both" }}>
           <Mail className="h-5 w-5 shrink-0 text-primary" />
           <p className="text-xs text-muted-foreground">
             Um e-mail de confirmação foi enviado para{" "}
@@ -311,7 +311,7 @@ const Success = () => {
         </div>
 
         {/* Security badge */}
-        <div className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card p-3">
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card p-3 animate-fade-in" style={{ animationDelay: "600ms", animationFillMode: "both" }}>
           <Shield className="h-4 w-4 text-accent" />
           <span className="text-xs text-muted-foreground">
             Compra 100% segura e protegida
