@@ -3,6 +3,7 @@
  * Substitua estas funções pelas chamadas reais à API do Mercado Pago
  * via seu backend (Edge Functions / API Routes).
  */
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Customer {
   email: string;
@@ -134,15 +135,41 @@ export async function fetchAddressByCep(cep: string): Promise<AddressResult | nu
  */
 export async function uploadPaymentProof(
   file: File,
-  meta: { payment_id: string; email: string; cpf: string; order_id?: string }
+  meta: { payment_id: string; email: string; cpf: string; order_id?: string; note?: string }
 ): Promise<UploadResult> {
-  await new Promise((r) => setTimeout(r, 1500));
+  // Upload file to storage
+  const filePath = `${meta.payment_id}/${Date.now()}_${file.name}`;
+  const { error: uploadError } = await supabase.storage
+    .from("payment-proofs")
+    .upload(filePath, file);
 
-  console.log("Upload proof:", { fileName: file.name, size: file.size, ...meta });
+  if (uploadError) {
+    throw new Error("Erro ao fazer upload do arquivo: " + uploadError.message);
+  }
 
-  return {
-    file_url: `https://storage.example.com/proofs/${meta.payment_id}/${file.name}`,
-  };
+  // Get public URL
+  const { data: urlData } = supabase.storage
+    .from("payment-proofs")
+    .getPublicUrl(filePath);
+
+  const fileUrl = urlData.publicUrl;
+
+  // Save record in payment_proofs table
+  const { error: dbError } = await supabase.from("payment_proofs").insert({
+    order_id: meta.order_id || null,
+    payment_id: meta.payment_id,
+    email: meta.email,
+    cpf: meta.cpf,
+    file_url: fileUrl,
+    file_name: file.name,
+    note: meta.note || null,
+  });
+
+  if (dbError) {
+    throw new Error("Erro ao salvar comprovante: " + dbError.message);
+  }
+
+  return { file_url: fileUrl };
 }
 
 /**

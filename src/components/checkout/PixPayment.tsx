@@ -14,9 +14,11 @@ interface PixPaymentProps {
   } | null;
   loading: boolean;
   onGeneratePix: () => void;
+  email: string;
+  cpf: string;
 }
 
-const PixPayment = ({ pixData, loading, onGeneratePix }: PixPaymentProps) => {
+const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf }: PixPaymentProps) => {
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
   const [expired, setExpired] = useState(false);
@@ -171,7 +173,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix }: PixPaymentProps) => {
       </Button>
 
       {/* Upload Comprovante */}
-      <ProofUpload paymentId={pixData.payment_id} />
+      <ProofUpload paymentId={pixData.payment_id} email={email} cpf={cpf} />
 
       {/* Ajuda */}
       <div>

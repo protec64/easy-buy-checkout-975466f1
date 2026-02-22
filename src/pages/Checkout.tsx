@@ -348,6 +348,8 @@ const Checkout = () => {
                   cardLoading={cardLoading}
                   cardApiError={cardApiError}
                   total={total}
+                  email={customer.email}
+                  cpf={customer.cpf}
                 />
 
                 <div className="rounded-xl border border-border bg-card p-5 checkout-shadow">

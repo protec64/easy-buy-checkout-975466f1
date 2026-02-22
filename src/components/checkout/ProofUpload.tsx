@@ -6,12 +6,15 @@ import { Upload, FileText, X, CheckCircle2, Loader2, Image } from "lucide-react"
 
 interface ProofUploadProps {
   paymentId: string;
+  email: string;
+  cpf: string;
+  orderId?: string;
 }
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED = ["image/jpeg", "image/png", "application/pdf"];
 
-const ProofUpload = ({ paymentId }: ProofUploadProps) => {
+const ProofUpload = ({ paymentId, email, cpf, orderId }: ProofUploadProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -62,12 +65,14 @@ const ProofUpload = ({ paymentId }: ProofUploadProps) => {
     try {
       await uploadPaymentProof(file, {
         payment_id: paymentId,
-        email: "",
-        cpf: "",
+        email,
+        cpf,
+        order_id: orderId,
+        note: note || undefined,
       });
       setUploaded(true);
-    } catch {
-      setError("Erro ao enviar. Tente novamente.");
+    } catch (err: any) {
+      setError(err?.message || "Erro ao enviar. Tente novamente.");
     }
     setUploading(false);
   };
