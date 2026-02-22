@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, Clock, QrCode, HelpCircle, RefreshCw, Loader2 } from "lucide-react";
+import { Copy, Check, Clock, QrCode, RefreshCw, Loader2, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import ProofUpload from "./ProofUpload";
 import { checkPaymentStatus } from "@/lib/checkout-api";
@@ -17,14 +17,24 @@ interface PixPaymentProps {
   onGeneratePix: () => void;
   email: string;
   cpf: string;
+  total?: number;
 }
 
-const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf }: PixPaymentProps) => {
+const BANK_LOGOS = [
+  { name: "Nubank", color: "hsl(280, 80%, 40%)", letter: "N" },
+  { name: "Banco Inter", color: "hsl(25, 95%, 50%)", letter: "I" },
+  { name: "Itaú", color: "hsl(220, 80%, 35%)", letter: "I" },
+  { name: "Bradesco", color: "hsl(0, 75%, 45%)", letter: "B" },
+  { name: "Banco do Brasil", color: "hsl(45, 90%, 50%)", letter: "BB" },
+];
+
+const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixPaymentProps) => {
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ min: "00", sec: "00" });
   const [expired, setExpired] = useState(false);
   const [status, setStatus] = useState(pixData?.status || "");
   const [checking, setChecking] = useState(false);
+  const [showAllBanks, setShowAllBanks] = useState(false);
 
   useEffect(() => {
     if (!pixData?.expires_at) return;
@@ -100,112 +110,158 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf }: PixPaymentP
   }
 
   const pixCode = pixData.copia_e_cola || pixData.qr_code_base64;
+  const formattedTotal = total ? `R$ ${total.toFixed(2).replace(".", ",")}` : "";
 
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="text-center">
-        <h3 className="text-lg font-bold text-foreground">PIX gerado com sucesso!</h3>
-        <p className="text-sm text-muted-foreground">Agora é só finalizar o pagamento</p>
+        <h3 className="text-xl font-bold text-foreground">Já é quase seu...</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Pague seu pix dentro de{" "}
+          <span className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold text-primary-foreground ${expired ? "bg-destructive" : "bg-primary"}`}>
+            {timeLeft.min}:{timeLeft.sec}
+          </span>
+          {" "}para garantir sua compra.
+        </p>
       </div>
 
-      {/* Timer */}
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">Este código expirará em:</span>
-        <div className="flex items-center gap-1">
-          <span className={`inline-flex h-9 w-10 items-center justify-center rounded-lg text-sm font-bold text-white ${expired ? "bg-destructive" : "bg-[hsl(var(--accent))]"}`}>
-            {timeLeft.min}
-          </span>
-          <span className="text-lg font-bold text-muted-foreground">:</span>
-          <span className={`inline-flex h-9 w-10 items-center justify-center rounded-lg text-sm font-bold text-white ${expired ? "bg-destructive" : "bg-[hsl(var(--accent))]"}`}>
-            {timeLeft.sec}
-          </span>
+      {/* Total */}
+      {formattedTotal && (
+        <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
+          <span className="text-sm text-muted-foreground">Total do pedido:</span>
+          <span className="text-lg font-bold text-foreground">{formattedTotal}</span>
         </div>
+      )}
+
+      {/* Beneficiary notice */}
+      <div className="rounded-lg border border-border bg-muted/50 px-4 py-3">
+        <p className="text-xs text-muted-foreground">
+          O beneficiário do PIX é <strong className="text-foreground">KXPAY PAGAMENTOS LTDA</strong>, a empresa que gerencia nossos pagamentos de forma segura.
+        </p>
       </div>
 
       {/* QR Code */}
-      <div className="flex justify-center">
-        <div className="rounded-xl border-2 border-dashed border-border p-4 bg-card">
+      <div className="flex flex-col items-center gap-2">
+        <div className="rounded-xl border border-border p-3 bg-card">
           {pixCode ? (
             <QRCodeSVG
               value={pixCode}
-              size={220}
+              size={200}
               level="M"
               includeMargin
             />
           ) : (
-            <div className="flex h-[220px] w-[220px] items-center justify-center">
+            <div className="flex h-[200px] w-[200px] items-center justify-center">
               <QrCode className="h-20 w-20 text-muted-foreground/30" />
             </div>
           )}
         </div>
+        <p className="text-xs text-muted-foreground">Aponte a câmera do seu celular</p>
       </div>
 
-      {/* Status */}
-      <div className="flex flex-col items-center gap-2">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span>Aguardando pagamento...</span>
+      {/* PIX Code + Copy */}
+      <div>
+        <p className="mb-2 text-sm font-semibold text-foreground">Código PIX</p>
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5">
+          <p className="flex-1 truncate text-xs text-muted-foreground font-mono select-all">
+            {pixCode}
+          </p>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleCopy}
+            className="shrink-0 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            {copied ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                Copiado!
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" />
+                Copiar
+              </>
+            )}
+          </Button>
         </div>
-        <span className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-          A aprovação leva no máximo 2 minutos
-        </span>
       </div>
-
-      {/* Copy button */}
-      <Button
-        variant="outline"
-        onClick={handleCopy}
-        className="w-full h-12 gap-2 text-base border-accent text-accent hover:bg-accent/5"
-      >
-        {copied ? (
-          <>
-            <Check className="h-4 w-4 text-accent" />
-            Copiado!
-          </>
-        ) : (
-          <>
-            <Copy className="h-4 w-4" />
-            Copiar código Pix
-          </>
-        )}
-      </Button>
-
-      {/* Already paid button */}
-      <Button
-        onClick={handleCheckStatus}
-        disabled={checking}
-        className="w-full h-12 text-base font-semibold bg-accent text-accent-foreground hover:bg-accent/90 gap-2"
-      >
-        {checking ? (
-          <>
-            <RefreshCw className="h-4 w-4 animate-spin" />
-            Verificando...
-          </>
-        ) : (
-          "Já fiz o pagamento"
-        )}
-      </Button>
 
       {/* Steps */}
-      <div className="space-y-3 pt-2">
-        {[
-          { n: 1, text: <>Abra o app do seu banco e entre na opção <strong>Pix</strong></> },
-          { n: 2, text: <>Escolha a opção <strong>Pagar / Pix copia e cola</strong></> },
-          { n: 3, text: <>Escaneie o QR Code. Se preferir, copie e cole o código</> },
-          { n: 4, text: <>Depois, confirme o pagamento</> },
-        ].map(({ n, text }) => (
-          <div key={n} className="flex items-start gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent/10 text-xs font-bold text-accent">
-              {n}
-            </span>
-            <p className="text-sm text-foreground">{text}</p>
-          </div>
-        ))}
+      <div>
+        <p className="mb-3 text-sm font-semibold text-foreground">Como pagar o pix:</p>
+        <div className="space-y-3">
+          {[
+            "Clique em copiar o código PIX logo acima",
+            "Acesse o app do seu banco",
+            "Vá até a opção PIX",
+            'Escolha a opção "COPIA E COLA"',
+            "Insira o código copiado e finalize seu pagamento",
+          ].map((text, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                {i + 1}
+              </span>
+              <p className="text-sm text-foreground">{text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Security Warning */}
+      <div className="rounded-lg border border-[hsl(var(--checkout-warning))]/30 bg-[hsl(var(--checkout-warning))]/5 p-4">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 shrink-0 text-[hsl(var(--checkout-warning))]" />
+          <p className="text-xs text-muted-foreground">
+            Os bancos reforçaram a segurança do Pix e podem exibir alertas preventivos durante o pagamento.{" "}
+            <strong className="text-foreground">Fique tranquilo — sua transação é segura e está totalmente protegida.</strong>
+          </p>
+        </div>
       </div>
 
       {/* Upload Comprovante */}
       <ProofUpload paymentId={pixData.payment_id} email={email} cpf={cpf} />
+
+      {/* Bank logos */}
+      <div>
+        <p className="mb-3 text-sm font-semibold text-foreground">Pague com seu banco:</p>
+        <div className="space-y-2">
+          {BANK_LOGOS.slice(0, showAllBanks ? BANK_LOGOS.length : 4).map((bank) => (
+            <div
+              key={bank.name}
+              className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3"
+            >
+              <div
+                className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-primary-foreground"
+                style={{ backgroundColor: bank.color }}
+              >
+                {bank.letter}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">{bank.name}</p>
+                <p className="text-[10px] text-muted-foreground">Pode precisar colar manualmente</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => setShowAllBanks(!showAllBanks)}
+          className="mt-2 flex w-full items-center justify-center gap-1 text-xs font-medium text-primary hover:underline"
+        >
+          {showAllBanks ? (
+            <>Ver menos <ChevronUp className="h-3 w-3" /></>
+          ) : (
+            <>Ver todos os bancos <ChevronDown className="h-3 w-3" /></>
+          )}
+        </button>
+      </div>
+
+      {/* Status footer */}
+      <div className="flex items-center justify-center gap-2 rounded-lg border border-border bg-muted/50 px-4 py-3">
+        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+        <span className="text-sm text-muted-foreground">Aguardando pagamento...</span>
+      </div>
     </div>
   );
 };
