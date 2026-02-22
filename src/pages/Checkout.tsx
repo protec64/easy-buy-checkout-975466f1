@@ -207,8 +207,9 @@ const Checkout = () => {
     try {
       const result = await createPixPayment(buildPayload("pix"));
       setPixData(result);
-    } catch {
-      // handle error
+    } catch (err: any) {
+      console.error("PIX error:", err);
+      setCardApiError(err?.message || "Erro ao gerar PIX. Tente novamente.");
     }
     setPixLoading(false);
   };

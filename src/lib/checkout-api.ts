@@ -78,18 +78,24 @@ export interface UploadResult {
  * TODO: Conectar ao endpoint real do seu backend.
  */
 export async function createPixPayment(payload: OrderPayload): Promise<PixPaymentResult> {
-  // Simula latência de rede
-  await new Promise((r) => setTimeout(r, 2000));
+  const { data, error } = await supabase.functions.invoke("create-pix", {
+    body: payload,
+  });
 
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+  if (error) {
+    throw new Error("Erro ao criar pagamento PIX: " + error.message);
+  }
+
+  if (data?.error) {
+    throw new Error("Erro na API de pagamento: " + data.error);
+  }
 
   return {
-    payment_id: "PIX_" + Math.random().toString(36).slice(2, 10).toUpperCase(),
-    qr_code_base64: "", // Substitua pelo base64 real do QR Code
-    copia_e_cola:
-      "00020126580014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540510.005802BR5925LOJA EXEMPLO6009SAO PAULO62070503***6304ABCD",
-    expires_at: expiresAt,
-    status: "pending",
+    payment_id: data.payment_id,
+    qr_code_base64: data.qr_code_base64 || "",
+    copia_e_cola: data.copia_e_cola || "",
+    expires_at: data.expires_at,
+    status: data.status || "pending",
   };
 }
 
