@@ -33,6 +33,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
   const [status, setStatus] = useState(pixData?.status || "");
   const [checking, setChecking] = useState(false);
   const [showAllBanks, setShowAllBanks] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
 
   useEffect(() => {
     if (!pixData?.expires_at) return;
@@ -143,23 +144,39 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
         </p>
       </div>
 
-      {/* QR Code */}
-      <div className="flex flex-col items-center gap-2">
-        <div className="rounded-xl border border-border p-3 bg-card">
-          {pixCode ? (
-            <QRCodeSVG
-              value={pixCode}
-              size={200}
-              level="M"
-              includeMargin
-            />
-          ) : (
-            <div className="flex h-[200px] w-[200px] items-center justify-center">
-              <QrCode className="h-20 w-20 text-muted-foreground/30" />
+      {/* QR Code (collapsible) */}
+      <div>
+        <button
+          onClick={() => setShowQrCode(!showQrCode)}
+          className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50"
+        >
+          <div className="flex items-center gap-2">
+            <QrCode className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">
+              {showQrCode ? "Ocultar QR Code" : "Mostrar QR Code"}
+            </span>
+          </div>
+          {showQrCode ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </button>
+        {showQrCode && (
+          <div className="mt-3 flex flex-col items-center gap-2">
+            <div className="rounded-xl border border-border p-3 bg-card">
+              {pixCode ? (
+                <QRCodeSVG
+                  value={pixCode}
+                  size={200}
+                  level="M"
+                  includeMargin
+                />
+              ) : (
+                <div className="flex h-[200px] w-[200px] items-center justify-center">
+                  <QrCode className="h-20 w-20 text-muted-foreground/30" />
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <p className="text-xs text-muted-foreground">Aponte a câmera do seu celular</p>
+            <p className="text-xs text-muted-foreground">Aponte a câmera do seu celular</p>
+          </div>
+        )}
       </div>
 
       {/* PIX Code + Copy */}
