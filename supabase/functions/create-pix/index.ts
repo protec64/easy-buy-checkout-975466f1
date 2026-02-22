@@ -128,11 +128,11 @@ Deno.serve(async (req) => {
     console.log("FreePay response:", JSON.stringify(freepayData));
 
     // Update order with FreePay payment info
-    const pixCode = freepayData.pix?.qr_code || freepayData.qr_code || "";
-    const pixCopiaECola =
-      freepayData.pix?.qr_code_url || freepayData.pix?.copy_paste || freepayData.copy_paste || "";
-    const paymentId = freepayData.id || freepayData.transaction_id || "";
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    const fpData = freepayData.data || freepayData;
+    const pixCode = fpData.pix?.qr_code || fpData.qr_code || "";
+    const pixCopiaECola = fpData.pix?.qr_code || fpData.pix?.qr_code_url || fpData.pix?.copy_paste || "";
+    const paymentId = fpData.id || fpData.transaction_id || "";
+    const expiresAt = fpData.pix?.expiration_date || new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     await supabase
       .from("orders")

@@ -19,8 +19,8 @@ Deno.serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const paymentId = String(body.id || body.transaction_id || "");
-    const status = body.status || body.current_status || "";
+    const paymentId = String(body.Id || body.id || body.transaction_id || "");
+    const status = body.Status || body.status || body.current_status || "";
 
     if (!paymentId) {
       throw new Error("No payment ID in webhook payload");
