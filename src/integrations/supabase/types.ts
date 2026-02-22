@@ -163,7 +163,7 @@ export type Database = {
           file_url: string
           id: string
           note: string | null
-          order_id: string
+          order_id: string | null
           payment_id: string
           status: string
         }
@@ -175,7 +175,7 @@ export type Database = {
           file_url: string
           id?: string
           note?: string | null
-          order_id: string
+          order_id?: string | null
           payment_id: string
           status?: string
         }
@@ -187,7 +187,7 @@ export type Database = {
           file_url?: string
           id?: string
           note?: string | null
-          order_id?: string
+          order_id?: string | null
           payment_id?: string
           status?: string
         }
