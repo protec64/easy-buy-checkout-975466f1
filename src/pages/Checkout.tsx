@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import CheckoutHeader from "@/components/checkout/CheckoutHeader";
-import { initMetaPixel, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase } from "@/lib/meta-pixel";
+import { initMetaPixel, trackInitiateCheckout, trackAddPaymentInfo } from "@/lib/meta-pixel";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import CustomerForm from "@/components/checkout/CustomerForm";
 import ShippingForm from "@/components/checkout/ShippingForm";
@@ -276,24 +276,6 @@ const Checkout = ({ productId }: { productId?: string }) => {
     try {
       const result = await createPixPayment(buildPayload("pix"));
       setPixData(result);
-      // Track Purchase on PIX generation (pending payment)
-      trackPurchase({
-        content_ids: items.map((i) => i.id),
-        contents: items.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
-        content_type: "product",
-        currency: "BRL",
-        num_items: items.reduce((s, i) => s + i.qty, 0),
-        value: total,
-        order_id: result.payment_id,
-        payment_method: "pix",
-        email: customer.email || undefined,
-        phone: customer.phone || undefined,
-        cpf: customer.cpf || undefined,
-        first_name: customer.fullName || undefined,
-        city: shipping.city || undefined,
-        state: shipping.state || undefined,
-        zip_code: shipping.cep || undefined,
-      });
     } catch (err: any) {
       console.error("PIX error:", err);
       setCardApiError(err?.message || "Erro ao gerar PIX. Tente novamente.");
