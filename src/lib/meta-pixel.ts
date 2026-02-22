@@ -81,6 +81,12 @@ function sendCAPIEvent(params: {
     email?: string;
     phone?: string;
     cpf?: string;
+    first_name?: string;
+    last_name?: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
+    country?: string;
     client_user_agent?: string;
     fbc?: string;
     fbp?: string;
@@ -119,8 +125,35 @@ interface TrackParams {
   email?: string;
   phone?: string;
   cpf?: string;
+  first_name?: string;
+  last_name?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
   order_id?: string;
   payment_method?: string;
+}
+
+/** Build CAPI user_data from TrackParams */
+function buildCAPIUserData(params: TrackParams, fbp?: string, fbc?: string) {
+  // Split full name into first/last
+  const nameParts = (params.first_name || "").trim().split(/\s+/);
+  const firstName = nameParts[0] || undefined;
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : undefined;
+
+  return {
+    email: params.email,
+    phone: params.phone,
+    cpf: params.cpf,
+    first_name: firstName,
+    last_name: lastName,
+    city: params.city,
+    state: params.state,
+    zip_code: params.zip_code,
+    country: "br",
+    fbp,
+    fbc,
+  };
 }
 
 /**
@@ -130,7 +163,7 @@ export function trackInitiateCheckout(params: TrackParams) {
   const eventId = generateEventId();
   const { fbp, fbc } = getMetaCookies();
 
-  const pixelData = {
+  fbq("track", "InitiateCheckout", {
     content_ids: params.content_ids,
     contents: params.contents,
     content_type: params.content_type,
@@ -138,15 +171,13 @@ export function trackInitiateCheckout(params: TrackParams) {
     num_items: params.num_items,
     value: params.value,
     eventID: eventId,
-  };
-
-  fbq("track", "InitiateCheckout", pixelData);
+  });
 
   sendCAPIEvent({
     event_name: "InitiateCheckout",
     event_id: eventId,
     event_source_url: window.location.href,
-    user_data: { email: params.email, phone: params.phone, cpf: params.cpf, fbp, fbc },
+    user_data: buildCAPIUserData(params, fbp, fbc),
     custom_data: {
       value: params.value,
       currency: params.currency,
@@ -179,7 +210,7 @@ export function trackAddPaymentInfo(params: TrackParams & { payment_method: stri
     event_name: "AddPaymentInfo",
     event_id: eventId,
     event_source_url: window.location.href,
-    user_data: { email: params.email, phone: params.phone, cpf: params.cpf, fbp, fbc },
+    user_data: buildCAPIUserData(params, fbp, fbc),
     custom_data: {
       value: params.value,
       currency: params.currency,
@@ -215,7 +246,7 @@ export function trackPurchase(params: TrackParams & { order_id?: string; payment
     event_name: "Purchase",
     event_id: eventId,
     event_source_url: window.location.href,
-    user_data: { email: params.email, phone: params.phone, cpf: params.cpf, fbp, fbc },
+    user_data: buildCAPIUserData(params, fbp, fbc),
     custom_data: {
       value: params.value,
       currency: params.currency,

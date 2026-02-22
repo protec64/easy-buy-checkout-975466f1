@@ -90,6 +90,10 @@ const Checkout = ({ productId }: { productId?: string }) => {
         email: customer.email || undefined,
         phone: customer.phone || undefined,
         cpf: customer.cpf || undefined,
+        first_name: customer.fullName || undefined,
+        city: shipping.city || undefined,
+        state: shipping.state || undefined,
+        zip_code: shipping.cep || undefined,
       });
     }
   }, [items]);
@@ -174,6 +178,10 @@ const Checkout = ({ productId }: { productId?: string }) => {
         email: customer.email || undefined,
         phone: customer.phone || undefined,
         cpf: customer.cpf || undefined,
+        first_name: customer.fullName || undefined,
+        city: shipping.city || undefined,
+        state: shipping.state || undefined,
+        zip_code: shipping.cep || undefined,
       });
     }
   }, [items, total]);
@@ -281,6 +289,10 @@ const Checkout = ({ productId }: { productId?: string }) => {
         email: customer.email || undefined,
         phone: customer.phone || undefined,
         cpf: customer.cpf || undefined,
+        first_name: customer.fullName || undefined,
+        city: shipping.city || undefined,
+        state: shipping.state || undefined,
+        zip_code: shipping.cep || undefined,
       });
     } catch (err: any) {
       console.error("PIX error:", err);
