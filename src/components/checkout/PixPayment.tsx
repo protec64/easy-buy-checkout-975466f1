@@ -7,6 +7,7 @@ import ProofUpload from "./ProofUpload";
 import BANKS from "./BankLogos";
 import { checkPaymentStatus } from "@/lib/checkout-api";
 import { useToast } from "@/hooks/use-toast";
+import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
 
 interface PixPaymentProps {
   pixData: {
@@ -21,12 +22,18 @@ interface PixPaymentProps {
   email: string;
   cpf: string;
   total?: number;
+  fullName?: string;
+  phone?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  items?: Array<{ id: string; name: string; qty: number; price: number }>;
 }
 
 
 
 
-const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixPaymentProps) => {
+const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullName, phone, city, state, zipCode, items: orderItems }: PixPaymentProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
@@ -130,6 +137,28 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
     setStatus(res.status);
     setChecking(false);
   }, [pixData]);
+
+  const handleProofUploaded = useCallback(() => {
+    if (!pixData || !orderItems?.length) return;
+    initMetaPixel();
+    trackPurchase({
+      content_ids: orderItems.map((i) => i.id),
+      contents: orderItems.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
+      content_type: "product",
+      currency: "BRL",
+      num_items: orderItems.reduce((s, i) => s + i.qty, 0),
+      value: total || 0,
+      email,
+      phone,
+      cpf,
+      first_name: fullName,
+      city,
+      state,
+      zip_code: zipCode,
+      order_id: pixData.payment_id,
+      payment_method: "pix",
+    });
+  }, [pixData, orderItems, total, email, phone, cpf, fullName, city, state, zipCode]);
 
   // Pre-generation state
   if (!pixData) {
@@ -302,7 +331,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
 
 
       {/* Upload Comprovante */}
-      <ProofUpload paymentId={pixData.payment_id} email={email} cpf={cpf} />
+      <ProofUpload paymentId={pixData.payment_id} email={email} cpf={cpf} onUploadSuccess={handleProofUploaded} />
 
       {/* Bank logos */}
       <div>

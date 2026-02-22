@@ -9,12 +9,13 @@ interface ProofUploadProps {
   email: string;
   cpf: string;
   orderId?: string;
+  onUploadSuccess?: () => void;
 }
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED = ["image/jpeg", "image/png", "application/pdf"];
 
-const ProofUpload = ({ paymentId, email, cpf, orderId }: ProofUploadProps) => {
+const ProofUpload = ({ paymentId, email, cpf, orderId, onUploadSuccess }: ProofUploadProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -71,6 +72,7 @@ const ProofUpload = ({ paymentId, email, cpf, orderId }: ProofUploadProps) => {
         note: note || undefined,
       });
       setUploaded(true);
+      onUploadSuccess?.();
     } catch (err: any) {
       setError(err?.message || "Erro ao enviar. Tente novamente.");
     }

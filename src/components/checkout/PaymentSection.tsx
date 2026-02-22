@@ -25,6 +25,12 @@ interface PaymentSectionProps {
   total: number;
   email: string;
   cpf: string;
+  fullName?: string;
+  phone?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  items?: Array<{ id: string; name: string; qty: number; price: number }>;
 }
 
 const PaymentSection = ({
@@ -42,6 +48,12 @@ const PaymentSection = ({
   total,
   email,
   cpf,
+  fullName,
+  phone,
+  city,
+  state,
+  zipCode,
+  items,
 }: PaymentSectionProps) => {
   return (
     <div className="rounded-xl border border-border bg-card p-4 sm:p-5 checkout-shadow">
@@ -76,6 +88,12 @@ const PaymentSection = ({
             email={email}
             cpf={cpf}
             total={total}
+            fullName={fullName}
+            phone={phone}
+            city={city}
+            state={state}
+            zipCode={zipCode}
+            items={items}
           />
         </TabsContent>
 

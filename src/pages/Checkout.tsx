@@ -458,6 +458,12 @@ const Checkout = ({ productId }: { productId?: string }) => {
                   total={total}
                   email={customer.email}
                   cpf={customer.cpf}
+                  fullName={customer.fullName}
+                  phone={customer.phone}
+                  city={shipping.city}
+                  state={shipping.state}
+                  zipCode={shipping.cep}
+                  items={items}
                 />
 
 
