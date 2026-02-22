@@ -60,14 +60,16 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
 
   // Auto-poll payment status every 5 seconds
   useEffect(() => {
-    if (!pixData?.payment_id || expired || status === "approved") return;
+    if (!pixData?.payment_id || status === "approved") return;
 
-    const interval = setInterval(async () => {
+    console.log("Starting payment polling for:", pixData.payment_id);
+
+    const poll = async () => {
       try {
         const res = await checkPaymentStatus(pixData.payment_id);
+        console.log("Poll result:", res.status);
         if (res.status === "approved") {
           setStatus("approved");
-          clearInterval(interval);
           toast({
             title: "✅ Pagamento confirmado!",
             description: "Seu pagamento foi aprovado com sucesso.",
@@ -79,10 +81,14 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
       } catch (err) {
         console.error("Polling error:", err);
       }
-    }, 5000);
+    };
 
+    // Initial check immediately
+    poll();
+
+    const interval = setInterval(poll, 5000);
     return () => clearInterval(interval);
-  }, [pixData?.payment_id, expired, status, navigate, toast]);
+  }, [pixData?.payment_id, status, navigate, toast]);
 
   const handleCopy = useCallback(async () => {
     if (!pixData) return;
