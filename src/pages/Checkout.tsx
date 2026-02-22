@@ -300,18 +300,18 @@ const Checkout = () => {
           <div ref={stepRef} className="flex-1 space-y-5 scroll-mt-20">
             {/* STEP 1 */}
             {step === 1 && (
-              <>
+              <div className="animate-fade-in space-y-5">
                 <CustomerForm values={customer} errors={customerErrors} onChange={handleCustomerChange} />
                 <Button onClick={handleNextFromStep1} className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold">
                   Continuar para Endereço
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-              </>
+              </div>
             )}
 
             {/* STEP 2 */}
             {step === 2 && (
-              <>
+              <div className="animate-fade-in space-y-5">
                 <StepSummaryCard
                   icon={User}
                   title={customer.fullName}
@@ -329,12 +329,12 @@ const Checkout = () => {
                     </Button>
                   </>
                 )}
-              </>
+              </div>
             )}
 
             {/* STEP 3 */}
             {step === 3 && (
-              <>
+              <div className="animate-fade-in space-y-5">
                 <StepSummaryCard
                   icon={User}
                   title={customer.fullName}
@@ -390,7 +390,7 @@ const Checkout = () => {
                 <p className="text-center text-xs text-muted-foreground">
                   Você receberá atualizações do pedido no email.
                 </p>
-              </>
+              </div>
             )}
           </div>
 
