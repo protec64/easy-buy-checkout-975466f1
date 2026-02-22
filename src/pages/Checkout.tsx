@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import CheckoutHeader from "@/components/checkout/CheckoutHeader";
+import { initMetaPixel, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase } from "@/lib/meta-pixel";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import CustomerForm from "@/components/checkout/CustomerForm";
 import ShippingForm from "@/components/checkout/ShippingForm";
@@ -43,6 +44,11 @@ const Checkout = ({ productId }: { productId?: string }) => {
   const [items, setItems] = useState<Array<{id: string; name: string; variation?: string; qty: number; price: number; image?: string}>>([]);
   const [step, setStep] = useState(1);
 
+  // Init Meta Pixel
+  useEffect(() => {
+    initMetaPixel();
+  }, []);
+
   useEffect(() => {
     const fetchProduct = async () => {
       let query = supabase
@@ -68,6 +74,22 @@ const Checkout = ({ productId }: { productId?: string }) => {
     };
     fetchProduct();
   }, [productId]);
+
+  // Track InitiateCheckout when items load
+  const initiateTracked = useRef(false);
+  useEffect(() => {
+    if (items.length > 0 && !initiateTracked.current) {
+      initiateTracked.current = true;
+      trackInitiateCheckout({
+        content_ids: items.map((i) => i.id),
+        contents: items.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
+        content_type: "product",
+        currency: "BRL",
+        num_items: items.reduce((s, i) => s + i.qty, 0),
+        value: items.reduce((s, i) => s + i.price * i.qty, 0),
+      });
+    }
+  }, [items]);
 
   const [customer, setCustomer] = useState({
     email: draft?.email || "",
@@ -133,6 +155,21 @@ const Checkout = ({ productId }: { productId?: string }) => {
   const selectedShipping = SHIPPING_OPTIONS.find((o) => o.id === shippingOption)!;
   const shippingCost = selectedShipping.price;
   const total = subtotal + shippingCost - DISCOUNT;
+
+  // Track AddPaymentInfo when payment method changes
+  const handlePaymentMethodChange = useCallback((method: "pix" | "card") => {
+    setPaymentMethod(method);
+    if (items.length > 0) {
+      trackAddPaymentInfo({
+        content_ids: items.map((i) => i.id),
+        contents: items.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
+        content_type: "product",
+        currency: "BRL",
+        value: total,
+        payment_method: method,
+      });
+    }
+  }, [items, total]);
 
   const validateStep1 = (): boolean => {
     const cResult = customerSchema.safeParse(customer);
@@ -224,6 +261,17 @@ const Checkout = ({ productId }: { productId?: string }) => {
     try {
       const result = await createPixPayment(buildPayload("pix"));
       setPixData(result);
+      // Track Purchase on PIX generation (pending payment)
+      trackPurchase({
+        content_ids: items.map((i) => i.id),
+        contents: items.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
+        content_type: "product",
+        currency: "BRL",
+        num_items: items.reduce((s, i) => s + i.qty, 0),
+        value: total,
+        order_id: result.payment_id,
+        payment_method: "pix",
+      });
     } catch (err: any) {
       console.error("PIX error:", err);
       setCardApiError(err?.message || "Erro ao gerar PIX. Tente novamente.");
@@ -387,7 +435,7 @@ const Checkout = ({ productId }: { productId?: string }) => {
 
                 <PaymentSection
                   method={paymentMethod}
-                  onMethodChange={setPaymentMethod}
+                  onMethodChange={handlePaymentMethodChange}
                   pixData={pixData}
                   pixLoading={pixLoading}
                   onGeneratePix={handleGeneratePix}
