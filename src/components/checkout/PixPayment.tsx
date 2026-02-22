@@ -37,17 +37,23 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
   const { toast } = useToast();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({ min: "00", sec: "00" });
+  const [timeLeft, setTimeLeft] = useState({ min: "15", sec: "00" });
   const [expired, setExpired] = useState(false);
+  const [pixGeneratedAt] = useState(() => Date.now());
   const [status, setStatus] = useState(pixData?.status || "");
   const [checking, setChecking] = useState(false);
   const [showAllBanks, setShowAllBanks] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
 
   useEffect(() => {
-    if (!pixData?.expires_at) return;
+    if (!pixData) return;
+    // Use expires_at from API, or fallback to 15 min from generation
+    const expiresAt = pixData.expires_at
+      ? new Date(pixData.expires_at).getTime()
+      : pixGeneratedAt + 15 * 60 * 1000;
+
     const timer = setInterval(() => {
-      const diff = new Date(pixData.expires_at).getTime() - Date.now();
+      const diff = expiresAt - Date.now();
       if (diff <= 0) {
         setExpired(true);
         setTimeLeft({ min: "00", sec: "00" });
@@ -59,7 +65,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       }
     }, 1000);
     return () => clearInterval(timer);
-  }, [pixData?.expires_at]);
+  }, [pixData, pixGeneratedAt]);
 
   useEffect(() => {
     if (pixData) setStatus(pixData.status);
