@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, Clock, QrCode, HelpCircle, RefreshCw } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import ProofUpload from "./ProofUpload";
 import { checkPaymentStatus } from "@/lib/checkout-api";
 
@@ -116,9 +117,10 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf }: PixPaymentP
       {/* QR Code */}
       <div className="flex justify-center rounded-lg border border-border bg-card p-4">
         {pixData.qr_code_base64 ? (
-          <img
-            src={`data:image/png;base64,${pixData.qr_code_base64}`}
-            alt="QR Code PIX"
+          <QRCodeSVG
+            value={pixData.qr_code_base64}
+            size={192}
+            level="M"
             className="h-48 w-48"
           />
         ) : (
