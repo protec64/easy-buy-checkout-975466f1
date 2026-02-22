@@ -207,7 +207,22 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
         </div>
       </div>
 
-      {/* Steps */}
+      {/* Security Warning */}
+      <div className="rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--checkout-warning))]">
+            <AlertTriangle className="h-4 w-4 text-primary-foreground" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Atenção ao pagar</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Os bancos reforçaram a segurança do Pix e podem exibir alertas preventivos durante o pagamento.{" "}
+              <strong className="text-foreground">Fique tranquilo — sua transação é segura e está totalmente protegida.</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div>
         <p className="mb-3 text-sm font-semibold text-foreground">Como pagar o pix:</p>
         <div className="space-y-3">
@@ -228,16 +243,8 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total }: PixP
         </div>
       </div>
 
-      {/* Security Warning */}
-      <div className="rounded-lg border border-[hsl(var(--checkout-warning))]/30 bg-[hsl(var(--checkout-warning))]/5 p-4">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 shrink-0 text-[hsl(var(--checkout-warning))]" />
-          <p className="text-xs text-muted-foreground">
-            Os bancos reforçaram a segurança do Pix e podem exibir alertas preventivos durante o pagamento.{" "}
-            <strong className="text-foreground">Fique tranquilo — sua transação é segura e está totalmente protegida.</strong>
-          </p>
-        </div>
-      </div>
+
+
 
       {/* Upload Comprovante */}
       <ProofUpload paymentId={pixData.payment_id} email={email} cpf={cpf} />
