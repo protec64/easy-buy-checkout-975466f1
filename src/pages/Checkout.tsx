@@ -35,7 +35,7 @@ function loadDraft() {
   }
 }
 
-const Checkout = () => {
+const Checkout = ({ productId }: { productId?: string }) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const draft = loadDraft();
@@ -44,11 +44,17 @@ const Checkout = () => {
   const [step, setStep] = useState(1);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const { data } = await supabase
+    const fetchProduct = async () => {
+      let query = supabase
         .from("products")
         .select("id, name, price, images, variations")
         .eq("active", true);
+
+      if (productId) {
+        query = query.eq("id", productId);
+      }
+
+      const { data } = await query;
       if (data && data.length > 0) {
         setItems(data.map((p: any) => ({
           id: p.id,
@@ -60,8 +66,8 @@ const Checkout = () => {
         })));
       }
     };
-    fetchProducts();
-  }, []);
+    fetchProduct();
+  }, [productId]);
 
   const [customer, setCustomer] = useState({
     email: draft?.email || "",

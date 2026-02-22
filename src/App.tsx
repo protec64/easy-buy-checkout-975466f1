@@ -17,7 +17,10 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/produto1" replace />} />
-          <Route path="/produto1" element={<Checkout />} />
+          <Route path="/produto1" element={<Checkout productId="d2311170-1710-4e78-81c4-9d329b831229" />} />
+          <Route path="/produto2" element={<Checkout productId="8c650269-0ca5-42d5-8f96-c3a47709e84f" />} />
+          <Route path="/produto3" element={<Checkout productId="21259381-c34e-42d2-a056-9bf98df0e8c8" />} />
+          <Route path="/produto4" element={<Checkout productId="0d1fd8d5-db8b-4c75-8d1c-da322d7a2d79" />} />
           <Route path="/success" element={<Success />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
