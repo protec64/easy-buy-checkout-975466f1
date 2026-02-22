@@ -87,6 +87,9 @@ const Checkout = ({ productId }: { productId?: string }) => {
         currency: "BRL",
         num_items: items.reduce((s, i) => s + i.qty, 0),
         value: items.reduce((s, i) => s + i.price * i.qty, 0),
+        email: customer.email || undefined,
+        phone: customer.phone || undefined,
+        cpf: customer.cpf || undefined,
       });
     }
   }, [items]);
@@ -165,8 +168,12 @@ const Checkout = ({ productId }: { productId?: string }) => {
         contents: items.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
         content_type: "product",
         currency: "BRL",
+        num_items: items.reduce((s, i) => s + i.qty, 0),
         value: total,
         payment_method: method,
+        email: customer.email || undefined,
+        phone: customer.phone || undefined,
+        cpf: customer.cpf || undefined,
       });
     }
   }, [items, total]);
@@ -271,6 +278,9 @@ const Checkout = ({ productId }: { productId?: string }) => {
         value: total,
         order_id: result.payment_id,
         payment_method: "pix",
+        email: customer.email || undefined,
+        phone: customer.phone || undefined,
+        cpf: customer.cpf || undefined,
       });
     } catch (err: any) {
       console.error("PIX error:", err);
