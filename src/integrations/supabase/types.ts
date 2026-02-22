@@ -252,6 +252,48 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          discount_percent: number | null
+          id: string
+          images: string[] | null
+          name: string
+          original_price: number | null
+          price: number
+          updated_at: string
+          variations: Json | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          discount_percent?: number | null
+          id?: string
+          images?: string[] | null
+          name: string
+          original_price?: number | null
+          price: number
+          updated_at?: string
+          variations?: Json | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          discount_percent?: number | null
+          id?: string
+          images?: string[] | null
+          name?: string
+          original_price?: number | null
+          price?: number
+          updated_at?: string
+          variations?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
