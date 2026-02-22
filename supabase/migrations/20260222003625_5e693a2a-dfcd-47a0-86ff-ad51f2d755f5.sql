@@ -1,0 +1,1 @@
+ALTER TABLE public.payment_proofs ALTER COLUMN order_id DROP NOT NULL;
