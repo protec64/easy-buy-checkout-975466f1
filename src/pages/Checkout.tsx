@@ -417,12 +417,14 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
                   lines={[customer.email]}
                   onEdit={() => goToStep(1)}
                 />
-                <StepSummaryCard
-                  icon={MapPin}
-                  title={`${shipping.street}, ${shipping.number}`}
-                  lines={[`${shipping.neighborhood} — ${shipping.city}/${shipping.state}`, `CEP ${shipping.cep}`]}
-                  onEdit={() => goToStep(2)}
-                />
+                {!digital && (
+                  <StepSummaryCard
+                    icon={MapPin}
+                    title={`${shipping.street}, ${shipping.number}`}
+                    lines={[`${shipping.neighborhood} — ${shipping.city}/${shipping.state}`, `CEP ${shipping.cep}`]}
+                    onEdit={() => goToStep(2)}
+                  />
+                )}
 
                 {showCardToPixMessage && (
                   <div className="rounded-xl border border-amber-300 bg-amber-50 p-5">
