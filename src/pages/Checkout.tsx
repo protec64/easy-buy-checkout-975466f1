@@ -379,7 +379,7 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
               <div className="animate-fade-in space-y-5">
                 <CustomerForm values={customer} errors={customerErrors} onChange={handleCustomerChange} />
                 <Button onClick={handleNextFromStep1} className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold">
-                  Continuar para Endereço
+                  {digital ? "Continuar para Pagamento" : "Continuar para Endereço"}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
