@@ -386,7 +386,7 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
             )}
 
             {/* STEP 2 */}
-            {step === 2 && (
+            {step === 2 && !digital && (
               <div className="animate-fade-in space-y-5">
                 <StepSummaryCard
                   icon={User}
