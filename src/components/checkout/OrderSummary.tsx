@@ -18,6 +18,7 @@ interface OrderSummaryProps {
   discount: number;
   installments?: number;
   isMobile?: boolean;
+  digital?: boolean;
 }
 
 const OrderSummary = ({
@@ -26,6 +27,7 @@ const OrderSummary = ({
   discount,
   installments,
   isMobile = false,
+  digital = false,
 }: OrderSummaryProps) => {
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
