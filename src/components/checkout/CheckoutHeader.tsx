@@ -1,5 +1,5 @@
 import { Lock, Shield } from "lucide-react";
-import mercadopagoLogo from "@/assets/mercadopago-logo.png";
+import azulLogo from "@/assets/azul-logo.png.asset.json";
 
 interface CheckoutHeaderProps {
   checkoutId?: string;
@@ -11,8 +11,8 @@ const CheckoutHeader = ({ checkoutId }: CheckoutHeaderProps) => {
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
           <img
-            src={mercadopagoLogo}
-            alt="Mercado Pago"
+            src={azulLogo.url}
+            alt="Azul"
             className="h-7"
           />
         </div>
