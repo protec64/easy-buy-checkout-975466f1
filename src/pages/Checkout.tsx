@@ -41,7 +41,7 @@ function loadDraft() {
   }
 }
 
-const Checkout = ({ productId }: { productId?: string }) => {
+const Checkout = ({ productId, digital = false }: { productId?: string; digital?: boolean }) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const draft = loadDraft();
