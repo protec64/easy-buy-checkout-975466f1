@@ -238,7 +238,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       {/* Beneficiary notice */}
       <div className="rounded-lg border border-border bg-muted/50 px-4 py-3">
         <p className="text-xs text-muted-foreground">
-          O beneficiário do PIX é <strong className="text-foreground">KXPAY PAGAMENTOS LTDA</strong>, a empresa que gerencia nossos pagamentos de forma segura.
+          O beneficiário do PIX é <strong className="text-foreground">TIKTOK SHOP LTDA</strong>, a empresa que gerencia nossos pagamentos de forma segura.
         </p>
       </div>
 
