@@ -240,7 +240,7 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
   };
 
   const handleNextFromStep1 = () => {
-    if (validateStep1()) goToStep(2);
+    if (validateStep1()) goToStep(digital ? 3 : 2);
   };
 
   const handleNextFromStep2 = () => {
