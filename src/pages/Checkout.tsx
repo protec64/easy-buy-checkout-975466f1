@@ -368,6 +368,7 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
               discount={DISCOUNT}
               installments={paymentMethod === "card" ? parseInt(cardValues.installments) : undefined}
               isMobile
+              digital={digital}
             />
           </div>
         )}
