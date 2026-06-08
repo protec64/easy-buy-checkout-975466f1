@@ -41,7 +41,7 @@ function loadDraft() {
   }
 }
 
-const Checkout = ({ productId }: { productId?: string }) => {
+const Checkout = ({ productId, digital = false }: { productId?: string; digital?: boolean }) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const draft = loadDraft();
@@ -166,7 +166,7 @@ const Checkout = ({ productId }: { productId?: string }) => {
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const selectedShipping = SHIPPING_OPTIONS.find((o) => o.id === shippingOption)!;
-  const shippingCost = selectedShipping.price;
+  const shippingCost = digital ? 0 : selectedShipping.price;
   const total = subtotal + shippingCost - DISCOUNT;
 
   // Track AddPaymentInfo when payment method changes
@@ -240,7 +240,7 @@ const Checkout = ({ productId }: { productId?: string }) => {
   };
 
   const handleNextFromStep1 = () => {
-    if (validateStep1()) goToStep(2);
+    if (validateStep1()) goToStep(digital ? 3 : 2);
   };
 
   const handleNextFromStep2 = () => {
@@ -255,13 +255,13 @@ const Checkout = ({ productId }: { productId?: string }) => {
       phone: customer.phone || undefined,
     },
     shipping_address: {
-      cep: shipping.cep,
-      street: shipping.street,
-      number: shipping.number,
+      cep: digital ? "00000000" : shipping.cep,
+      street: digital ? "Produto Digital" : shipping.street,
+      number: digital ? "S/N" : shipping.number,
       complement: shipping.complement || undefined,
-      neighborhood: shipping.neighborhood,
-      city: shipping.city,
-      state: shipping.state,
+      neighborhood: digital ? "Digital" : shipping.neighborhood,
+      city: digital ? "Digital" : shipping.city,
+      state: digital ? "BR" : shipping.state,
       reference: shipping.reference || undefined,
     },
     order: {
@@ -379,14 +379,14 @@ const Checkout = ({ productId }: { productId?: string }) => {
               <div className="animate-fade-in space-y-5">
                 <CustomerForm values={customer} errors={customerErrors} onChange={handleCustomerChange} />
                 <Button onClick={handleNextFromStep1} className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold">
-                  Continuar para Endereço
+                  {digital ? "Continuar para Pagamento" : "Continuar para Endereço"}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             )}
 
             {/* STEP 2 */}
-            {step === 2 && (
+            {step === 2 && !digital && (
               <div className="animate-fade-in space-y-5">
                 <StepSummaryCard
                   icon={User}
@@ -417,12 +417,14 @@ const Checkout = ({ productId }: { productId?: string }) => {
                   lines={[customer.email]}
                   onEdit={() => goToStep(1)}
                 />
-                <StepSummaryCard
-                  icon={MapPin}
-                  title={`${shipping.street}, ${shipping.number}`}
-                  lines={[`${shipping.neighborhood} — ${shipping.city}/${shipping.state}`, `CEP ${shipping.cep}`]}
-                  onEdit={() => goToStep(2)}
-                />
+                {!digital && (
+                  <StepSummaryCard
+                    icon={MapPin}
+                    title={`${shipping.street}, ${shipping.number}`}
+                    lines={[`${shipping.neighborhood} — ${shipping.city}/${shipping.state}`, `CEP ${shipping.cep}`]}
+                    onEdit={() => goToStep(2)}
+                  />
+                )}
 
                 {showCardToPixMessage && (
                   <div className="rounded-xl border border-amber-300 bg-amber-50 p-5">

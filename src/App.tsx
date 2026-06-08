@@ -2,10 +2,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import Checkout from "./pages/Checkout";
 import Success from "./pages/Success";
 import NotFound from "./pages/NotFound";
+
+const DigitalCheckout = () => {
+  const { productId } = useParams();
+  return <Checkout productId={productId} digital />;
+};
 
 const queryClient = new QueryClient();
 
@@ -24,6 +29,7 @@ const App = () => (
           <Route path="/produto5" element={<Checkout productId="87323788-46ee-4055-a282-6094ac615f11" />} />
           <Route path="/produto6" element={<Checkout productId="def084a3-04b1-4149-8845-2a3cd64ca086" />} />
           <Route path="/produto7" element={<Checkout productId="c0a13ac2-91df-437e-aa08-5e811c230f2b" />} />
+          <Route path="/digital/:productId" element={<DigitalCheckout />} />
           <Route path="/success" element={<Success />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
