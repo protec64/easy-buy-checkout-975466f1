@@ -15,11 +15,6 @@ const CheckoutHeader = ({ checkoutId }: CheckoutHeaderProps) => {
             alt="Mercado Pago"
             className="h-7"
           />
-          {checkoutId && (
-            <span className="hidden sm:inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-[11px] font-mono text-muted-foreground">
-              Pedido {checkoutId}
-            </span>
-          )}
         </div>
         <div className="flex items-center gap-2 text-checkout-trust">
           <Shield className="h-4 w-4" />
@@ -33,13 +28,13 @@ const CheckoutHeader = ({ checkoutId }: CheckoutHeaderProps) => {
           <span className="text-xs font-medium sm:hidden">Seguro</span>
         </div>
       </div>
-      {checkoutId && (
-        <div className="sm:hidden border-t border-border bg-muted/50 px-4 py-1.5 text-center">
-          <span className="text-[11px] font-mono text-muted-foreground">
-            Pedido {checkoutId}
-          </span>
-        </div>
-      )}
+      <div className="border-t-2 border-destructive bg-destructive/10 px-4 py-2">
+        <p className="mx-auto max-w-5xl text-[11px] sm:text-xs text-foreground leading-snug text-center">
+          <strong className="text-destructive">⚠️ Atenção:</strong> Este pagamento só pode ser realizado dentro do tempo. Após este período, caso o pagamento não seja confirmado,{" "}
+          <strong>sua solicitação será cancelada</strong>. A desistência gera{" "}
+          <strong className="text-destructive">multa de R$ 226,39 vinculada ao seu CPF</strong>, conforme os Termos de Uso.
+        </p>
+      </div>
     </header>
   );
 };
