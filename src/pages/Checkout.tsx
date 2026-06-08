@@ -378,13 +378,6 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
             {/* STEP 1 */}
             {step === 1 && (
               <div className="animate-fade-in space-y-5">
-                <div className="rounded-lg border-2 border-destructive bg-destructive/10 px-4 py-3">
-                  <p className="text-xs sm:text-sm text-foreground leading-relaxed">
-                    <strong className="text-destructive">⚠️ Atenção:</strong> Este pagamento só pode ser realizado dentro do tempo. Após este período, caso o pagamento não seja confirmado,{" "}
-                    <strong>sua solicitação será cancelada</strong>. A desistência gera{" "}
-                    <strong className="text-destructive">multa de R$ 226,39 vinculada ao seu CPF</strong>, conforme os Termos de Uso.
-                  </p>
-                </div>
                 <CustomerForm values={customer} errors={customerErrors} onChange={handleCustomerChange} />
                 <Button onClick={handleNextFromStep1} className="w-full h-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 text-base font-semibold">
                   {digital ? "Continuar para Pagamento" : "Continuar para Endereço"}
