@@ -29,6 +29,9 @@ const App = () => (
           <Route path="/produto5" element={<Checkout productId="87323788-46ee-4055-a282-6094ac615f11" />} />
           <Route path="/produto6" element={<Checkout productId="def084a3-04b1-4149-8845-2a3cd64ca086" />} />
           <Route path="/produto7" element={<Checkout productId="c0a13ac2-91df-437e-aa08-5e811c230f2b" />} />
+          <Route path="/taxa1" element={<Checkout productId="d3d978a6-2426-49c6-9803-1e252e5376c9" digital />} />
+          <Route path="/taxa2" element={<Checkout productId="95216e2e-a90d-4a0f-9cc0-7fe888ca54dd" digital />} />
+          <Route path="/taxa3" element={<Checkout productId="3c547ca4-f181-409e-af84-a7e7dfc8a7f0" digital />} />
           <Route path="/digital/:productId" element={<DigitalCheckout />} />
           <Route path="/success" element={<Success />} />
           <Route path="*" element={<NotFound />} />
