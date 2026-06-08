@@ -166,7 +166,7 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const selectedShipping = SHIPPING_OPTIONS.find((o) => o.id === shippingOption)!;
-  const shippingCost = selectedShipping.price;
+  const shippingCost = digital ? 0 : selectedShipping.price;
   const total = subtotal + shippingCost - DISCOUNT;
 
   // Track AddPaymentInfo when payment method changes
