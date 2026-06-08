@@ -18,6 +18,7 @@ interface OrderSummaryProps {
   discount: number;
   installments?: number;
   isMobile?: boolean;
+  digital?: boolean;
 }
 
 const OrderSummary = ({
@@ -26,6 +27,7 @@ const OrderSummary = ({
   discount,
   installments,
   isMobile = false,
+  digital = false,
 }: OrderSummaryProps) => {
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
@@ -117,17 +119,19 @@ const OrderSummary = ({
             })}
           </span>
         </div>
-        <div className="flex justify-between text-muted-foreground">
-          <span>Frete</span>
-          <span>
-            {shippingCost > 0
-              ? shippingCost.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })
-              : "Grátis"}
-          </span>
-        </div>
+        {!digital && (
+          <div className="flex justify-between text-muted-foreground">
+            <span>Frete</span>
+            <span>
+              {shippingCost > 0
+                ? shippingCost.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })
+                : "Grátis"}
+            </span>
+          </div>
+        )}
         {discount > 0 && (
           <div className="flex justify-between text-checkout-trust">
             <span>Desconto</span>
