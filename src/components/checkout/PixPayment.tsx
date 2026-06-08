@@ -214,14 +214,6 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         </p>
       </div>
 
-      {/* Aviso de cancelamento / multa */}
-      <div className="rounded-lg border-2 border-destructive bg-destructive/10 px-4 py-3">
-        <p className="text-xs sm:text-sm text-foreground leading-relaxed">
-          <strong className="text-destructive">⚠️ Atenção:</strong> Este pagamento só pode ser realizado dentro do tempo. Após este período, caso o pagamento não seja confirmado,{" "}
-          <strong>sua solicitação será cancelada</strong>. A desistência gera{" "}
-          <strong className="text-destructive">multa de R$ 226,39 vinculada ao seu CPF</strong>, conforme os Termos de Uso.
-        </p>
-      </div>
 
       {/* Header */}
       <div className="text-center">
