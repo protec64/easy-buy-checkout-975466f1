@@ -134,6 +134,31 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         console.log("Poll result:", res.status);
         if (res.status === "approved") {
           setStatus("approved");
+          // Dispara Purchase no Meta Pixel apenas na confirmação real
+          if (orderItems?.length) {
+            try {
+              initMetaPixel();
+              trackPurchase({
+                content_ids: orderItems.map((i) => i.id),
+                contents: orderItems.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
+                content_type: "product",
+                currency: "BRL",
+                num_items: orderItems.reduce((s, i) => s + i.qty, 0),
+                value: total || 0,
+                email,
+                phone,
+                cpf,
+                first_name: fullName,
+                city,
+                state,
+                zip_code: zipCode,
+                order_id: pixData.payment_id,
+                payment_method: "pix",
+              });
+            } catch (e) {
+              console.error("trackPurchase error:", e);
+            }
+          }
           toast({
             title: "✅ Pagamento confirmado!",
             description: "Redirecionando...",
