@@ -39,6 +39,13 @@ function resetCheckoutStorage() {
   } catch {}
 }
 
+function pickDraftFields<T extends Record<string, string>>(emptyValues: T, draft: Record<string, string> | null) {
+  return Object.keys(emptyValues).reduce((acc, key) => {
+    acc[key as keyof T] = draft?.[key] ?? emptyValues[key as keyof T];
+    return acc;
+  }, {} as T);
+}
+
 function generateCheckoutId(): string {
   const ts = Date.now().toString(36).toUpperCase();
   const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
@@ -126,13 +133,13 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
     }
   }, [items]);
 
-  const [customer, setCustomer] = useState({ ...EMPTY_CUSTOMER, ...draft });
+  const [customer, setCustomer] = useState(() => pickDraftFields(EMPTY_CUSTOMER, draft));
 
-  const [shipping, setShipping] = useState({ ...EMPTY_SHIPPING, ...draft });
+  const [shipping, setShipping] = useState(() => pickDraftFields(EMPTY_SHIPPING, draft));
 
   const [shippingOption, setShippingOption] = useState("free");
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card">("pix");
-  const [cardValues, setCardValues] = useState(EMPTY_CARD);
+  const [cardValues, setCardValues] = useState(() => EMPTY_CARD);
 
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [customerErrors, setCustomerErrors] = useState<Record<string, string>>({});
