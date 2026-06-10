@@ -87,6 +87,13 @@ export type Database = {
           subtotal: number
           total: number
           updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_sck: string | null
+          utm_source: string | null
+          utm_src: string | null
+          utm_term: string | null
         }
         Insert: {
           address_number: string
@@ -119,6 +126,13 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_sck?: string | null
+          utm_source?: string | null
+          utm_src?: string | null
+          utm_term?: string | null
         }
         Update: {
           address_number?: string
@@ -151,6 +165,13 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_sck?: string | null
+          utm_source?: string | null
+          utm_src?: string | null
+          utm_term?: string | null
         }
         Relationships: []
       }
