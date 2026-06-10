@@ -187,6 +187,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
     // Redireciona após envio do comprovante (mesma lógica do polling de aprovação)
     setTimeout(() => {
+      try { localStorage.removeItem("checkout_form_draft"); } catch {}
       const ids = (orderItems || []).map((i) => i.id);
       if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
         navigate("/ativar-conta");
