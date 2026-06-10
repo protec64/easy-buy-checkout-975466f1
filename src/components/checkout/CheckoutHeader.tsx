@@ -4,12 +4,13 @@ import azulLogo from "@/assets/azul-logo.png.asset.json";
 
 interface CheckoutHeaderProps {
   checkoutId?: string;
+  showTimerWarning?: boolean;
 }
 
 const TIMER_KEY = "checkout_deadline_ts";
 const DURATION_MS = 15 * 60 * 1000;
 
-const CheckoutHeader = ({ checkoutId }: CheckoutHeaderProps) => {
+const CheckoutHeader = ({ checkoutId, showTimerWarning = false }: CheckoutHeaderProps) => {
   const [timeLeft, setTimeLeft] = useState({ min: "15", sec: "00" });
   const [expired, setExpired] = useState(false);
 
