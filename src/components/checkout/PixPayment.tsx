@@ -98,6 +98,8 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
               navigate("/ativar-conta");
             } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
               navigate("/taxa-iof");
+            } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
+              navigate("/taxa-anual");
             } else {
               navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`);
             }
