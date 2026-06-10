@@ -184,6 +184,15 @@ export async function uploadPaymentProof(
     throw new Error("Erro ao salvar comprovante: " + dbError.message);
   }
 
+  // Dispara UTMify "paid" e marca pedido como aprovado
+  try {
+    await supabase.functions.invoke("approve-by-proof", {
+      body: { payment_id: meta.payment_id },
+    });
+  } catch (e) {
+    console.warn("approve-by-proof invoke failed", e);
+  }
+
   return { file_url: fileUrl };
 }
 
