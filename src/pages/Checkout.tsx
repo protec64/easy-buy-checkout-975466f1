@@ -44,8 +44,20 @@ function loadDraft() {
 
 const Checkout = ({ productId, digital = false }: { productId?: string; digital?: boolean }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
-  const draft = loadDraft();
+
+  // Se chegou via redirect pós-pagamento, limpa rascunho ANTES de inicializar o estado
+  const shouldReset = (location.state as { reset?: boolean } | null)?.reset === true;
+  if (shouldReset) {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem("checkout_deadline_ts");
+      // limpa o state para não re-disparar em navegações futuras
+      window.history.replaceState({}, "");
+    } catch {}
+  }
+  const draft = shouldReset ? null : loadDraft();
 
   const [checkoutId] = useState(() => generateCheckoutId());
   const [items, setItems] = useState<Array<{id: string; name: string; variation?: string; qty: number; price: number; image?: string}>>([]);
