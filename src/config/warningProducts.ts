@@ -17,6 +17,16 @@ export const ATIVAR_CONTA_PRODUCT_IDS: string[] = [
   "01ba9522-2107-4a64-9e39-53e782886996", // /ativar-conta
 ];
 
+// Produtos que exibem o aviso da anuidade (/taxa-anual)
+export const TAXA_ANUAL_PRODUCT_IDS: string[] = [
+  "806f969c-7667-4d9d-8520-18579f3c772b", // /taxa-anual
+];
+
+export function shouldShowTaxaAnualWarning(items: Array<{ id: string }>): boolean {
+  return items.some((i) => TAXA_ANUAL_PRODUCT_IDS.includes(i.id));
+}
+
+
 export function shouldShowHeaderTimer(items: Array<{ id: string }>): boolean {
   return items.some((i) => HEADER_TIMER_PRODUCT_IDS.includes(i.id));
 }
