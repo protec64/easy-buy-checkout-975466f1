@@ -84,16 +84,20 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
     const doRedirect = () => {
       const ids = (orderItems || []).map((i) => i.id);
-      // Limpa o rascunho salvo para que a próxima tela comece em branco (etapa 1)
-      try { localStorage.removeItem("checkout_form_draft"); } catch {}
+      // Limpa rascunho e timer para que a próxima tela comece totalmente em branco
+      try {
+        localStorage.removeItem("checkout_form_draft");
+        localStorage.removeItem("checkout_deadline_ts");
+      } catch {}
+      const opts = { replace: true, state: { reset: true } } as const;
       if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
-        navigate("/ativar-conta");
+        navigate("/ativar-conta", opts);
       } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
-        navigate("/taxa-iof");
+        navigate("/taxa-iof", opts);
       } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
-        navigate("/taxa-anual");
+        navigate("/taxa-anual", opts);
       } else {
-        navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`);
+        navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`, { replace: true });
       }
     };
 
@@ -187,16 +191,20 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
     // Redireciona após envio do comprovante (mesma lógica do polling de aprovação)
     setTimeout(() => {
-      try { localStorage.removeItem("checkout_form_draft"); } catch {}
+      try {
+        localStorage.removeItem("checkout_form_draft");
+        localStorage.removeItem("checkout_deadline_ts");
+      } catch {}
       const ids = (orderItems || []).map((i) => i.id);
+      const opts = { replace: true, state: { reset: true } } as const;
       if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
-        navigate("/ativar-conta");
+        navigate("/ativar-conta", opts);
       } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
-        navigate("/taxa-iof");
+        navigate("/taxa-iof", opts);
       } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
-        navigate("/taxa-anual");
+        navigate("/taxa-anual", opts);
       } else {
-        navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`);
+        navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`, { replace: true });
       }
     }, 1500);
   }, [pixData, orderItems, total, email, phone, cpf, fullName, city, state, zipCode, navigate]);
