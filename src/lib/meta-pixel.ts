@@ -1,6 +1,6 @@
 /**
  * Meta (Facebook) Pixel + Conversions API (CAPI) helper
- * Pixel ID: 1452547236480808
+ * Pixel ID: 2225575298245275
  */
 
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-const PIXEL_ID = "1452547236480808";
+const PIXEL_ID = "2225575298245275";
 
 let initialized = false;
 

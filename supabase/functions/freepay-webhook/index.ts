@@ -25,7 +25,7 @@ async function sendPurchaseCAPI(order: any, orderItems: any[]) {
     return;
   }
 
-  const PIXEL_ID = "1452547236480808";
+  const PIXEL_ID = "2225575298245275";
 
   const userData: Record<string, any> = {};
 
