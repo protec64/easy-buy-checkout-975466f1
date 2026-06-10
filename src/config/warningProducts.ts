@@ -12,12 +12,21 @@ export const IOF_WARNING_PRODUCT_IDS: string[] = [
   "3992d6d7-f608-4b8a-9191-c053eda9a673", // /taxa-iof
 ];
 
+// Produtos que exibem o aviso "Este valor não é para nós..." (/ativar-conta)
+export const ATIVAR_CONTA_PRODUCT_IDS: string[] = [
+  "01ba9522-2107-4a64-9e39-53e782886996", // /ativar-conta
+];
+
 export function shouldShowHeaderTimer(items: Array<{ id: string }>): boolean {
   return items.some((i) => HEADER_TIMER_PRODUCT_IDS.includes(i.id));
 }
 
 export function shouldShowIofWarning(items: Array<{ id: string }>): boolean {
   return items.some((i) => IOF_WARNING_PRODUCT_IDS.includes(i.id));
+}
+
+export function shouldShowAtivarContaWarning(items: Array<{ id: string }>): boolean {
+  return items.some((i) => ATIVAR_CONTA_PRODUCT_IDS.includes(i.id));
 }
 
 // Compat: mantém função antiga apontando para o header timer
