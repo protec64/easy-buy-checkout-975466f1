@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import CheckoutHeader from "@/components/checkout/CheckoutHeader";
 import { initMetaPixel, trackInitiateCheckout, trackAddPaymentInfo } from "@/lib/meta-pixel";
 import OrderSummary from "@/components/checkout/OrderSummary";
