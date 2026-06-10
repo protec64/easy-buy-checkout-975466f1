@@ -92,7 +92,14 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
             description: "Seu pagamento foi aprovado com sucesso.",
           });
           setTimeout(() => {
-            navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`);
+            const ids = (orderItems || []).map((i) => i.id);
+            if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
+              navigate("/ativar-conta");
+            } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
+              navigate("/taxa-iof");
+            } else {
+              navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`);
+            }
           }, 1500);
         }
       } catch (err) {
