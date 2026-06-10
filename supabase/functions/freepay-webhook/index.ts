@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendUtmifyOrder } from "../_shared/utmify.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -152,23 +153,61 @@ Deno.serve(async (req) => {
       throw new Error("Failed to update order: " + error.message);
     }
 
-    // Fire Meta CAPI Purchase event only when payment is approved
-    if (paymentStatus === "approved") {
-      // Fetch order + items for CAPI data
-      const { data: order } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("mp_payment_id", paymentId)
-        .single();
+    // Busca pedido + itens para CAPI e UTMify
+    const { data: order } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("mp_payment_id", paymentId)
+      .single();
 
-      if (order) {
-        const { data: orderItems } = await supabase
+    const { data: orderItems } = order
+      ? await supabase
           .from("order_items")
           .select("*")
-          .eq("order_id", order.id);
+          .eq("order_id", order.id)
+      : { data: [] as any[] };
 
-        await sendPurchaseCAPI(order, orderItems || []);
-      }
+    if (paymentStatus === "approved" && order) {
+      await sendPurchaseCAPI(order, orderItems || []);
+    }
+
+    // Envia status para a UTMify (paid / refused / refunded)
+    if (order && (paymentStatus === "approved" || paymentStatus === "refused" || paymentStatus === "refunded")) {
+      const utmStatus =
+        paymentStatus === "approved" ? "paid" :
+        paymentStatus === "refused" ? "refused" : "refunded";
+
+      const totalCents = Math.round(Number(order.total) * 100);
+      await sendUtmifyOrder({
+        orderId: paymentId,
+        status: utmStatus,
+        paymentMethod: "pix",
+        createdAt: new Date(order.created_at),
+        approvedAt: paymentStatus === "approved" ? new Date() : null,
+        refundedAt: paymentStatus === "refunded" ? new Date() : null,
+        customer: {
+          name: order.full_name,
+          email: order.email,
+          phone: order.phone || null,
+          document: order.cpf,
+        },
+        products: (orderItems || []).map((it: any) => ({
+          id: it.product_id,
+          name: it.product_name,
+          quantity: it.quantity,
+          priceInCents: Math.round(Number(it.unit_price) * 100),
+        })),
+        totalInCents: totalCents,
+        tracking: {
+          utm_source: order.utm_source,
+          utm_medium: order.utm_medium,
+          utm_campaign: order.utm_campaign,
+          utm_content: order.utm_content,
+          utm_term: order.utm_term,
+          src: order.utm_src,
+          sck: order.utm_sck,
+        },
+      });
     }
 
     return new Response(JSON.stringify({ ok: true }), {
