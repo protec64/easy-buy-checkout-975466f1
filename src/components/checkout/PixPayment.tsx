@@ -82,6 +82,19 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
     console.log("Starting payment polling for:", pixData.payment_id);
 
+    const doRedirect = () => {
+      const ids = (orderItems || []).map((i) => i.id);
+      if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
+        navigate("/ativar-conta");
+      } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
+        navigate("/taxa-iof");
+      } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
+        navigate("/taxa-anual");
+      } else {
+        navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`);
+      }
+    };
+
     const poll = async () => {
       try {
         const res = await checkPaymentStatus(pixData.payment_id);
@@ -90,25 +103,16 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
           setStatus("approved");
           toast({
             title: "✅ Pagamento confirmado!",
-            description: "Seu pagamento foi aprovado com sucesso.",
+            description: "Redirecionando...",
           });
-          setTimeout(() => {
-            const ids = (orderItems || []).map((i) => i.id);
-            if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
-              navigate("/ativar-conta");
-            } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
-              navigate("/taxa-iof");
-            } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
-              navigate("/taxa-anual");
-            } else {
-              navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`);
-            }
-          }, 1500);
+          // Redirect imediato — sem setTimeout para evitar perda em re-render
+          doRedirect();
         }
       } catch (err) {
         console.error("Polling error:", err);
       }
     };
+
 
     // Check immediately when user returns to the tab (critical for mobile)
     const handleVisibility = () => {
