@@ -5,6 +5,7 @@ export const HEADER_TIMER_PRODUCT_IDS: string[] = [
   "d3d978a6-2426-49c6-9803-1e252e5376c9", // taxa1
   "95216e2e-a90d-4a0f-9cc0-7fe888ca54dd", // taxa2
   "3c547ca4-f181-409e-af84-a7e7dfc8a7f0", // taxa3
+  "bf888b49-0d72-4aeb-a202-d391c5432f95", // taxa4
 ];
 
 // Produtos que exibem o aviso "Atenção - O não pagamento do imposto..." (taxa-iof)
