@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import Checkout from "./pages/Checkout";
 import Success from "./pages/Success";
+import AdminProofs from "./pages/AdminProofs";
 import NotFound from "./pages/NotFound";
 
 const DigitalCheckout = () => {
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/taxa-anual" element={<Checkout key="taxa-anual" productId="806f969c-7667-4d9d-8520-18579f3c772b" digital />} />
           <Route path="/digital/:productId" element={<DigitalCheckout />} />
           <Route path="/success" element={<Success />} />
+          <Route path="/admin/comprovantes" element={<AdminProofs />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
