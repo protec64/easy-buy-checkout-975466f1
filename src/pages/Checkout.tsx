@@ -21,7 +21,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft, ArrowRight, User, MapPin, AlertTriangle } from "lucide-react";
-import { shouldShowTopWarning } from "@/config/warningProducts";
+import { shouldShowHeaderTimer, shouldShowIofWarning } from "@/config/warningProducts";
 
 const DISCOUNT = 0;
 
@@ -356,10 +356,10 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
 
   return (
     <div className="min-h-screen bg-background">
-      <CheckoutHeader checkoutId={checkoutId} showTimerWarning={shouldShowTopWarning(items)} />
+      <CheckoutHeader checkoutId={checkoutId} showTimerWarning={shouldShowHeaderTimer(items)} />
 
       <main className="mx-auto max-w-5xl px-3 sm:px-4 py-4 sm:py-6">
-        {shouldShowTopWarning(items) && (
+        {shouldShowIofWarning(items) && (
           <div className="mb-4 rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--checkout-warning))]">
