@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendUtmifyOrder } from "../_shared/utmify.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,7 +21,8 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { customer, shipping_address, order } = body;
+    const { customer, shipping_address, order, tracking } = body;
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -48,6 +50,13 @@ Deno.serve(async (req) => {
         discount: order.discount,
         total: order.total,
         payment_status: "pending",
+        utm_source: tracking?.utm_source || null,
+        utm_medium: tracking?.utm_medium || null,
+        utm_campaign: tracking?.utm_campaign || null,
+        utm_content: tracking?.utm_content || null,
+        utm_term: tracking?.utm_term || null,
+        utm_src: tracking?.src || null,
+        utm_sck: tracking?.sck || null,
       })
       .select("id, order_number")
       .single();
@@ -145,6 +154,29 @@ Deno.serve(async (req) => {
         payment_id: String(paymentId),
       })
       .eq("id", orderData.id);
+
+    // Envia para a UTMify como "waiting_payment"
+    await sendUtmifyOrder({
+      orderId: String(paymentId),
+      status: "waiting_payment",
+      paymentMethod: "pix",
+      createdAt: new Date(),
+      customer: {
+        name: customer.full_name,
+        email: customer.email,
+        phone: customer.phone || null,
+        document: customer.cpf,
+        ip: clientIp,
+      },
+      products: order.items.map((it: any) => ({
+        id: it.id,
+        name: it.name,
+        quantity: it.qty,
+        priceInCents: Math.round(it.price * 100),
+      })),
+      totalInCents: amountInCents,
+      tracking: tracking || null,
+    });
 
     return new Response(
       JSON.stringify({

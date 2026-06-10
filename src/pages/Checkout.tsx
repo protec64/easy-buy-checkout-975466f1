@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft, ArrowRight, User, MapPin, AlertTriangle } from "lucide-react";
 import { shouldShowHeaderTimer, shouldShowIofWarning, shouldShowAtivarContaWarning, shouldShowTaxaAnualWarning } from "@/config/warningProducts";
+import { captureTrackingFromUrl, loadTracking } from "@/lib/utm";
 
 const DISCOUNT = 0;
 
@@ -82,9 +83,10 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
   const [items, setItems] = useState<Array<{id: string; name: string; variation?: string; qty: number; price: number; image?: string}>>([]);
   const [step, setStep] = useState(1);
 
-  // Init Meta Pixel
+  // Init Meta Pixel + captura UTMs
   useEffect(() => {
     initMetaPixel();
+    captureTrackingFromUrl();
   }, []);
 
   useEffect(() => {
@@ -306,6 +308,7 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
       method,
       installments: method === "card" ? parseInt(cardValues.installments) : undefined,
     },
+    tracking: loadTracking(),
   });
 
   const handleGeneratePix = async () => {

@@ -46,6 +46,15 @@ export interface OrderPayload {
     installments?: number;
     token?: string;
   };
+  tracking?: {
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    utm_content?: string;
+    utm_term?: string;
+    src?: string;
+    sck?: string;
+  };
 }
 
 export interface PixPaymentResult {
