@@ -11,6 +11,7 @@ import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
 import {
   HEADER_TIMER_PRODUCT_IDS,
   ATIVAR_CONTA_PRODUCT_IDS,
+  IOF_WARNING_PRODUCT_IDS,
 } from "@/config/warningProducts";
 
 interface PixPaymentProps {
