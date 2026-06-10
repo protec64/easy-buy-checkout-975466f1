@@ -26,17 +26,30 @@ import { shouldShowHeaderTimer, shouldShowIofWarning, shouldShowAtivarContaWarni
 const DISCOUNT = 0;
 
 const STORAGE_KEY = "checkout_form_draft";
+const RESET_STORAGE_KEYS = [STORAGE_KEY, "checkout_deadline_ts"] as const;
 const STEPS = ["Dados", "Endereço", "Pagamento"];
+
+const EMPTY_CUSTOMER = { email: "", fullName: "", cpf: "", phone: "" };
+const EMPTY_SHIPPING = { cep: "", street: "", number: "", complement: "", neighborhood: "", city: "", state: "", reference: "" };
+const EMPTY_CARD = { cardNumber: "", cardName: "", expiry: "", cvv: "", installments: "1" };
+
+function resetCheckoutStorage() {
+  try {
+    RESET_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+  } catch {}
+}
 
 function generateCheckoutId(): string {
   const ts = Date.now().toString(36).toUpperCase();
   const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
   return `#${ts}${rand}`;
 }
-function loadDraft() {
+function loadDraft(productId?: string) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.productId === productId ? parsed : null;
   } catch {
     return null;
   }
@@ -50,14 +63,10 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
   // Se chegou via redirect pós-pagamento, limpa rascunho ANTES de inicializar o estado
   const shouldReset = (location.state as { reset?: boolean } | null)?.reset === true;
   if (shouldReset) {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem("checkout_deadline_ts");
-      // limpa o state para não re-disparar em navegações futuras
-      window.history.replaceState({}, "");
-    } catch {}
+    resetCheckoutStorage();
+    window.history.replaceState({}, "");
   }
-  const draft = shouldReset ? null : loadDraft();
+  const draft = shouldReset ? null : loadDraft(productId);
 
   const [checkoutId] = useState(() => generateCheckoutId());
   const [items, setItems] = useState<Array<{id: string; name: string; variation?: string; qty: number; price: number; image?: string}>>([]);
@@ -117,33 +126,13 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
     }
   }, [items]);
 
-  const [customer, setCustomer] = useState({
-    email: draft?.email || "",
-    fullName: draft?.fullName || "",
-    cpf: draft?.cpf || "",
-    phone: draft?.phone || "",
-  });
+  const [customer, setCustomer] = useState({ ...EMPTY_CUSTOMER, ...draft });
 
-  const [shipping, setShipping] = useState({
-    cep: draft?.cep || "",
-    street: draft?.street || "",
-    number: draft?.number || "",
-    complement: draft?.complement || "",
-    neighborhood: draft?.neighborhood || "",
-    city: draft?.city || "",
-    state: draft?.state || "",
-    reference: draft?.reference || "",
-  });
+  const [shipping, setShipping] = useState({ ...EMPTY_SHIPPING, ...draft });
 
   const [shippingOption, setShippingOption] = useState("free");
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card">("pix");
-  const [cardValues, setCardValues] = useState({
-    cardNumber: "",
-    cardName: "",
-    expiry: "",
-    cvv: "",
-    installments: "1",
-  });
+  const [cardValues, setCardValues] = useState(EMPTY_CARD);
 
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [customerErrors, setCustomerErrors] = useState<Record<string, string>>({});
@@ -157,9 +146,29 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
   const [showCardToPixMessage, setShowCardToPixMessage] = useState(false);
 
   useEffect(() => {
-    const data = { ...customer, ...shipping };
+    if (!shouldReset) return;
+    setStep(1);
+    setCustomer(EMPTY_CUSTOMER);
+    setShipping(EMPTY_SHIPPING);
+    setShippingOption("free");
+    setPaymentMethod("pix");
+    setCardValues(EMPTY_CARD);
+    setTermsAccepted(false);
+    setCustomerErrors({});
+    setShippingErrors({});
+    setCardErrors({});
+    setTermsError("");
+    setPixData(null);
+    setPixLoading(false);
+    setCardLoading(false);
+    setCardApiError("");
+    setShowCardToPixMessage(false);
+  }, [shouldReset]);
+
+  useEffect(() => {
+    const data = { productId, ...customer, ...shipping };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }, [customer, shipping]);
+  }, [productId, customer, shipping]);
 
   const handleCustomerChange = useCallback((field: string, value: string) => {
     setCustomer((prev) => ({ ...prev, [field]: value }));
