@@ -391,6 +391,22 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
           </div>
         )}
 
+        {shouldShowTaxaAnualWarning(items) && (
+          <div className="mb-4 rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--checkout-warning))]">
+                <AlertTriangle className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Atenção</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Para acessar o aplicativo e <strong className="text-foreground">liberar todas as funções do cartão</strong>, é necessário realizar o pagamento da <strong className="text-foreground">taxa de anuidade</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         
 
         {isMobile && (
