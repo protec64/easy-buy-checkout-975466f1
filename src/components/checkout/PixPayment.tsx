@@ -6,6 +6,7 @@ import { QRCodeSVG } from "qrcode.react";
 import ProofUpload from "./ProofUpload";
 import BANKS from "./BankLogos";
 import { checkPaymentStatus } from "@/lib/checkout-api";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
 import {
@@ -82,22 +83,50 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
     console.log("Starting payment polling for:", pixData.payment_id);
 
-    const doRedirect = () => {
+    const doRedirect = async (opts: { requireApproved: boolean }) => {
+      const pid = pixData?.payment_id;
+      if (!pid) {
+        console.warn("[guard] redirect bloqueado: payment_id ausente");
+        return;
+      }
+
+      // GUARD: valida o pedido no banco antes de limpar estado e avançar
+      const { data: order, error } = await supabase
+        .from("orders")
+        .select("id, mp_payment_id, payment_status")
+        .eq("mp_payment_id", pid)
+        .maybeSingle();
+
+      if (error || !order) {
+        console.warn("[guard] redirect bloqueado: pedido não encontrado", { pid, error });
+        toast({
+          title: "Aguardando confirmação",
+          description: "Não foi possível validar o pedido. Tente novamente em instantes.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (opts.requireApproved && order.payment_status !== "approved") {
+        console.warn("[guard] redirect bloqueado: status != approved", order.payment_status);
+        return;
+      }
+
+      // Validação OK — agora sim, limpa rascunho/timer e redireciona
       const ids = (orderItems || []).map((i) => i.id);
-      // Limpa rascunho e timer para que a próxima tela comece totalmente em branco
       try {
         localStorage.removeItem("checkout_form_draft");
         localStorage.removeItem("checkout_deadline_ts");
       } catch {}
-      const opts = { replace: true, state: { reset: true } } as const;
+      const navOpts = { replace: true, state: { reset: true } } as const;
       if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
-        navigate("/ativar-conta", opts);
+        navigate("/ativar-conta", navOpts);
       } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
-        navigate("/taxa-iof", opts);
+        navigate("/taxa-iof", navOpts);
       } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
-        navigate("/taxa-anual", opts);
+        navigate("/taxa-anual", navOpts);
       } else {
-        navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`, { replace: true });
+        navigate(`/success?order_id=${encodeURIComponent(pid)}`, { replace: true });
       }
     };
 
@@ -111,13 +140,13 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
             title: "✅ Pagamento confirmado!",
             description: "Redirecionando...",
           });
-          // Redirect imediato — sem setTimeout para evitar perda em re-render
-          doRedirect();
+          await doRedirect({ requireApproved: true });
         }
       } catch (err) {
         console.error("Polling error:", err);
       }
     };
+
 
 
     // Check immediately when user returns to the tab (critical for mobile)
@@ -189,8 +218,26 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       payment_method: "pix",
     });
 
-    // Redireciona após envio do comprovante (mesma lógica do polling de aprovação)
-    setTimeout(() => {
+    // Redireciona após envio do comprovante, com guard de validação no banco
+    setTimeout(async () => {
+      const pid = pixData.payment_id;
+
+      // GUARD: garante que o pedido existe antes de limpar o estado
+      const { data: order, error } = await supabase
+        .from("orders")
+        .select("id, mp_payment_id")
+        .eq("mp_payment_id", pid)
+        .maybeSingle();
+
+      if (error || !order) {
+        console.warn("[guard] redirect (comprovante) bloqueado: pedido não encontrado", { pid, error });
+        toast({
+          title: "Comprovante enviado",
+          description: "Aguardando validação do pedido. Mantenha esta tela aberta.",
+        });
+        return;
+      }
+
       try {
         localStorage.removeItem("checkout_form_draft");
         localStorage.removeItem("checkout_deadline_ts");
@@ -204,7 +251,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
         navigate("/taxa-anual", opts);
       } else {
-        navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`, { replace: true });
+        navigate(`/success?order_id=${encodeURIComponent(pid)}`, { replace: true });
       }
     }, 1500);
   }, [pixData, orderItems, total, email, phone, cpf, fullName, city, state, zipCode, navigate]);
