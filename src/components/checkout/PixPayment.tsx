@@ -178,7 +178,21 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       order_id: pixData.payment_id,
       payment_method: "pix",
     });
-  }, [pixData, orderItems, total, email, phone, cpf, fullName, city, state, zipCode]);
+
+    // Redireciona após envio do comprovante (mesma lógica do polling de aprovação)
+    setTimeout(() => {
+      const ids = (orderItems || []).map((i) => i.id);
+      if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
+        navigate("/ativar-conta");
+      } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
+        navigate("/taxa-iof");
+      } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
+        navigate("/taxa-anual");
+      } else {
+        navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`);
+      }
+    }, 1500);
+  }, [pixData, orderItems, total, email, phone, cpf, fullName, city, state, zipCode, navigate]);
 
   // Pre-generation state
   if (!pixData) {
