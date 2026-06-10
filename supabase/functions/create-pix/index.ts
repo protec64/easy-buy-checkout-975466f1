@@ -155,6 +155,29 @@ Deno.serve(async (req) => {
       })
       .eq("id", orderData.id);
 
+    // Envia para a UTMify como "waiting_payment"
+    await sendUtmifyOrder({
+      orderId: String(paymentId),
+      status: "waiting_payment",
+      paymentMethod: "pix",
+      createdAt: new Date(),
+      customer: {
+        name: customer.full_name,
+        email: customer.email,
+        phone: customer.phone || null,
+        document: customer.cpf,
+        ip: clientIp,
+      },
+      products: order.items.map((it: any) => ({
+        id: it.id,
+        name: it.name,
+        quantity: it.qty,
+        priceInCents: Math.round(it.price * 100),
+      })),
+      totalInCents: amountInCents,
+      tracking: tracking || null,
+    });
+
     return new Response(
       JSON.stringify({
         payment_id: String(paymentId),
