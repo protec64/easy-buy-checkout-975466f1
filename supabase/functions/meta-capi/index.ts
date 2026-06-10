@@ -60,7 +60,11 @@ Deno.serve(async (req) => {
   try {
     const META_TOKEN = Deno.env.get("META_CONVERSIONS_API_TOKEN");
     if (!META_TOKEN) {
-      throw new Error("META_CONVERSIONS_API_TOKEN not configured");
+      // Token not configured — skip silently so the frontend doesn't error
+      return new Response(JSON.stringify({ skipped: true, reason: "token_not_configured" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const body: CAPIPayload = await req.json();
