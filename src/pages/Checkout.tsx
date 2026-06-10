@@ -21,7 +21,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft, ArrowRight, User, MapPin, AlertTriangle } from "lucide-react";
-import { shouldShowTopWarning } from "@/config/warningProducts";
+import { shouldShowHeaderTimer, shouldShowIofWarning } from "@/config/warningProducts";
 
 const DISCOUNT = 0;
 
