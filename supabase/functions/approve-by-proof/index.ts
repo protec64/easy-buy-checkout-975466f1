@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
         email: order.email,
         phone: order.phone || null,
         document: order.cpf,
+        ip: clientIp,
       },
       products: (orderItems || []).map((it: any) => ({
         id: it.product_id,
