@@ -39,11 +39,14 @@ function resetCheckoutStorage() {
   } catch {}
 }
 
-function pickDraftFields<T extends Record<string, string>>(emptyValues: T, draft: Record<string, string> | null) {
-  return Object.keys(emptyValues).reduce((acc, key) => {
-    acc[key as keyof T] = draft?.[key] ?? emptyValues[key as keyof T];
-    return acc;
-  }, {} as T);
+function pickDraftFields<T extends Record<string, string>>(emptyValues: T, draft: Record<string, string> | null): T {
+  const values = { ...emptyValues };
+  Object.keys(emptyValues).forEach((key) => {
+    if (typeof draft?.[key] === "string") {
+      values[key as keyof T] = draft[key] as T[keyof T];
+    }
+  });
+  return values;
 }
 
 function generateCheckoutId(): string {
