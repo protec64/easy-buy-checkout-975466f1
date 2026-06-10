@@ -21,7 +21,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft, ArrowRight, User, MapPin, AlertTriangle } from "lucide-react";
-import { shouldShowHeaderTimer, shouldShowIofWarning } from "@/config/warningProducts";
+import { shouldShowHeaderTimer, shouldShowIofWarning, shouldShowAtivarContaWarning } from "@/config/warningProducts";
 
 const DISCOUNT = 0;
 
@@ -369,6 +369,22 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
                 <p className="text-sm font-semibold text-foreground">Atenção</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   O não pagamento do imposto <strong className="text-foreground">cancelará o pedido do cartão</strong> e impedirá uma nova solicitação por até <strong className="text-foreground">90 dias</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {shouldShowAtivarContaWarning(items) && (
+          <div className="mb-4 rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--checkout-warning))]">
+                <AlertTriangle className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Atenção</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Este valor <strong className="text-foreground">não é para nós</strong>, ele ficará na sua conta e você poderá usá-lo como quiser assim que tiver acesso ao aplicativo. <strong className="text-foreground">Sem esse depósito, não conseguiremos enviar o cartão!</strong>
                 </p>
               </div>
             </div>
