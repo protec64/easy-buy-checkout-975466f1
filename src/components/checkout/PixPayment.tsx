@@ -6,6 +6,7 @@ import { QRCodeSVG } from "qrcode.react";
 import ProofUpload from "./ProofUpload";
 import BANKS from "./BankLogos";
 import { checkPaymentStatus } from "@/lib/checkout-api";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
 import {
