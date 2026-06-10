@@ -218,8 +218,26 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       payment_method: "pix",
     });
 
-    // Redireciona após envio do comprovante (mesma lógica do polling de aprovação)
-    setTimeout(() => {
+    // Redireciona após envio do comprovante, com guard de validação no banco
+    setTimeout(async () => {
+      const pid = pixData.payment_id;
+
+      // GUARD: garante que o pedido existe antes de limpar o estado
+      const { data: order, error } = await supabase
+        .from("orders")
+        .select("id, mp_payment_id")
+        .eq("mp_payment_id", pid)
+        .maybeSingle();
+
+      if (error || !order) {
+        console.warn("[guard] redirect (comprovante) bloqueado: pedido não encontrado", { pid, error });
+        toast({
+          title: "Comprovante enviado",
+          description: "Aguardando validação do pedido. Mantenha esta tela aberta.",
+        });
+        return;
+      }
+
       try {
         localStorage.removeItem("checkout_form_draft");
         localStorage.removeItem("checkout_deadline_ts");
@@ -233,7 +251,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
         navigate("/taxa-anual", opts);
       } else {
-        navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`, { replace: true });
+        navigate(`/success?order_id=${encodeURIComponent(pid)}`, { replace: true });
       }
     }, 1500);
   }, [pixData, orderItems, total, email, phone, cpf, fullName, city, state, zipCode, navigate]);
