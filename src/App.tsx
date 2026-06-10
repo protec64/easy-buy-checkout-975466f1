@@ -34,6 +34,7 @@ const App = () => (
           <Route path="/taxa3" element={<Checkout productId="3c547ca4-f181-409e-af84-a7e7dfc8a7f0" digital />} />
           <Route path="/ativar-conta" element={<Checkout productId="01ba9522-2107-4a64-9e39-53e782886996" digital />} />
           <Route path="/taxa-iof" element={<Checkout productId="3992d6d7-f608-4b8a-9191-c053eda9a673" digital />} />
+          <Route path="/taxa-anual" element={<Checkout productId="806f969c-7667-4d9d-8520-18579f3c772b" digital />} />
           <Route path="/digital/:productId" element={<DigitalCheckout />} />
           <Route path="/success" element={<Success />} />
           <Route path="*" element={<NotFound />} />
