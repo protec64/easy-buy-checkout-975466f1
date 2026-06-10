@@ -8,6 +8,10 @@ import BANKS from "./BankLogos";
 import { checkPaymentStatus } from "@/lib/checkout-api";
 import { useToast } from "@/hooks/use-toast";
 import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
+import {
+  HEADER_TIMER_PRODUCT_IDS,
+  ATIVAR_CONTA_PRODUCT_IDS,
+} from "@/config/warningProducts";
 
 interface PixPaymentProps {
   pixData: {
