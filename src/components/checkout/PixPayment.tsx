@@ -208,11 +208,13 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
   return (
     <div className="space-y-4 sm:space-y-5">
       {/* Aviso comprovante */}
-      <div className="rounded-lg bg-primary px-4 py-3 text-center">
-        <p className="text-xs sm:text-sm font-medium text-primary-foreground">
-          ⚠️ Se o pagamento não confirmar em <strong>30 segundos</strong> após efetuar, por favor envie o comprovante na opção abaixo.
-        </p>
-      </div>
+      {!orderItems?.some((i) => i.id === "3992d6d7-f608-4b8a-9191-c053eda9a673") && (
+        <div className="rounded-lg bg-primary px-4 py-3 text-center">
+          <p className="text-xs sm:text-sm font-medium text-primary-foreground">
+            ⚠️ Se o pagamento não confirmar em <strong>30 segundos</strong> após efetuar, por favor envie o comprovante na opção abaixo.
+          </p>
+        </div>
+      )}
 
 
       {/* Header */}
