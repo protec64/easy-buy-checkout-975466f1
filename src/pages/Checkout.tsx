@@ -359,7 +359,7 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
       <CheckoutHeader checkoutId={checkoutId} />
 
       <main className="mx-auto max-w-5xl px-3 sm:px-4 py-4 sm:py-6">
-        {items.some((i) => ["d3d978a6-2426-49c6-9803-1e252e5376c9","95216e2e-a90d-4a0f-9cc0-7fe888ca54dd","3c547ca4-f181-409e-af84-a7e7dfc8a7f0"].includes(i.id)) && (
+        {shouldShowTopWarning(items) && (
           <div className="mb-4 rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--checkout-warning))]">
