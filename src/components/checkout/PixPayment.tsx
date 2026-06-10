@@ -11,6 +11,7 @@ import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
 import {
   HEADER_TIMER_PRODUCT_IDS,
   ATIVAR_CONTA_PRODUCT_IDS,
+  IOF_WARNING_PRODUCT_IDS,
 } from "@/config/warningProducts";
 
 interface PixPaymentProps {
@@ -97,6 +98,8 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
               navigate("/ativar-conta");
             } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
               navigate("/taxa-iof");
+            } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
+              navigate("/taxa-anual");
             } else {
               navigate(`/success?order_id=${encodeURIComponent(pixData.payment_id)}`);
             }
