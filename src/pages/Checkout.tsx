@@ -20,7 +20,7 @@ import {
 } from "@/lib/checkout-api";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowLeft, ArrowRight, User, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, User, MapPin, AlertTriangle } from "lucide-react";
 
 const DISCOUNT = 0;
 
