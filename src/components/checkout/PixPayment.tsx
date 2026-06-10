@@ -84,6 +84,8 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
     const doRedirect = () => {
       const ids = (orderItems || []).map((i) => i.id);
+      // Limpa o rascunho salvo para que a próxima tela comece em branco (etapa 1)
+      try { localStorage.removeItem("checkout_form_draft"); } catch {}
       if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
         navigate("/ativar-conta");
       } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
@@ -185,6 +187,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
     // Redireciona após envio do comprovante (mesma lógica do polling de aprovação)
     setTimeout(() => {
+      try { localStorage.removeItem("checkout_form_draft"); } catch {}
       const ids = (orderItems || []).map((i) => i.id);
       if (ids.some((id) => HEADER_TIMER_PRODUCT_IDS.includes(id))) {
         navigate("/ativar-conta");
