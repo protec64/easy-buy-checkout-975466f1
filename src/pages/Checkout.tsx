@@ -356,7 +356,7 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
 
   return (
     <div className="min-h-screen bg-background">
-      <CheckoutHeader checkoutId={checkoutId} />
+      <CheckoutHeader checkoutId={checkoutId} showTimerWarning={shouldShowTopWarning(items)} />
 
       <main className="mx-auto max-w-5xl px-3 sm:px-4 py-4 sm:py-6">
         {shouldShowTopWarning(items) && (

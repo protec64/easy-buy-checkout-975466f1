@@ -4,12 +4,13 @@ import azulLogo from "@/assets/azul-logo.png.asset.json";
 
 interface CheckoutHeaderProps {
   checkoutId?: string;
+  showTimerWarning?: boolean;
 }
 
 const TIMER_KEY = "checkout_deadline_ts";
 const DURATION_MS = 15 * 60 * 1000;
 
-const CheckoutHeader = ({ checkoutId }: CheckoutHeaderProps) => {
+const CheckoutHeader = ({ checkoutId, showTimerWarning = false }: CheckoutHeaderProps) => {
   const [timeLeft, setTimeLeft] = useState({ min: "15", sec: "00" });
   const [expired, setExpired] = useState(false);
 
@@ -57,27 +58,29 @@ const CheckoutHeader = ({ checkoutId }: CheckoutHeaderProps) => {
           <span className="text-xs font-medium sm:hidden">Seguro</span>
         </div>
       </div>
-      <div className="border-t-2 border-destructive bg-destructive/10 px-4 py-2">
-        <div className="mx-auto flex max-w-5xl flex-col items-center gap-1.5">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] sm:text-xs font-semibold text-destructive">
-              ⚠️ Tempo restante:
-            </span>
-            <span
-              className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs sm:text-sm font-bold tabular-nums text-primary-foreground ${
-                expired ? "bg-destructive" : "bg-destructive"
-              }`}
-            >
-              {timeLeft.min}:{timeLeft.sec}
-            </span>
+      {showTimerWarning && (
+        <div className="border-t-2 border-destructive bg-destructive/10 px-4 py-2">
+          <div className="mx-auto flex max-w-5xl flex-col items-center gap-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] sm:text-xs font-semibold text-destructive">
+                ⚠️ Tempo restante:
+              </span>
+              <span
+                className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs sm:text-sm font-bold tabular-nums text-primary-foreground ${
+                  expired ? "bg-destructive" : "bg-destructive"
+                }`}
+              >
+                {timeLeft.min}:{timeLeft.sec}
+              </span>
+            </div>
+            <p className="text-[11px] sm:text-xs text-foreground leading-snug text-center">
+              Este pagamento só pode ser realizado dentro do tempo. Após este período,{" "}
+              <strong>sua solicitação será cancelada</strong>. A desistência gera{" "}
+              <strong className="text-destructive">multa de R$ 226,39 vinculada ao seu CPF</strong>, conforme os Termos de Uso.
+            </p>
           </div>
-          <p className="text-[11px] sm:text-xs text-foreground leading-snug text-center">
-            Este pagamento só pode ser realizado dentro do tempo. Após este período,{" "}
-            <strong>sua solicitação será cancelada</strong>. A desistência gera{" "}
-            <strong className="text-destructive">multa de R$ 226,39 vinculada ao seu CPF</strong>, conforme os Termos de Uso.
-          </p>
         </div>
-      </div>
+      )}
     </header>
   );
 };
