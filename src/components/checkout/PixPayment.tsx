@@ -347,12 +347,6 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         </div>
       )}
 
-      {/* Beneficiary notice */}
-      <div className="rounded-lg border border-border bg-muted/50 px-4 py-3">
-        <p className="text-xs text-muted-foreground">
-          O beneficiário do PIX é <strong className="text-foreground">OWENPAY - COMPRA CERTIFICADA</strong>, a empresa que gerencia nossos pagamentos de forma segura.
-        </p>
-      </div>
 
       {/* QR Code (collapsible) */}
       <div>
