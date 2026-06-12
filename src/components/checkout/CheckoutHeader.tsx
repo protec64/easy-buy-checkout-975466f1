@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Lock, Shield } from "lucide-react";
-import azulLogo from "@/assets/azul-logo.png.asset.json";
+import sheinLogo from "@/assets/shein-logo.png.asset.json";
 
 interface CheckoutHeaderProps {
   checkoutId?: string;
@@ -44,7 +44,7 @@ const CheckoutHeader = ({ checkoutId, showTimerWarning = false }: CheckoutHeader
     <header className="sticky top-0 z-50 border-b border-border bg-card checkout-shadow">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
-          <img src={azulLogo.url} alt="Azul" className="h-7" />
+          <img src={sheinLogo.url} alt="SHEIN" className="h-6" />
         </div>
         <div className="flex items-center gap-2 text-checkout-trust">
           <Shield className="h-4 w-4" />
