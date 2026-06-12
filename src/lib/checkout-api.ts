@@ -203,6 +203,17 @@ export async function uploadPaymentProof(
 export async function checkPaymentStatus(
   payment_id: string
 ): Promise<{ status: string }> {
+  // Consulta o status real na FreePay via edge function (dispara aprovação automática)
+  try {
+    const { data, error } = await supabase.functions.invoke("check-payment", {
+      body: { payment_id },
+    });
+    if (!error && data?.status && data.status !== "pending") {
+      return { status: data.status };
+    }
+  } catch {}
+
+  // Fallback: status salvo no banco
   const { data, error } = await supabase
     .from("orders")
     .select("payment_status")
