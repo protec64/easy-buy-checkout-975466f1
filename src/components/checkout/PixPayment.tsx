@@ -121,6 +121,8 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       } catch {}
       if (ids.some((id) => TAXA_ANUAL_PRODUCT_IDS.includes(id))) {
         window.location.href = "https://azulaprovado.site/cartao-liberado/up3/";
+      } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://azulaprovado.site/cartao-liberado/up3/";
       } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
         window.location.href = "https://azulaprovado.site/cartao-liberado/imposto/";
       } else {
@@ -267,6 +269,8 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       } catch {}
       const ids = (orderItems || []).map((i) => i.id);
       if (ids.some((id) => TAXA_ANUAL_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://azulaprovado.site/cartao-liberado/up3/";
+      } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
         window.location.href = "https://azulaprovado.site/cartao-liberado/up3/";
       } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
         window.location.href = "https://azulaprovado.site/cartao-liberado/imposto/";
