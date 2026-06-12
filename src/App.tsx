@@ -31,9 +31,9 @@ const App = () => (
           <Route path="/produto5" element={<Checkout key="produto5" productId="87323788-46ee-4055-a282-6094ac615f11" />} />
           <Route path="/produto6" element={<Checkout key="produto6" productId="def084a3-04b1-4149-8845-2a3cd64ca086" />} />
           <Route path="/produto7" element={<Checkout key="produto7" productId="c0a13ac2-91df-437e-aa08-5e811c230f2b" />} />
-          <Route path="/taxa1" element={<Checkout key="taxa1" productId="d3d978a6-2426-49c6-9803-1e252e5376c9" digital overrideImage={sheinCard.url} />} />
-          <Route path="/taxa2" element={<Checkout key="taxa2" productId="95216e2e-a90d-4a0f-9cc0-7fe888ca54dd" digital overrideImage={sheinCard.url} />} />
-          <Route path="/taxa3" element={<Checkout key="taxa3" productId="3c547ca4-f181-409e-af84-a7e7dfc8a7f0" digital overrideImage={sheinCard.url} />} />
+          <Route path="/taxa1" element={<Checkout key="taxa1" productId="804a87c3-c43e-4173-b71c-069d83911bc8" digital overrideImage={sheinCard.url} />} />
+          <Route path="/taxa2" element={<Checkout key="taxa2" productId="31ccbc66-dff2-4273-a3f1-d6e7858a2578" digital overrideImage={sheinCard.url} />} />
+          <Route path="/taxa3" element={<Checkout key="taxa3" productId="4e1e0583-f0c9-47e9-8632-2e5c81a43518" digital overrideImage={sheinCard.url} />} />
           <Route path="/taxa4" element={<Checkout key="taxa4" productId="bf888b49-0d72-4aeb-a202-d391c5432f95" digital />} />
           <Route path="/ativar-conta" element={<Checkout key="ativar-conta" productId="01ba9522-2107-4a64-9e39-53e782886996" digital />} />
           <Route path="/taxa-iof" element={<Checkout key="taxa-iof" productId="3992d6d7-f608-4b8a-9191-c053eda9a673" digital />} />
