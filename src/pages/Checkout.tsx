@@ -66,7 +66,7 @@ function loadDraft(productId?: string) {
   }
 }
 
-const Checkout = ({ productId, digital = false }: { productId?: string; digital?: boolean }) => {
+const Checkout = ({ productId, digital = false, overrideImage }: { productId?: string; digital?: boolean; overrideImage?: string }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -108,7 +108,7 @@ const Checkout = ({ productId, digital = false }: { productId?: string; digital?
           qty: 1,
           price: Number(p.price),
           variation: p.variations?.[0]?.name || undefined,
-          image: p.images?.[0] || undefined,
+          image: overrideImage || p.images?.[0] || undefined,
         })));
       }
     };
