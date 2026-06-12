@@ -9,6 +9,7 @@ import AdminProofs from "./pages/AdminProofs";
 import NotFound from "./pages/NotFound";
 import sheinCard from "@/assets/shein-card.jpg.asset.json";
 import contaPj from "@/assets/conta-pj.png.asset.json";
+import taxaIof from "@/assets/taxa-iof.jpg.asset.json";
 
 const DigitalCheckout = () => {
   const { productId } = useParams();
@@ -37,7 +38,7 @@ const App = () => (
           <Route path="/taxa3" element={<Checkout key="taxa3" productId="4e1e0583-f0c9-47e9-8632-2e5c81a43518" digital overrideImage={sheinCard.url} />} />
           <Route path="/taxa4" element={<Checkout key="taxa4" productId="bf888b49-0d72-4aeb-a202-d391c5432f95" digital />} />
           <Route path="/ativar-conta" element={<Checkout key="ativar-conta" productId="01ba9522-2107-4a64-9e39-53e782886996" digital overrideImage={contaPj.url} />} />
-          <Route path="/taxa-iof" element={<Checkout key="taxa-iof" productId="3992d6d7-f608-4b8a-9191-c053eda9a673" digital />} />
+          <Route path="/taxa-iof" element={<Checkout key="taxa-iof" productId="3992d6d7-f608-4b8a-9191-c053eda9a673" digital overrideImage={taxaIof.url} />} />
           <Route path="/taxa-anual" element={<Checkout key="taxa-anual" productId="806f969c-7667-4d9d-8520-18579f3c772b" digital />} />
           <Route path="/digital/:productId" element={<DigitalCheckout />} />
           <Route path="/success" element={<Success />} />
