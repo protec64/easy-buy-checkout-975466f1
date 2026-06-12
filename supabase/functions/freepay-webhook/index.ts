@@ -125,6 +125,21 @@ Deno.serve(async (req) => {
 
     console.log(`Payment ${paymentId}: raw=${rawStatus}, mapped=${paymentStatus}`);
 
+    // Idempotência: se o pedido já está nesse status, não reprocessa
+    const { data: existing } = await supabase
+      .from("orders")
+      .select("id, payment_status")
+      .eq("mp_payment_id", paymentId)
+      .single();
+
+    if (existing && existing.payment_status === paymentStatus) {
+      console.log(`Order already in status ${paymentStatus}, skipping`);
+      return new Response(JSON.stringify({ ok: true, skipped: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Generate order number only when approved
     const updateData: Record<string, any> = {
       mp_status: status,
