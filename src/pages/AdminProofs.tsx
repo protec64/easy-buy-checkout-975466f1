@@ -16,7 +16,7 @@ interface Proof {
   created_at: string;
 }
 
-const ADMIN_PASS = "owempay2026";
+const ADMIN_PASS = "@Android007";
 
 const AdminProofs = () => {
   const [authed, setAuthed] = useState(
