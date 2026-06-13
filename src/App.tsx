@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-
 import Checkout from "./pages/Checkout";
 import Success from "./pages/Success";
 import AdminProofs from "./pages/AdminProofs";
+import AdminOrders from "./pages/AdminOrders";
 import NotFound from "./pages/NotFound";
 import sheinCard from "@/assets/shein-card.jpg.asset.json";
 import contaPj from "@/assets/conta-pj.png.asset.json";
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/digital/:productId" element={<DigitalCheckout />} />
           <Route path="/success" element={<Success />} />
           <Route path="/admin/comprovantes" element={<AdminProofs />} />
+          <Route path="/admin/pedidos" element={<AdminOrders />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
