@@ -1,11 +1,10 @@
 // Configuração centralizada de avisos por produto.
 
-// Produtos que exibem o aviso de "Tempo restante / multa" no header (taxa1, taxa2, taxa3)
+// Produtos que exibem o aviso de "Tempo restante / multa" no header (apenas taxa1, taxa2, taxa3)
 export const HEADER_TIMER_PRODUCT_IDS: string[] = [
-  "d3d978a6-2426-49c6-9803-1e252e5376c9", // taxa1
-  "95216e2e-a90d-4a0f-9cc0-7fe888ca54dd", // taxa2
-  "3c547ca4-f181-409e-af84-a7e7dfc8a7f0", // taxa3
-  "bf888b49-0d72-4aeb-a202-d391c5432f95", // taxa4
+  "804a87c3-c43e-4173-b71c-069d83911bc8", // taxa1
+  "31ccbc66-dff2-4273-a3f1-d6e7858a2578", // taxa2
+  "4e1e0583-f0c9-47e9-8632-2e5c81a43518", // taxa3
 ];
 
 // Produtos que exibem o aviso "Atenção - O não pagamento do imposto..." (taxa-iof)
