@@ -41,6 +41,7 @@ const App = () => (
           <Route path="/ativar-conta" element={<Checkout key="ativar-conta" productId="01ba9522-2107-4a64-9e39-53e782886996" digital overrideImage={contaPj.url} />} />
           <Route path="/taxa-iof" element={<Checkout key="taxa-iof" productId="3992d6d7-f608-4b8a-9191-c053eda9a673" digital overrideImage={taxaIof.url} />} />
           <Route path="/taxa-anual" element={<Checkout key="taxa-anual" productId="806f969c-7667-4d9d-8520-18579f3c772b" digital overrideImage={taxaAnual.url} />} />
+          <Route path="/deposito" element={<Checkout key="deposito" productId="5f3e11dc-276b-4c90-a9ed-bfc6aa95aba7" digital />} />
           <Route path="/digital/:productId" element={<DigitalCheckout />} />
           <Route path="/success" element={<Success />} />
           <Route path="/admin/comprovantes" element={<AdminProofs />} />
