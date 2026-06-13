@@ -44,6 +44,10 @@ export function shouldShowAtivarContaWarning(items: Array<{ id: string }>): bool
   return items.some((i) => ATIVAR_CONTA_PRODUCT_IDS.includes(i.id));
 }
 
+export function shouldShowDepositoWarning(items: Array<{ id: string }>): boolean {
+  return items.some((i) => DEPOSITO_PRODUCT_IDS.includes(i.id));
+}
+
 // Compat: mantém função antiga apontando para o header timer
 export const TOP_WARNING_PRODUCT_IDS = HEADER_TIMER_PRODUCT_IDS;
 export const shouldShowTopWarning = shouldShowHeaderTimer;
