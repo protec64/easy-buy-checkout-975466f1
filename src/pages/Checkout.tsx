@@ -21,7 +21,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft, ArrowRight, User, MapPin, AlertTriangle } from "lucide-react";
-import { shouldShowHeaderTimer, shouldShowIofWarning, shouldShowAtivarContaWarning, shouldShowTaxaAnualWarning } from "@/config/warningProducts";
+import { shouldShowHeaderTimer, shouldShowIofWarning, shouldShowAtivarContaWarning, shouldShowTaxaAnualWarning, shouldShowDepositoWarning } from "@/config/warningProducts";
 import { captureTrackingFromUrl, loadTracking } from "@/lib/utm";
 
 const DISCOUNT = 0;
