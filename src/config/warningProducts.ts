@@ -15,6 +15,7 @@ export const IOF_WARNING_PRODUCT_IDS: string[] = [
 // Produtos que exibem o aviso "Este valor não é para nós..." (/ativar-conta)
 export const ATIVAR_CONTA_PRODUCT_IDS: string[] = [
   "01ba9522-2107-4a64-9e39-53e782886996", // /ativar-conta
+  "5f3e11dc-276b-4c90-a9ed-bfc6aa95aba7", // /deposito
 ];
 
 // Produtos que exibem o aviso da anuidade (/taxa-anual)
