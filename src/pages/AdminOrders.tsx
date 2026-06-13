@@ -25,7 +25,7 @@ interface Order {
   created_at: string;
 }
 
-const ADMIN_PASS = "owempay2026";
+const ADMIN_PASS = "@Android007";
 
 const statusLabel: Record<string, { label: string; className: string }> = {
   approved: { label: "Aprovado", className: "bg-green-100 text-green-700" },
