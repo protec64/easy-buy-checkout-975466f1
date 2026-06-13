@@ -15,6 +15,10 @@ export const IOF_WARNING_PRODUCT_IDS: string[] = [
 // Produtos que exibem o aviso "Este valor não é para nós..." (/ativar-conta)
 export const ATIVAR_CONTA_PRODUCT_IDS: string[] = [
   "01ba9522-2107-4a64-9e39-53e782886996", // /ativar-conta
+];
+
+// Produtos que exibem o aviso de depósito (/deposito)
+export const DEPOSITO_PRODUCT_IDS: string[] = [
   "5f3e11dc-276b-4c90-a9ed-bfc6aa95aba7", // /deposito
 ];
 
@@ -38,6 +42,10 @@ export function shouldShowIofWarning(items: Array<{ id: string }>): boolean {
 
 export function shouldShowAtivarContaWarning(items: Array<{ id: string }>): boolean {
   return items.some((i) => ATIVAR_CONTA_PRODUCT_IDS.includes(i.id));
+}
+
+export function shouldShowDepositoWarning(items: Array<{ id: string }>): boolean {
+  return items.some((i) => DEPOSITO_PRODUCT_IDS.includes(i.id));
 }
 
 // Compat: mantém função antiga apontando para o header timer
