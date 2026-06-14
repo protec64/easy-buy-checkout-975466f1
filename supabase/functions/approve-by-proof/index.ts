@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendUtmifyOrder } from "../_shared/utmify.ts";
+import { sendNtfy } from "../_shared/ntfy.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
