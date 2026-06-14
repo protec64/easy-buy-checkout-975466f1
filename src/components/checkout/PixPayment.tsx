@@ -156,6 +156,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
                 zip_code: zipCode,
                 order_id: pixData.payment_id,
                 payment_method: "pix",
+                event_id: pixData.event_id,
               });
             } catch (e) {
               console.error("trackPurchase error:", e);
@@ -241,6 +242,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       zip_code: zipCode,
       order_id: pixData.payment_id,
       payment_method: "pix",
+      event_id: pixData.event_id,
     });
 
     // Redireciona após envio do comprovante, com guard de validação no banco
