@@ -1,6 +1,9 @@
 /**
  * Meta (Facebook) Pixel + Conversions API (CAPI) helper
  * Pixel ID: 4337182786597702
+ *
+ * Events: PageView, ViewContent, InitiateCheckout, AddPaymentInfo, Purchase
+ * Purchase uses event_id for browser↔server deduplication.
  */
 
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +22,6 @@ let initialized = false;
 export function initMetaPixel() {
   if (initialized || typeof window === "undefined") return;
 
-  // Facebook Pixel base code
   (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
     if (f.fbq) return;
     n = f.fbq = function () {
@@ -68,7 +70,7 @@ function getMetaCookies(): { fbp?: string; fbc?: string } {
 }
 
 /** Generate unique event ID for deduplication between browser pixel and CAPI */
-function generateEventId(): string {
+export function generateEventId(): string {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
@@ -93,7 +95,6 @@ function sendCAPIEvent(params: {
   };
   custom_data?: Record<string, any>;
 }) {
-  // Fire and forget — don't block UI
   supabase.functions
     .invoke("meta-capi", {
       body: {
@@ -121,7 +122,6 @@ interface TrackParams {
   currency: string;
   num_items: number;
   value: number;
-  // User data for CAPI
   email?: string;
   phone?: string;
   cpf?: string;
@@ -136,7 +136,6 @@ interface TrackParams {
 
 /** Build CAPI user_data from TrackParams */
 function buildCAPIUserData(params: TrackParams, fbp?: string, fbc?: string) {
-  // Split full name into first/last
   const nameParts = (params.first_name || "").trim().split(/\s+/);
   const firstName = nameParts[0] || undefined;
   const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : undefined;
@@ -154,6 +153,37 @@ function buildCAPIUserData(params: TrackParams, fbp?: string, fbc?: string) {
     fbp,
     fbc,
   };
+}
+
+/**
+ * ViewContent — fired on product/offer page load
+ */
+export function trackViewContent(params: TrackParams) {
+  const eventId = generateEventId();
+  const { fbp, fbc } = getMetaCookies();
+
+  fbq("track", "ViewContent", {
+    content_ids: params.content_ids,
+    contents: params.contents,
+    content_type: params.content_type,
+    currency: params.currency,
+    value: params.value,
+    eventID: eventId,
+  });
+
+  sendCAPIEvent({
+    event_name: "ViewContent",
+    event_id: eventId,
+    event_source_url: window.location.href,
+    user_data: buildCAPIUserData(params, fbp, fbc),
+    custom_data: {
+      value: params.value,
+      currency: params.currency,
+      content_ids: params.content_ids,
+      contents: params.contents,
+      content_type: params.content_type,
+    },
+  });
 }
 
 /**
@@ -224,10 +254,11 @@ export function trackAddPaymentInfo(params: TrackParams & { payment_method: stri
 }
 
 /**
- * Purchase — fired when payment is confirmed/approved
+ * Purchase — fired ONLY after confirmed payment.
+ * Accepts optional event_id for dedup with server-side CAPI.
  */
-export function trackPurchase(params: TrackParams & { order_id?: string; payment_method?: string }) {
-  const eventId = generateEventId();
+export function trackPurchase(params: TrackParams & { order_id?: string; payment_method?: string; event_id?: string }) {
+  const eventId = params.event_id || generateEventId();
   const { fbp, fbc } = getMetaCookies();
 
   fbq("track", "Purchase", {
