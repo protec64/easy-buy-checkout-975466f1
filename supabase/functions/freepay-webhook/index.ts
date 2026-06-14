@@ -18,7 +18,7 @@ async function sha256(value: string): Promise<string> {
     .join("");
 }
 
-/** Send Purchase event to Meta CAPI */
+/** Send Purchase event to Meta CAPI with dedup event_id */
 async function sendPurchaseCAPI(order: any, orderItems: any[]) {
   const META_TOKEN = Deno.env.get("META_CONVERSIONS_API_TOKEN");
   if (!META_TOKEN) {
@@ -50,13 +50,17 @@ async function sendPurchaseCAPI(order: any, orderItems: any[]) {
   if (order.cep) userData.zp = await sha256(order.cep.replace(/\D/g, ""));
   userData.country = await sha256("br");
 
+  // Include fbp/fbc for better matching (NOT hashed per Meta docs)
+  if (order.fbp) userData.fbp = order.fbp;
+  if (order.fbc) userData.fbc = order.fbc;
+
   const contents = orderItems.map((item: any) => ({
     id: item.product_id,
     quantity: item.quantity,
     item_price: item.unit_price,
   }));
 
-  const event = {
+  const event: Record<string, any> = {
     event_name: "Purchase",
     event_time: Math.floor(Date.now() / 1000),
     action_source: "website",
@@ -72,6 +76,11 @@ async function sendPurchaseCAPI(order: any, orderItems: any[]) {
       payment_method: order.payment_method,
     },
   };
+
+  // Use stored event_id for browser↔server deduplication
+  if (order.event_id) {
+    event.event_id = order.event_id;
+  }
 
   const payload = { data: [event] };
   console.log("CAPI Purchase event:", JSON.stringify(payload));
