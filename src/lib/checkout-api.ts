@@ -66,6 +66,7 @@ export interface PixPaymentResult {
   copia_e_cola: string;
   expires_at: string;
   status: string;
+  event_id?: string;
 }
 
 export interface CardPaymentResult {
@@ -108,6 +109,7 @@ export async function createPixPayment(payload: OrderPayload): Promise<PixPaymen
     copia_e_cola: data.copia_e_cola || "",
     expires_at: data.expires_at,
     status: data.status || "pending",
+    event_id: data.event_id || undefined,
   };
 }
 
