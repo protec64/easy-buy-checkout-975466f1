@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import CheckoutHeader from "@/components/checkout/CheckoutHeader";
-import { initMetaPixel, trackInitiateCheckout, trackAddPaymentInfo } from "@/lib/meta-pixel";
+import { initMetaPixel, trackInitiateCheckout, trackAddPaymentInfo, trackViewContent } from "@/lib/meta-pixel";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import CustomerForm from "@/components/checkout/CustomerForm";
 import ShippingForm from "@/components/checkout/ShippingForm";
@@ -120,6 +120,18 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
   useEffect(() => {
     if (items.length > 0 && !initiateTracked.current) {
       initiateTracked.current = true;
+
+      // ViewContent — product page view
+      trackViewContent({
+        content_ids: items.map((i) => i.id),
+        contents: items.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
+        content_type: "product",
+        currency: "BRL",
+        num_items: items.reduce((s, i) => s + i.qty, 0),
+        value: items.reduce((s, i) => s + i.price * i.qty, 0),
+      });
+
+      // InitiateCheckout
       trackInitiateCheckout({
         content_ids: items.map((i) => i.id),
         contents: items.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
