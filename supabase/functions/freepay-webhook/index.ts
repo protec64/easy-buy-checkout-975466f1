@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendUtmifyOrder } from "../_shared/utmify.ts";
-import { sendNtfy } from "../_shared/ntfy.ts";
+import { sendWirePusher } from "../_shared/wirepusher.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -195,16 +195,14 @@ Deno.serve(async (req) => {
     if (paymentStatus === "approved" && order) {
       await sendPurchaseCAPI(order, orderItems || []);
 
-      // Notificação push de venda aprovada (ntfy.sh)
-      await sendNtfy({
+      // Notificação push de venda aprovada (WirePusher)
+      await sendWirePusher({
         title: "✅ Venda aprovada!",
         message:
-          `Pedido ${order.order_number || paymentId}\n` +
-          `Valor: R$ ${Number(order.total).toFixed(2)}\n` +
-          `Cliente: ${order.full_name || "-"}\n` +
+          `Pedido ${order.order_number || paymentId} | ` +
+          `R$ ${Number(order.total).toFixed(2)} | ` +
+          `Cliente: ${order.full_name || "-"} | ` +
           `Pagamento confirmado (PIX)`,
-        priority: "max",
-        tags: ["moneybag", "white_check_mark"],
       });
     }
 
