@@ -23,6 +23,7 @@ interface PixPaymentProps {
     copia_e_cola: string;
     expires_at: string;
     status: string;
+    event_id?: string;
   } | null;
   loading: boolean;
   onGeneratePix: () => void;
