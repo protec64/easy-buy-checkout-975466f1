@@ -97,6 +97,18 @@ Deno.serve(async (req) => {
       },
     });
 
+    // Notificação push: comprovante enviado / pedido aprovado (ntfy.sh)
+    await sendNtfy({
+      title: "🧾 Comprovante recebido!",
+      message:
+        `Pedido ${orderNumber || payment_id}\n` +
+        `Valor: R$ ${Number(order.total).toFixed(2)}\n` +
+        `Cliente: ${order.full_name || "-"}\n` +
+        `Cliente enviou o comprovante (PIX)`,
+      priority: "max",
+      tags: ["receipt", "white_check_mark"],
+    });
+
     return new Response(
       JSON.stringify({ ok: true, order_number: orderNumber }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
