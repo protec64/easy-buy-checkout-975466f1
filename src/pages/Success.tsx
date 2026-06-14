@@ -84,6 +84,15 @@ const Success = () => {
         setItems(orderItems);
         setLoading(false);
 
+        // Só dispara Purchase quando o pagamento estiver realmente confirmado
+        const isPaid =
+          (orderData as { payment_status?: string }).payment_status === "approved" ||
+          (orderData as { mp_status?: string }).mp_status === "paid";
+        if (!isPaid) {
+          console.warn("[Success] Purchase não disparado: pagamento não confirmado", paymentId);
+          return;
+        }
+
         trackPurchase({
           content_ids: itemsData?.map((i) => i.product_id) || [],
           contents: orderItems.map((i) => ({
