@@ -226,25 +226,8 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
   const handleProofUploaded = useCallback(() => {
     if (!pixData || !orderItems?.length) return;
-    initMetaPixel();
-    trackPurchase({
-      content_ids: orderItems.map((i) => i.id),
-      contents: orderItems.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
-      content_type: "product",
-      currency: "BRL",
-      num_items: orderItems.reduce((s, i) => s + i.qty, 0),
-      value: total || 0,
-      email,
-      phone,
-      cpf,
-      first_name: fullName,
-      city,
-      state,
-      zip_code: zipCode,
-      order_id: pixData.payment_id,
-      payment_method: "pix",
-      event_id: pixData.event_id,
-    });
+    // NÃO dispara Purchase aqui: o envio do comprovante não confirma o pagamento.
+    // O Purchase só é disparado quando o status do pagamento é "approved".
 
     // Redireciona após envio do comprovante, com guard de validação no banco
     setTimeout(async () => {
