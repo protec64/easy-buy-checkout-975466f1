@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendUtmifyOrder } from "../_shared/utmify.ts";
+import { sendNtfy } from "../_shared/ntfy.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -94,6 +95,18 @@ Deno.serve(async (req) => {
         src: order.utm_src,
         sck: order.utm_sck,
       },
+    });
+
+    // Notificação push: comprovante enviado / pedido aprovado (ntfy.sh)
+    await sendNtfy({
+      title: "🧾 Comprovante recebido!",
+      message:
+        `Pedido ${orderNumber || payment_id}\n` +
+        `Valor: R$ ${Number(order.total).toFixed(2)}\n` +
+        `Cliente: ${order.full_name || "-"}\n` +
+        `Cliente enviou o comprovante (PIX)`,
+      priority: "max",
+      tags: ["receipt", "white_check_mark"],
     });
 
     return new Response(
