@@ -194,6 +194,18 @@ Deno.serve(async (req) => {
 
     if (paymentStatus === "approved" && order) {
       await sendPurchaseCAPI(order, orderItems || []);
+
+      // Notificação push de venda aprovada (ntfy.sh)
+      await sendNtfy({
+        title: "✅ Venda aprovada!",
+        message:
+          `Pedido ${order.order_number || paymentId}\n` +
+          `Valor: R$ ${Number(order.total).toFixed(2)}\n` +
+          `Cliente: ${order.full_name || "-"}\n` +
+          `Pagamento confirmado (PIX)`,
+        priority: "max",
+        tags: ["moneybag", "white_check_mark"],
+      });
     }
 
     // Envia status para a UTMify (paid / refused / refunded)
