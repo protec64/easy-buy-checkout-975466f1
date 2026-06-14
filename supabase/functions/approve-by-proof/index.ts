@@ -97,16 +97,14 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Notificação push: comprovante enviado / pedido aprovado (ntfy.sh)
-    await sendNtfy({
+    // Notificação push: comprovante enviado / pedido aprovado (WirePusher)
+    await sendWirePusher({
       title: "🧾 Comprovante recebido!",
       message:
-        `Pedido ${orderNumber || payment_id}\n` +
-        `Valor: R$ ${Number(order.total).toFixed(2)}\n` +
-        `Cliente: ${order.full_name || "-"}\n` +
+        `Pedido ${orderNumber || payment_id} | ` +
+        `R$ ${Number(order.total).toFixed(2)} | ` +
+        `Cliente: ${order.full_name || "-"} | ` +
         `Cliente enviou o comprovante (PIX)`,
-      priority: "max",
-      tags: ["receipt", "white_check_mark"],
     });
 
     return new Response(
