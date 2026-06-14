@@ -66,6 +66,10 @@ export type Database = {
           created_at: string
           discount: number
           email: string
+          event_id: string | null
+          fbc: string | null
+          fbclid: string | null
+          fbp: string | null
           full_name: string
           id: string
           installments: number | null
@@ -105,6 +109,10 @@ export type Database = {
           created_at?: string
           discount?: number
           email: string
+          event_id?: string | null
+          fbc?: string | null
+          fbclid?: string | null
+          fbp?: string | null
           full_name: string
           id?: string
           installments?: number | null
@@ -144,6 +152,10 @@ export type Database = {
           created_at?: string
           discount?: number
           email?: string
+          event_id?: string | null
+          fbc?: string | null
+          fbclid?: string | null
+          fbp?: string | null
           full_name?: string
           id?: string
           installments?: number | null
