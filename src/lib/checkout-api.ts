@@ -54,6 +54,9 @@ export interface OrderPayload {
     utm_term?: string;
     src?: string;
     sck?: string;
+    fbclid?: string;
+    fbp?: string;
+    fbc?: string;
   };
 }
 
