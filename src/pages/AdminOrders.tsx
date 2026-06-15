@@ -57,6 +57,7 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const load = async () => {
     setLoading(true);
@@ -77,16 +78,27 @@ const AdminOrders = () => {
 
   const filtered = useMemo(() => {
     const q = filter.toLowerCase().trim();
-    return orders.filter(
-      (o) =>
+    return orders.filter((o) => {
+      const matchesText =
         !q ||
         o.full_name?.toLowerCase().includes(q) ||
         o.email?.toLowerCase().includes(q) ||
         o.cpf?.includes(q) ||
         o.phone?.includes(q) ||
-        o.order_number?.toLowerCase().includes(q)
-    );
-  }, [orders, filter]);
+        o.order_number?.toLowerCase().includes(q);
+
+      let matchesDate = true;
+      if (selectedDate) {
+        const orderDate = new Date(o.created_at);
+        matchesDate =
+          orderDate.getFullYear() === selectedDate.getFullYear() &&
+          orderDate.getMonth() === selectedDate.getMonth() &&
+          orderDate.getDate() === selectedDate.getDate();
+      }
+
+      return matchesText && matchesDate;
+    });
+  }, [orders, filter, selectedDate]);
 
   const totalApproved = useMemo(
     () =>
