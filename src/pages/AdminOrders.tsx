@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -12,9 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MessageCircle, Search, Lock, CheckCircle2, Clock, CalendarIcon, X } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { MessageCircle, Search, Lock, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Order {
@@ -57,7 +53,8 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  type DateFilter = "today" | "yesterday" | "last3" | "last7" | null;
+  const [dateFilter, setDateFilter] = useState<DateFilter>(null);
 
   const load = async () => {
     setLoading(true);
@@ -76,8 +73,22 @@ const AdminOrders = () => {
     if (authed) load();
   }, [authed]);
 
+  const isSameDay = (d1: Date, d2: Date) =>
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();
+
   const filtered = useMemo(() => {
     const q = filter.toLowerCase().trim();
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterdayStart = new Date(todayStart);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    const last3Start = new Date(todayStart);
+    last3Start.setDate(last3Start.getDate() - 2);
+    const last7Start = new Date(todayStart);
+    last7Start.setDate(last7Start.getDate() - 6);
+
     return orders.filter((o) => {
       const matchesText =
         !q ||
@@ -87,33 +98,37 @@ const AdminOrders = () => {
         o.phone?.includes(q) ||
         o.order_number?.toLowerCase().includes(q);
 
-      let matchesDate = true;
-      if (selectedDate) {
-        const orderDate = new Date(o.created_at);
-        matchesDate =
-          orderDate.getFullYear() === selectedDate.getFullYear() &&
-          orderDate.getMonth() === selectedDate.getMonth() &&
-          orderDate.getDate() === selectedDate.getDate();
-      }
+      if (!dateFilter) return matchesText;
 
+      const orderDate = new Date(o.created_at);
+      let matchesDate = false;
+      if (dateFilter === "today") {
+        matchesDate = isSameDay(orderDate, todayStart);
+      } else if (dateFilter === "yesterday") {
+        matchesDate = isSameDay(orderDate, yesterdayStart);
+      } else if (dateFilter === "last3") {
+        matchesDate = orderDate >= last3Start;
+      } else if (dateFilter === "last7") {
+        matchesDate = orderDate >= last7Start;
+      }
       return matchesText && matchesDate;
     });
-  }, [orders, filter, selectedDate]);
+  }, [orders, filter, dateFilter]);
 
   const totalApproved = useMemo(
     () =>
-      orders
+      filtered
         .filter((o) => o.payment_status === "approved")
         .reduce((sum, o) => sum + Number(o.total), 0),
-    [orders]
+    [filtered]
   );
 
   const totalPending = useMemo(
     () =>
-      orders
+      filtered
         .filter((o) => o.payment_status === "pending")
         .reduce((sum, o) => sum + Number(o.total), 0),
-    [orders]
+    [filtered]
   );
 
   if (!authed) {
@@ -169,34 +184,24 @@ const AdminOrders = () => {
                 className="pl-8 w-72"
               />
             </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "justify-start text-left font-normal",
-                    !selectedDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedDate ? format(selectedDate, "dd/MM/yyyy", { locale: ptBR }) : "Escolher dia"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-            {selectedDate && (
-              <Button variant="ghost" size="icon" onClick={() => setSelectedDate(undefined)}>
-                <X className="h-4 w-4" />
+            {(
+              [
+                { key: "today", label: "Hoje" },
+                { key: "yesterday", label: "Ontem" },
+                { key: "last3", label: "Últimos 3 dias" },
+                { key: "last7", label: "Últimos 7 dias" },
+              ] as { key: DateFilter; label: string }[]
+            ).map((opt) => (
+              <Button
+                key={opt.key}
+                variant={dateFilter === opt.key ? "default" : "outline"}
+                onClick={() =>
+                  setDateFilter((prev) => (prev === opt.key ? null : opt.key))
+                }
+              >
+                {opt.label}
               </Button>
-            )}
+            ))}
             <Button variant="outline" onClick={load} disabled={loading}>
               {loading ? "..." : "Atualizar"}
             </Button>
