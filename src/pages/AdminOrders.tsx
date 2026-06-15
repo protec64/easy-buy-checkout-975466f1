@@ -159,7 +159,7 @@ const AdminOrders = () => {
           <h1 className="text-xl font-semibold text-foreground">
             Pedidos ({filtered.length})
           </h1>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -169,6 +169,34 @@ const AdminOrders = () => {
                 className="pl-8 w-72"
               />
             </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, "dd/MM/yyyy", { locale: ptBR }) : "Escolher dia"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+            {selectedDate && (
+              <Button variant="ghost" size="icon" onClick={() => setSelectedDate(undefined)}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
             <Button variant="outline" onClick={load} disabled={loading}>
               {loading ? "..." : "Atualizar"}
             </Button>
