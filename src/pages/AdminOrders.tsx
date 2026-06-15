@@ -158,6 +158,31 @@ const AdminOrders = () => {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="rounded-lg border border-border bg-card p-4 flex items-center gap-3">
+            <div className="rounded-full bg-green-100 p-2">
+              <CheckCircle2 className="h-5 w-5 text-green-700" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Total Pago</p>
+              <p className="text-lg font-semibold text-foreground">
+                R$ {totalApproved.toFixed(2).replace(".", ",")}
+              </p>
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-4 flex items-center gap-3">
+            <div className="rounded-full bg-yellow-100 p-2">
+              <Clock className="h-5 w-5 text-yellow-700" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Total Pendente</p>
+              <p className="text-lg font-semibold text-foreground">
+                R$ {totalPending.toFixed(2).replace(".", ",")}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="rounded-lg border border-border bg-card">
           <Table>
             <TableHeader>
