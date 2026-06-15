@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MessageCircle, Search, Lock } from "lucide-react";
+import { MessageCircle, Search, Lock, CheckCircle2, Clock } from "lucide-react";
 
 interface Order {
   id: string;
