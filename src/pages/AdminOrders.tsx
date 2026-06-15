@@ -117,18 +117,18 @@ const AdminOrders = () => {
 
   const totalApproved = useMemo(
     () =>
-      orders
+      filtered
         .filter((o) => o.payment_status === "approved")
         .reduce((sum, o) => sum + Number(o.total), 0),
-    [orders]
+    [filtered]
   );
 
   const totalPending = useMemo(
     () =>
-      orders
+      filtered
         .filter((o) => o.payment_status === "pending")
         .reduce((sum, o) => sum + Number(o.total), 0),
-    [orders]
+    [filtered]
   );
 
   if (!authed) {
