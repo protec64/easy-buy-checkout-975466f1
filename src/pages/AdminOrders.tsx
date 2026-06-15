@@ -53,7 +53,8 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  type DateFilter = "today" | "yesterday" | "last3" | "last7" | null;
+  const [dateFilter, setDateFilter] = useState<DateFilter>(null);
 
   const load = async () => {
     setLoading(true);
