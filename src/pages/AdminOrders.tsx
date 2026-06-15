@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MessageCircle, Search, Lock } from "lucide-react";
+import { MessageCircle, Search, Lock, CheckCircle2, Clock } from "lucide-react";
 
 interface Order {
   id: string;
@@ -83,6 +83,22 @@ const AdminOrders = () => {
     );
   }, [orders, filter]);
 
+  const totalApproved = useMemo(
+    () =>
+      orders
+        .filter((o) => o.payment_status === "approved")
+        .reduce((sum, o) => sum + Number(o.total), 0),
+    [orders]
+  );
+
+  const totalPending = useMemo(
+    () =>
+      orders
+        .filter((o) => o.payment_status === "pending")
+        .reduce((sum, o) => sum + Number(o.total), 0),
+    [orders]
+  );
+
   if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -139,6 +155,31 @@ const AdminOrders = () => {
             <Button variant="outline" onClick={load} disabled={loading}>
               {loading ? "..." : "Atualizar"}
             </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="rounded-lg border border-border bg-card p-4 flex items-center gap-3">
+            <div className="rounded-full bg-green-100 p-2">
+              <CheckCircle2 className="h-5 w-5 text-green-700" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Total Pago</p>
+              <p className="text-lg font-semibold text-foreground">
+                R$ {totalApproved.toFixed(2).replace(".", ",")}
+              </p>
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-4 flex items-center gap-3">
+            <div className="rounded-full bg-yellow-100 p-2">
+              <Clock className="h-5 w-5 text-yellow-700" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Total Pendente</p>
+              <p className="text-lg font-semibold text-foreground">
+                R$ {totalPending.toFixed(2).replace(".", ",")}
+              </p>
+            </div>
           </div>
         </div>
 
