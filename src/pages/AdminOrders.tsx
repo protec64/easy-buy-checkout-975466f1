@@ -184,34 +184,24 @@ const AdminOrders = () => {
                 className="pl-8 w-72"
               />
             </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "justify-start text-left font-normal",
-                    !selectedDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedDate ? format(selectedDate, "dd/MM/yyyy", { locale: ptBR }) : "Escolher dia"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-            {selectedDate && (
-              <Button variant="ghost" size="icon" onClick={() => setSelectedDate(undefined)}>
-                <X className="h-4 w-4" />
+            {(
+              [
+                { key: "today", label: "Hoje" },
+                { key: "yesterday", label: "Ontem" },
+                { key: "last3", label: "Últimos 3 dias" },
+                { key: "last7", label: "Últimos 7 dias" },
+              ] as { key: DateFilter; label: string }[]
+            ).map((opt) => (
+              <Button
+                key={opt.key}
+                variant={dateFilter === opt.key ? "default" : "outline"}
+                onClick={() =>
+                  setDateFilter((prev) => (prev === opt.key ? null : opt.key))
+                }
+              >
+                {opt.label}
               </Button>
-            )}
+            ))}
             <Button variant="outline" onClick={load} disabled={loading}>
               {loading ? "..." : "Atualizar"}
             </Button>
