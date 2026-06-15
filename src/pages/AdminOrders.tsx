@@ -73,8 +73,22 @@ const AdminOrders = () => {
     if (authed) load();
   }, [authed]);
 
+  const isSameDay = (d1: Date, d2: Date) =>
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();
+
   const filtered = useMemo(() => {
     const q = filter.toLowerCase().trim();
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterdayStart = new Date(todayStart);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    const last3Start = new Date(todayStart);
+    last3Start.setDate(last3Start.getDate() - 2);
+    const last7Start = new Date(todayStart);
+    last7Start.setDate(last7Start.getDate() - 6);
+
     return orders.filter((o) => {
       const matchesText =
         !q ||
@@ -84,18 +98,22 @@ const AdminOrders = () => {
         o.phone?.includes(q) ||
         o.order_number?.toLowerCase().includes(q);
 
-      let matchesDate = true;
-      if (selectedDate) {
-        const orderDate = new Date(o.created_at);
-        matchesDate =
-          orderDate.getFullYear() === selectedDate.getFullYear() &&
-          orderDate.getMonth() === selectedDate.getMonth() &&
-          orderDate.getDate() === selectedDate.getDate();
-      }
+      if (!dateFilter) return matchesText;
 
+      const orderDate = new Date(o.created_at);
+      let matchesDate = false;
+      if (dateFilter === "today") {
+        matchesDate = isSameDay(orderDate, todayStart);
+      } else if (dateFilter === "yesterday") {
+        matchesDate = isSameDay(orderDate, yesterdayStart);
+      } else if (dateFilter === "last3") {
+        matchesDate = orderDate >= last3Start;
+      } else if (dateFilter === "last7") {
+        matchesDate = orderDate >= last7Start;
+      }
       return matchesText && matchesDate;
     });
-  }, [orders, filter, selectedDate]);
+  }, [orders, filter, dateFilter]);
 
   const totalApproved = useMemo(
     () =>
