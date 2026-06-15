@@ -83,6 +83,22 @@ const AdminOrders = () => {
     );
   }, [orders, filter]);
 
+  const totalApproved = useMemo(
+    () =>
+      orders
+        .filter((o) => o.payment_status === "approved")
+        .reduce((sum, o) => sum + Number(o.total), 0),
+    [orders]
+  );
+
+  const totalPending = useMemo(
+    () =>
+      orders
+        .filter((o) => o.payment_status === "pending")
+        .reduce((sum, o) => sum + Number(o.total), 0),
+    [orders]
+  );
+
   if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
