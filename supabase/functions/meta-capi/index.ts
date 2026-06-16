@@ -4,7 +4,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PIXEL_ID = "4337182786597702";
+const PIXEL_ID = "1556662072725633";
 
 /**
  * Hash a value with SHA-256 (Meta requires lowercase hex)
