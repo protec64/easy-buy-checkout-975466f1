@@ -162,14 +162,18 @@ export function trackViewContent(params: TrackParams) {
   const eventId = generateEventId();
   const { fbp, fbc } = getMetaCookies();
 
-  fbq("track", "ViewContent", {
-    content_ids: params.content_ids,
-    contents: params.contents,
-    content_type: params.content_type,
-    currency: params.currency,
-    value: params.value,
-    eventID: eventId,
-  });
+  fbq(
+    "track",
+    "ViewContent",
+    {
+      content_ids: params.content_ids,
+      contents: params.contents,
+      content_type: params.content_type,
+      currency: params.currency,
+      value: params.value,
+    },
+    { eventID: eventId }
+  );
 
   sendCAPIEvent({
     event_name: "ViewContent",
@@ -193,15 +197,19 @@ export function trackInitiateCheckout(params: TrackParams) {
   const eventId = generateEventId();
   const { fbp, fbc } = getMetaCookies();
 
-  fbq("track", "InitiateCheckout", {
-    content_ids: params.content_ids,
-    contents: params.contents,
-    content_type: params.content_type,
-    currency: params.currency,
-    num_items: params.num_items,
-    value: params.value,
-    eventID: eventId,
-  });
+  fbq(
+    "track",
+    "InitiateCheckout",
+    {
+      content_ids: params.content_ids,
+      contents: params.contents,
+      content_type: params.content_type,
+      currency: params.currency,
+      num_items: params.num_items,
+      value: params.value,
+    },
+    { eventID: eventId }
+  );
 
   sendCAPIEvent({
     event_name: "InitiateCheckout",
@@ -226,15 +234,19 @@ export function trackAddPaymentInfo(params: TrackParams & { payment_method: stri
   const eventId = generateEventId();
   const { fbp, fbc } = getMetaCookies();
 
-  fbq("track", "AddPaymentInfo", {
-    content_ids: params.content_ids,
-    contents: params.contents,
-    content_type: params.content_type,
-    currency: params.currency,
-    value: params.value,
-    payment_method: params.payment_method,
-    eventID: eventId,
-  });
+  fbq(
+    "track",
+    "AddPaymentInfo",
+    {
+      content_ids: params.content_ids,
+      contents: params.contents,
+      content_type: params.content_type,
+      currency: params.currency,
+      value: params.value,
+      payment_method: params.payment_method,
+    },
+    { eventID: eventId }
+  );
 
   sendCAPIEvent({
     event_name: "AddPaymentInfo",
@@ -261,17 +273,21 @@ export function trackPurchase(params: TrackParams & { order_id?: string; payment
   const eventId = params.event_id || generateEventId();
   const { fbp, fbc } = getMetaCookies();
 
-  fbq("track", "Purchase", {
-    content_ids: params.content_ids,
-    contents: params.contents,
-    content_type: params.content_type,
-    currency: params.currency,
-    num_items: params.num_items,
-    value: params.value,
-    order_id: params.order_id,
-    payment_method: params.payment_method,
-    eventID: eventId,
-  });
+  fbq(
+    "track",
+    "Purchase",
+    {
+      content_ids: params.content_ids,
+      contents: params.contents,
+      content_type: params.content_type,
+      currency: params.currency,
+      num_items: params.num_items,
+      value: params.value,
+      order_id: params.order_id,
+      payment_method: params.payment_method,
+    },
+    { eventID: eventId }
+  );
 
   sendCAPIEvent({
     event_name: "Purchase",
