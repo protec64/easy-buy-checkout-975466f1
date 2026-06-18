@@ -18,11 +18,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const FREEPAY_PUBLIC_KEY = Deno.env.get("FREEPAY_PUBLIC_KEY");
-    const FREEPAY_SECRET_KEY = Deno.env.get("FREEPAY_SECRET_KEY");
+    const SKALEPAY_API_KEY = Deno.env.get("SKALEPAY_API_KEY");
 
-    if (!FREEPAY_PUBLIC_KEY || !FREEPAY_SECRET_KEY) {
-      throw new Error("FreePay credentials not configured");
+    if (!SKALEPAY_API_KEY) {
+      throw new Error("SkalePay credentials not configured");
     }
 
     const body = await req.json();
