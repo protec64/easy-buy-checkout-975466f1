@@ -16,21 +16,19 @@ Deno.serve(async (req) => {
     const { payment_id } = await req.json();
     if (!payment_id) throw new Error("payment_id required");
 
-    const FREEPAY_PUBLIC_KEY = Deno.env.get("FREEPAY_PUBLIC_KEY");
-    const FREEPAY_SECRET_KEY = Deno.env.get("FREEPAY_SECRET_KEY");
-    if (!FREEPAY_PUBLIC_KEY || !FREEPAY_SECRET_KEY) {
-      throw new Error("FreePay credentials not configured");
+    const SKALEPAY_API_KEY = Deno.env.get("SKALEPAY_API_KEY");
+    if (!SKALEPAY_API_KEY) {
+      throw new Error("SkalePay credentials not configured");
     }
 
-    const authToken = btoa(`${FREEPAY_PUBLIC_KEY}:${FREEPAY_SECRET_KEY}`);
     const res = await fetch(
-      `https://api.freepaybrasil.com/v1/payment-transaction/info/${payment_id}`,
-      { headers: { Authorization: `Basic ${authToken}` } }
+      `https://api.skalepayments.com.br/transactions/${payment_id}`,
+      { headers: { "X-API-Key": SKALEPAY_API_KEY } }
     );
     const data = await res.json();
 
     if (!res.ok) {
-      console.error("FreePay info error:", JSON.stringify(data));
+      console.error("SkalePay info error:", JSON.stringify(data));
       return new Response(JSON.stringify({ status: "pending" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -39,11 +37,11 @@ Deno.serve(async (req) => {
 
     const fp = data.data || data;
     const rawStatus = String(fp.status || "").toLowerCase();
-    console.log(`check-payment ${payment_id}: freepay status=${rawStatus}`);
+    console.log(`check-payment ${payment_id}: skalepay status=${rawStatus}`);
 
     let status = "pending";
     if (rawStatus === "paid" || rawStatus === "approved") status = "approved";
-    else if (["refused", "failed", "declined"].includes(rawStatus)) status = "refused";
+    else if (["refused", "failed", "declined", "cancelled"].includes(rawStatus)) status = "refused";
     else if (["refunded", "chargedback"].includes(rawStatus)) status = "refunded";
 
     // Encaminha para o webhook interno para processar aprovação (UTMify + CAPI)

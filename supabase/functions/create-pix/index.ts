@@ -18,11 +18,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const FREEPAY_PUBLIC_KEY = Deno.env.get("FREEPAY_PUBLIC_KEY");
-    const FREEPAY_SECRET_KEY = Deno.env.get("FREEPAY_SECRET_KEY");
+    const SKALEPAY_API_KEY = Deno.env.get("SKALEPAY_API_KEY");
 
-    if (!FREEPAY_PUBLIC_KEY || !FREEPAY_SECRET_KEY) {
-      throw new Error("FreePay credentials not configured");
+    if (!SKALEPAY_API_KEY) {
+      throw new Error("SkalePay credentials not configured");
     }
 
     const body = await req.json();
@@ -89,32 +88,32 @@ Deno.serve(async (req) => {
 
     await supabase.from("order_items").insert(itemInserts);
 
-    // Build FreePay payload
+    // Build SkalePay payload
     const amountInCents = Math.round(order.total * 100);
     const cleanCpf = customer.cpf.replace(/\D/g, "");
-    const authToken = btoa(`${FREEPAY_PUBLIC_KEY}:${FREEPAY_SECRET_KEY}`);
 
-    const freepayPayload = {
+    const skalePayload = {
       amount: amountInCents,
-      payment_method: "pix",
-      postback_url: `${SUPABASE_URL}/functions/v1/freepay-webhook`,
+      paymentMethod: "pix",
+      postbackUrl: `${SUPABASE_URL}/functions/v1/freepay-webhook`,
       customer: {
         name: customer.full_name,
         email: customer.email,
+        phone: customer.phone ? customer.phone.replace(/\D/g, "") : "00000000000",
         document: {
           type: cleanCpf.length <= 11 ? "cpf" : "cnpj",
           number: cleanCpf,
         },
-        phone: customer.phone ? customer.phone.replace(/\D/g, "") : "00000000000",
       },
       items: order.items.map((item: any) => ({
         title: item.name,
+        unitPrice: Math.round(item.price * 100),
         quantity: item.qty,
-        unit_price: Math.round(item.price * 100),
         tangible: true,
+        externalRef: String(item.id),
       })),
       pix: {
-        expires_in: 900,
+        expiresInDays: 1,
       },
       metadata: {
         provider_name: "Lovable Checkout",
@@ -123,37 +122,38 @@ Deno.serve(async (req) => {
       },
     };
 
-    console.log("FreePay request:", JSON.stringify(freepayPayload));
+    console.log("SkalePay request:", JSON.stringify(skalePayload));
 
     const freepayRes = await fetch(
-      "https://api.freepaybrasil.com/v1/payment-transaction/create",
+      "https://api.skalepayments.com.br/transactions",
       {
         method: "POST",
         headers: {
-          Authorization: `Basic ${authToken}`,
+          "X-API-Key": SKALEPAY_API_KEY,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(freepayPayload),
+        body: JSON.stringify(skalePayload),
       }
     );
 
     const freepayData = await freepayRes.json();
 
     if (!freepayRes.ok) {
-      console.error("FreePay error:", JSON.stringify(freepayData));
+      console.error("SkalePay error:", JSON.stringify(freepayData));
       throw new Error(
-        `FreePay API error [${freepayRes.status}]: ${JSON.stringify(freepayData)}`
+        `SkalePay API error [${freepayRes.status}]: ${JSON.stringify(freepayData)}`
       );
     }
 
-    console.log("FreePay response:", JSON.stringify(freepayData));
+    console.log("SkalePay response:", JSON.stringify(freepayData));
 
-    // Update order with FreePay payment info
+    // Update order with SkalePay payment info
     const fpData = freepayData.data || freepayData;
-    const pixCode = fpData.pix?.qr_code || fpData.qr_code || "";
-    const pixCopiaECola = fpData.pix?.qr_code || fpData.pix?.qr_code_url || fpData.pix?.copy_paste || "";
+    const pixCode = fpData.pix?.qrcode || fpData.pix?.qr_code || "";
+    const pixCopiaECola = fpData.pix?.qrcode || fpData.pix?.qr_code || "";
     const paymentId = fpData.id || fpData.transaction_id || "";
-    const expiresAt = fpData.pix?.expiration_date || new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    const expiresAt = fpData.pix?.expirationDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
 
     await supabase
       .from("orders")

@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    console.log("FreePay webhook received:", JSON.stringify(body));
+    console.log("SkalePay webhook received:", JSON.stringify(body));
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -123,11 +123,11 @@ Deno.serve(async (req) => {
       throw new Error("No payment ID in webhook payload");
     }
 
-    // Map FreePay status to our status
+    // Map SkalePay status to our status
     let paymentStatus = "pending";
     if (status === "paid" || status === "approved") {
       paymentStatus = "approved";
-    } else if (status === "refused" || status === "failed" || status === "declined") {
+    } else if (status === "refused" || status === "failed" || status === "declined" || status === "cancelled") {
       paymentStatus = "refused";
     } else if (status === "refunded" || status === "chargedback") {
       paymentStatus = "refunded";
