@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     if (status !== "pending") {
       const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
       try {
-        const whRes = await fetch(`${SUPABASE_URL}/functions/v1/freepay-webhook`, {
+        const whRes = await fetch(`${SUPABASE_URL}/functions/v1/skalepay-webhook`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: String(payment_id), status: rawStatus }),
