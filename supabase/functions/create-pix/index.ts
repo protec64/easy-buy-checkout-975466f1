@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
     const skalePayload = {
       amount: amountInCents,
       paymentMethod: "pix",
-      postbackUrl: `${SUPABASE_URL}/functions/v1/freepay-webhook`,
+      postbackUrl: `${SUPABASE_URL}/functions/v1/skalepay-webhook`,
       customer: {
         name: customer.full_name,
         email: customer.email,
