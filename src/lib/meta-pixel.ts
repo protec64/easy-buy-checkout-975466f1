@@ -1,6 +1,6 @@
 /**
  * Meta (Facebook) Pixel + Conversions API (CAPI) helper
- * Pixel ID: 1556662072725633
+ * Pixel ID: 1325984956346321
  *
  * Events: PageView, ViewContent, InitiateCheckout, AddPaymentInfo, Purchase
  * Purchase uses event_id for browser↔server deduplication.
@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-const PIXEL_ID = "1556662072725633";
+const PIXEL_ID = "1325984956346321";
 
 let initialized = false;
 
