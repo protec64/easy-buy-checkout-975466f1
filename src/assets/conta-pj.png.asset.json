@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "757f1435-e262-4fb3-b98f-a2a49d082e8f",
-  "project_id": "af24bb9a-dfbe-4060-a31e-63cb9456960d",
-  "url": "/__l5e/assets-v1/757f1435-e262-4fb3-b98f-a2a49d082e8f/conta-pj.png",
-  "r2_key": "a/v1/af24bb9a-dfbe-4060-a31e-63cb9456960d/757f1435-e262-4fb3-b98f-a2a49d082e8f/conta-pj.png",
-  "original_filename": "conta-pj.png",
-  "size": 90722,
   "content_type": "image/png",
-  "created_at": "2026-06-12T04:32:17Z"
+  "created_at": "2026-06-12T04:32:17Z",
+  "original_filename": "conta-pj.png",
+  "project_id": "cd926aeb-05d2-4931-8834-4698608bcdf2",
+  "r2_key": "a/v1/cd926aeb-05d2-4931-8834-4698608bcdf2/757f1435-e262-4fb3-b98f-a2a49d082e8f/conta-pj.png",
+  "size": 90722,
+  "url": "/__l5e/assets-v1/757f1435-e262-4fb3-b98f-a2a49d082e8f/conta-pj.png",
+  "version": 1
 }

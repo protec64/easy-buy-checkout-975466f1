@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "72299165-056b-4552-8d65-ed6c3bf29491",
-  "project_id": "af24bb9a-dfbe-4060-a31e-63cb9456960d",
-  "url": "/__l5e/assets-v1/72299165-056b-4552-8d65-ed6c3bf29491/shein-logo.png",
-  "r2_key": "a/v1/af24bb9a-dfbe-4060-a31e-63cb9456960d/72299165-056b-4552-8d65-ed6c3bf29491/shein-logo.png",
-  "original_filename": "shein-logo.png",
-  "size": 14139,
   "content_type": "image/png",
-  "created_at": "2026-06-12T04:17:42Z"
+  "created_at": "2026-06-12T04:17:42Z",
+  "original_filename": "shein-logo.png",
+  "project_id": "cd926aeb-05d2-4931-8834-4698608bcdf2",
+  "r2_key": "a/v1/cd926aeb-05d2-4931-8834-4698608bcdf2/72299165-056b-4552-8d65-ed6c3bf29491/shein-logo.png",
+  "size": 14139,
+  "url": "/__l5e/assets-v1/72299165-056b-4552-8d65-ed6c3bf29491/shein-logo.png",
+  "version": 1
 }
