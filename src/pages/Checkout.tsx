@@ -121,6 +121,16 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
     if (items.length > 0 && !initiateTracked.current) {
       initiateTracked.current = true;
 
+      // Dedup em nível de sessão para evitar múltiplos disparos
+      // (remontagens, StrictMode, navegação entre produtos)
+      const dedupKey = `ic_fired_${items.map((i) => `${i.id}:${i.qty}`).join("|")}`;
+      try {
+        if (sessionStorage.getItem(dedupKey)) return;
+        sessionStorage.setItem(dedupKey, "1");
+      } catch {
+        // ignore storage errors
+      }
+
       // ViewContent — product page view
       trackViewContent({
         content_ids: items.map((i) => i.id),
