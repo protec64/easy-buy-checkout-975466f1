@@ -68,6 +68,7 @@ Deno.serve(async (req) => {
         fbclid: tracking?.fbclid || null,
         fbp: tracking?.fbp || null,
         fbc: tracking?.fbc || null,
+        customer_ip: clientIp,
       })
       .select("id, order_number")
       .single();
