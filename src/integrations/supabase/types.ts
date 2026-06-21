@@ -64,6 +64,7 @@ export type Database = {
           coupon_code: string | null
           cpf: string
           created_at: string
+          customer_ip: string | null
           discount: number
           email: string
           event_id: string | null
@@ -107,6 +108,7 @@ export type Database = {
           coupon_code?: string | null
           cpf: string
           created_at?: string
+          customer_ip?: string | null
           discount?: number
           email: string
           event_id?: string | null
@@ -150,6 +152,7 @@ export type Database = {
           coupon_code?: string | null
           cpf?: string
           created_at?: string
+          customer_ip?: string | null
           discount?: number
           email?: string
           event_id?: string | null
