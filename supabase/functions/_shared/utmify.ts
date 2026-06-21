@@ -71,7 +71,7 @@ export async function sendUtmifyOrder(input: UtmifyPayloadInput): Promise<void> 
       phone: input.customer.phone || null,
       document: input.customer.document.replace(/\D/g, ""),
       country: "BR",
-      ip: input.customer.ip || "",
+      ip: input.customer.ip && input.customer.ip.length > 0 ? input.customer.ip : "0.0.0.0",
     },
     products: input.products.map((p) => ({
       id: p.id,
