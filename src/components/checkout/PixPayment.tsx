@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, Clock, QrCode, RefreshCw, Loader2, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import ProofUpload from "./ProofUpload";
 import BANKS from "./BankLogos";
 import { checkPaymentStatus } from "@/lib/checkout-api";
 import { supabase } from "@/integrations/supabase/client";
@@ -459,9 +458,6 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
 
 
-
-      {/* Upload Comprovante */}
-      <ProofUpload paymentId={pixData.payment_id} email={email} cpf={cpf} onUploadSuccess={handleProofUploaded} />
 
       {/* Bank logos */}
       <div>
