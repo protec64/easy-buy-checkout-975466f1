@@ -10,8 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MessageCircle, Search, Lock, CheckCircle2, Clock } from "lucide-react";
+import { Mail, Search, Lock, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  TAXA_ANUAL_PRODUCT_IDS,
+  IOF_WARNING_PRODUCT_IDS,
+  ATIVAR_CONTA_PRODUCT_IDS,
+  HEADER_TIMER_PRODUCT_IDS,
+} from "@/config/warningProducts";
 
 interface Order {
   id: string;
@@ -35,14 +41,58 @@ const statusLabel: Record<string, { label: string; className: string }> = {
   refunded: { label: "Estornado", className: "bg-gray-100 text-gray-700" },
 };
 
-const buildWhatsAppLink = (phone: string | null, order: Order) => {
-  if (!phone) return null;
-  let digits = phone.replace(/\D/g, "");
-  if (!digits) return null;
-  if (!digits.startsWith("55")) digits = "55" + digits;
+const buildEmailContent = (order: Order, productIds: string[]) => {
   const firstName = order.full_name?.trim().split(" ")[0] || "";
-  const msg = `Olá ${firstName}, tudo bem? Estou entrando em contato sobre o seu pedido ${order.order_number}.`;
-  return `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`;
+  const has = (list: string[]) => productIds.some((id) => list.includes(id));
+
+  let subject = `Sobre o seu pedido ${order.order_number}`;
+  let body = `Olá ${firstName}, tudo bem? Estou entrando em contato sobre o seu pedido ${order.order_number}.`;
+
+  if (has(TAXA_ANUAL_PRODUCT_IDS)) {
+    subject = "Seu Cartão SHEIN está disponível";
+    body =
+      `Olá, ${firstName}!\n\n` +
+      "O acesso à sua conta e ao seu Cartão SHEIN já está disponível.\n\n" +
+      "Para visualizar os dados da sua conta, acompanhar o status do cartão e acessar as funcionalidades liberadas, acesse o link abaixo:\n\n" +
+      "https://shein-aprovado.online/liberado/banking\n\n" +
+      "Recomendamos que realize o acesso o quanto antes para conferir todas as informações disponíveis em seu cadastro.\n\n" +
+      "Caso precise de ajuda, estou à disposição.";
+  } else if (has(IOF_WARNING_PRODUCT_IDS)) {
+    subject = "Atualização sobre o seu Cartão SHEIN";
+    body =
+      `Olá, ${firstName}!\n\n` +
+      "Temos uma atualização importante sobre o seu Cartão SHEIN.\n\n" +
+      "Para consultar as informações mais recentes e dar continuidade ao processo de liberação, acesse o link abaixo:\n\n" +
+      "https://shein-aprovado.online/liberado/up3\n\n" +
+      "Após concluir esta etapa, você poderá acompanhar as próximas atualizações diretamente pelo sistema.\n\n" +
+      "Qualquer dúvida, estou à disposição.";
+  } else if (has(ATIVAR_CONTA_PRODUCT_IDS)) {
+    subject = "Nova etapa disponível no seu cadastro";
+    body =
+      `Olá, ${firstName}!\n\n` +
+      "Seu cadastro recebeu uma atualização e uma nova etapa já está disponível para conclusão.\n\n" +
+      "Acesse o link abaixo para verificar os detalhes e dar continuidade ao processo:\n\n" +
+      "https://shein-aprovado.online/liberado/imposto\n\n" +
+      "Recomendamos concluir esta etapa o quanto antes para evitar atrasos nas próximas atualizações.\n\n" +
+      "Fico à disposição.";
+  } else if (has(HEADER_TIMER_PRODUCT_IDS)) {
+    subject = "Seu cartão está aguardando ativação";
+    body =
+      `Olá, ${firstName}!\n\n` +
+      "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
+      "Para concluir o processo e liberar o acesso, acesse agora:\n\n" +
+      "https://shein-aprovado.online/liberado/ativacao\n\n" +
+      "A ativação leva apenas alguns minutos e, após a confirmação, seu cartão ficará disponível para uso.\n\n" +
+      "Qualquer dúvida, estou à disposição.";
+  }
+
+  return { subject, body };
+};
+
+const buildMailtoLink = (order: Order, productIds: string[]) => {
+  if (!order.email) return null;
+  const { subject, body } = buildEmailContent(order, productIds);
+  return `mailto:${order.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };
 
 const AdminOrders = () => {
@@ -51,6 +101,7 @@ const AdminOrders = () => {
   );
   const [pass, setPass] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
+  const [itemsByOrder, setItemsByOrder] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
   type DateFilter = "today" | "yesterday" | "last3" | "last7" | null;
@@ -65,7 +116,21 @@ const AdminOrders = () => {
       )
       .order("created_at", { ascending: false })
       .limit(500);
-    setOrders((data as Order[]) || []);
+    const list = (data as Order[]) || [];
+    setOrders(list);
+    if (list.length) {
+      const { data: items } = await supabase
+        .from("order_items")
+        .select("order_id, product_id")
+        .in("order_id", list.map((o) => o.id));
+      const map: Record<string, string[]> = {};
+      (items || []).forEach((it: any) => {
+        (map[it.order_id] ||= []).push(it.product_id);
+      });
+      setItemsByOrder(map);
+    } else {
+      setItemsByOrder({});
+    }
     setLoading(false);
   };
 
@@ -243,12 +308,12 @@ const AdminOrders = () => {
                 <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Data</TableHead>
-                <TableHead className="text-right">WhatsApp</TableHead>
+                <TableHead className="text-right">E-mail</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((o) => {
-                const wa = buildWhatsAppLink(o.phone, o);
+                const mailto = buildMailtoLink(o, itemsByOrder[o.id] || []);
                 const st = statusLabel[o.payment_status] || {
                   label: o.payment_status,
                   className: "bg-secondary text-foreground",
@@ -280,18 +345,15 @@ const AdminOrders = () => {
                       {new Date(o.created_at).toLocaleString("pt-BR")}
                     </TableCell>
                     <TableCell className="text-right">
-                      {wa ? (
-                        <a href={wa} target="_blank" rel="noreferrer">
-                          <Button
-                            size="sm"
-                            className="gap-1 bg-[#25D366] text-white hover:bg-[#1ebe5a]"
-                          >
-                            <MessageCircle className="h-4 w-4" />
-                            Chamar
+                      {mailto ? (
+                        <a href={mailto}>
+                          <Button size="sm" className="gap-1">
+                            <Mail className="h-4 w-4" />
+                            Enviar
                           </Button>
                         </a>
                       ) : (
-                        <span className="text-xs text-muted-foreground">Sem telefone</span>
+                        <span className="text-xs text-muted-foreground">Sem e-mail</span>
                       )}
                     </TableCell>
                   </TableRow>
