@@ -136,21 +136,6 @@ Deno.serve(async (req) => {
 
     console.log(`Payment ${paymentId}: raw=${rawStatus}, mapped=${paymentStatus}`);
 
-    // Idempotência: se o pedido já está nesse status, não reprocessa
-    const { data: existing } = await supabase
-      .from("orders")
-      .select("id, payment_status")
-      .eq("mp_payment_id", paymentId)
-      .single();
-
-    if (existing && existing.payment_status === paymentStatus) {
-      console.log(`Order already in status ${paymentStatus}, skipping`);
-      return new Response(JSON.stringify({ ok: true, skipped: true }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     // Generate order number only when approved
     const updateData: Record<string, any> = {
       mp_status: status,
@@ -169,14 +154,26 @@ Deno.serve(async (req) => {
       updateData.order_number = `PED-${seq}-${rand}`;
     }
 
-    const { error } = await supabase
+    // Idempotência ATÔMICA: só atualiza se o status atual for diferente.
+    // Se nenhuma linha voltar, outro webhook já processou este status — encerra sem reenviar e-mail/CAPI/UTMify.
+    const { data: updated, error } = await supabase
       .from("orders")
       .update(updateData)
-      .eq("mp_payment_id", paymentId);
+      .eq("mp_payment_id", paymentId)
+      .neq("payment_status", paymentStatus)
+      .select("id");
 
     if (error) {
       console.error("Error updating order:", error);
       throw new Error("Failed to update order: " + error.message);
+    }
+
+    if (!updated || updated.length === 0) {
+      console.log(`Order already in status ${paymentStatus}, skipping side-effects`);
+      return new Response(JSON.stringify({ ok: true, skipped: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Busca pedido + itens para CAPI e UTMify
