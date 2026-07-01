@@ -52,15 +52,47 @@ export async function sendOrderEmailViaGmail(params: {
     return;
   }
 
-  const rfc2822 = [
+  const fromName = Deno.env.get("EMAIL_FROM_NAME") || "Atendimento SHEIN Card";
+  const fromAddr = Deno.env.get("EMAIL_FROM_ADDRESS") || "";
+  const replyTo = Deno.env.get("EMAIL_REPLY_TO") || fromAddr;
+
+  const subjectEnc = `=?UTF-8?B?${btoa(unescape(encodeURIComponent(params.subject)))}?=`;
+  const fromNameEnc = `=?UTF-8?B?${btoa(unescape(encodeURIComponent(fromName)))}?=`;
+
+  // HTML alternative (better inbox placement than pure text with a bare link)
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const linkified = escapeHtml(params.body).replace(
+    /(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" style="color:#111;">$1</a>',
+  );
+  const htmlBody =
+    `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#111;max-width:560px;">` +
+    linkified.replace(/\n/g, "<br>") +
+    `</div>`;
+
+  const boundary = `bnd_${crypto.randomUUID().replace(/-/g, "")}`;
+  const headers: string[] = [
     `To: ${params.to}`,
-    `Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(params.subject)))}?=`,
+    fromAddr ? `From: ${fromNameEnc} <${fromAddr}>` : `From: ${fromNameEnc}`,
+    replyTo ? `Reply-To: ${replyTo}` : "",
+    `Subject: ${subjectEnc}`,
     "MIME-Version: 1.0",
-    'Content-Type: text/plain; charset="UTF-8"',
-    "Content-Transfer-Encoding: 8bit",
-    "",
-    params.body,
-  ].join("\r\n");
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+  ].filter(Boolean);
+
+  const rfc2822 =
+    headers.join("\r\n") +
+    "\r\n\r\n" +
+    `--${boundary}\r\n` +
+    'Content-Type: text/plain; charset="UTF-8"\r\n' +
+    "Content-Transfer-Encoding: 8bit\r\n\r\n" +
+    params.body +
+    `\r\n--${boundary}\r\n` +
+    'Content-Type: text/html; charset="UTF-8"\r\n' +
+    "Content-Transfer-Encoding: 8bit\r\n\r\n" +
+    htmlBody +
+    `\r\n--${boundary}--\r\n`;
 
   const raw = base64Url(rfc2822);
 
