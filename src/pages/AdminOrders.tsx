@@ -49,19 +49,19 @@ const buildEmailContent = (order: Order, productIds: string[]) => {
   let body = `Olá ${firstName}, tudo bem? Estou entrando em contato sobre o seu pedido ${order.order_number}.`;
 
   if (has(TAXA_ANUAL_PRODUCT_IDS)) {
-    subject = "Seu Cartão SHEIN está disponível";
+    subject = "Seu cartão está disponível";
     body =
       `Olá, ${firstName}!\n\n` +
-      "O acesso à sua conta e ao seu Cartão SHEIN já está disponível.\n\n" +
+      "O acesso à sua conta e ao seu cartão já está disponível.\n\n" +
       "Para visualizar os dados da sua conta, acompanhar o status do cartão e acessar as funcionalidades liberadas, acesse o link abaixo:\n\n" +
       "https://shein-aprovado.online/liberado/banking\n\n" +
       "Recomendamos que realize o acesso o quanto antes para conferir todas as informações disponíveis em seu cadastro.\n\n" +
       "Caso precise de ajuda, estou à disposição.";
   } else if (has(IOF_WARNING_PRODUCT_IDS)) {
-    subject = "Atualização sobre o seu Cartão SHEIN";
+    subject = "Atualização sobre o seu cartão";
     body =
       `Olá, ${firstName}!\n\n` +
-      "Temos uma atualização importante sobre o seu Cartão SHEIN.\n\n" +
+      "Temos uma atualização importante sobre o seu cartão.\n\n" +
       "Para consultar as informações mais recentes e dar continuidade ao processo de liberação, acesse o link abaixo:\n\n" +
       "https://shein-aprovado.online/liberado/up3\n\n" +
       "Após concluir esta etapa, você poderá acompanhar as próximas atualizações diretamente pelo sistema.\n\n" +
