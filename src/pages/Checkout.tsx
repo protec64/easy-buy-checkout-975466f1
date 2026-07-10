@@ -414,6 +414,28 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
     <div className="min-h-screen bg-background">
       <CheckoutHeader checkoutId={checkoutId} showTimerWarning={shouldShowHeaderTimer(items)} />
 
+      {/* Tela única e fixa quando o PIX já foi gerado */}
+      {pixData ? (
+        <main className="mx-auto max-w-xl px-3 sm:px-4 py-4 sm:py-6">
+          <div className="rounded-xl border border-border bg-card p-4 sm:p-6 checkout-shadow">
+            <PaymentSection
+              method="pix"
+              pixData={pixData}
+              pixLoading={pixLoading}
+              onGeneratePix={handleGeneratePix}
+              total={total}
+              email={customer.email}
+              cpf={customer.cpf}
+              fullName={customer.fullName}
+              phone={customer.phone}
+              city={shipping.city}
+              state={shipping.state}
+              zipCode={shipping.cep}
+              items={items}
+            />
+          </div>
+        </main>
+      ) : (
       <main className="mx-auto max-w-5xl px-3 sm:px-4 py-4 sm:py-6">
         {shouldShowIofWarning(items) && (
           <div className="mb-4 rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
