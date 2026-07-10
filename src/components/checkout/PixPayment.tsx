@@ -86,12 +86,20 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
     return () => clearInterval(timer);
   }, [pixData?.payment_id, pixData?.expires_at]);
 
-  // Scroll até o "Código PIX" assim que o PIX é gerado
+  // Scroll até o "Código PIX" assim que o PIX é gerado — respeita header sticky
   useEffect(() => {
     if (!pixData) return;
-    const t = setTimeout(() => {
-      pixCodeRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 250);
+    const scrollToPix = () => {
+      const el = pixCodeRef.current;
+      if (!el) return;
+      const header = document.querySelector("header");
+      const headerHeight = header instanceof HTMLElement ? header.offsetHeight : 0;
+      const offset = headerHeight + 16; // respiro extra
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    };
+    // Dois frames para garantir layout final (mobile + header sticky com warning)
+    const t = setTimeout(() => requestAnimationFrame(scrollToPix), 300);
     return () => clearTimeout(t);
   }, [pixData?.payment_id]);
 
@@ -402,7 +410,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       </div>
 
       {/* PIX Code + Copy */}
-      <div ref={pixCodeRef} className="scroll-mt-24">
+      <div ref={pixCodeRef} className="scroll-mt-32 sm:scroll-mt-24">
         <p className="mb-2 text-sm font-semibold text-foreground">Código PIX</p>
         <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5">
           <p className="flex-1 truncate text-xs text-muted-foreground font-mono select-all">
