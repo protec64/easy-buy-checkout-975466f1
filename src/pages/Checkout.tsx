@@ -637,6 +637,7 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
 
         <TrustBadges />
       </main>
+      )}
     </div>
   );
 };
