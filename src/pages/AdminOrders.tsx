@@ -10,7 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Mail, Search, Lock, CheckCircle2, Clock } from "lucide-react";
+import { Mail, Search, Lock, CheckCircle2, Clock, Zap } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
   TAXA_ANUAL_PRODUCT_IDS,
@@ -106,6 +107,39 @@ const AdminOrders = () => {
   const [filter, setFilter] = useState("");
   type DateFilter = "today" | "yesterday" | "last3" | "last7" | null;
   const [dateFilter, setDateFilter] = useState<DateFilter>(null);
+  const [testingUtmify, setTestingUtmify] = useState(false);
+
+  const testUtmify = async () => {
+    setTestingUtmify(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("utmify-test", {});
+      if (error) throw error;
+      const ok = (data as any)?.ok;
+      const status = (data as any)?.status;
+      const body = (data as any)?.body;
+      if (ok) {
+        toast({
+          title: "UTMify autenticou ✅",
+          description: `HTTP ${status} · Pedido de teste enviado (${(data as any)?.orderId}).`,
+        });
+      } else {
+        toast({
+          title: "Falha na autenticação UTMify",
+          description: `HTTP ${status ?? "?"} · ${String(body).slice(0, 200)}`,
+          variant: "destructive",
+        });
+      }
+      console.log("utmify-test result:", data);
+    } catch (e: any) {
+      toast({
+        title: "Erro ao testar UTMify",
+        description: e?.message || String(e),
+        variant: "destructive",
+      });
+    } finally {
+      setTestingUtmify(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -269,6 +303,15 @@ const AdminOrders = () => {
             ))}
             <Button variant="outline" onClick={load} disabled={loading}>
               {loading ? "..." : "Atualizar"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={testUtmify}
+              disabled={testingUtmify}
+              className="gap-1"
+            >
+              <Zap className="h-4 w-4" />
+              {testingUtmify ? "Testando..." : "Testar UTMify"}
             </Button>
           </div>
         </div>
