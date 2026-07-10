@@ -36,10 +36,22 @@ interface Order {
 const ADMIN_PASS = "@Android007";
 
 const statusLabel: Record<string, { label: string; className: string }> = {
-  approved: { label: "Aprovado", className: "bg-green-100 text-green-700" },
-  pending: { label: "Pendente", className: "bg-yellow-100 text-yellow-700" },
-  refused: { label: "Recusado", className: "bg-red-100 text-red-700" },
-  refunded: { label: "Estornado", className: "bg-gray-100 text-gray-700" },
+  approved: {
+    label: "Aprovado",
+    className: "bg-[hsl(var(--success-soft))] text-[hsl(var(--success-foreground))]",
+  },
+  pending: {
+    label: "Pendente",
+    className: "bg-[hsl(var(--warning-soft))] text-[hsl(var(--warning-foreground))]",
+  },
+  refused: {
+    label: "Recusado",
+    className: "bg-[hsl(var(--danger-soft))] text-[hsl(var(--danger-foreground))]",
+  },
+  refunded: {
+    label: "Estornado",
+    className: "bg-[hsl(var(--neutral-soft))] text-[hsl(var(--neutral-foreground))]",
+  },
 };
 
 const buildEmailContent = (order: Order, productIds: string[]) => {
@@ -233,10 +245,13 @@ const AdminOrders = () => {
   if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="w-full max-w-sm space-y-4 rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center gap-2 text-foreground">
-            <Lock className="h-5 w-5" />
-            <h1 className="text-lg font-semibold">Acesso restrito</h1>
+        <div className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-8 checkout-shadow-lg">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <Lock className="h-5 w-5 text-primary" />
+            </div>
+            <h1 className="text-lg font-semibold text-foreground">Acesso restrito</h1>
+            <p className="text-xs text-muted-foreground">Informe a senha para continuar.</p>
           </div>
           <Input
             type="password"
@@ -268,11 +283,16 @@ const AdminOrders = () => {
 
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6">
-      <div className="mx-auto max-w-6xl space-y-4">
+      <div className="mx-auto max-w-6xl space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h1 className="text-xl font-semibold text-foreground">
-            Pedidos ({filtered.length})
-          </h1>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              Pedidos
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {filtered.length} {filtered.length === 1 ? "pedido" : "pedidos"} · atualizados agora
+            </p>
+          </div>
           <div className="flex gap-2 flex-wrap">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -294,6 +314,7 @@ const AdminOrders = () => {
               <Button
                 key={opt.key}
                 variant={dateFilter === opt.key ? "default" : "outline"}
+                size="sm"
                 onClick={() =>
                   setDateFilter((prev) => (prev === opt.key ? null : opt.key))
                 }
@@ -301,11 +322,12 @@ const AdminOrders = () => {
                 {opt.label}
               </Button>
             ))}
-            <Button variant="outline" onClick={load} disabled={loading}>
+            <Button variant="outline" size="sm" onClick={load} disabled={loading}>
               {loading ? "..." : "Atualizar"}
             </Button>
             <Button
               variant="outline"
+              size="sm"
               onClick={testUtmify}
               disabled={testingUtmify}
               className="gap-1"
@@ -317,34 +339,34 @@ const AdminOrders = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="rounded-lg border border-border bg-card p-4 flex items-center gap-3">
-            <div className="rounded-full bg-green-100 p-2">
-              <CheckCircle2 className="h-5 w-5 text-green-700" />
+          <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3 checkout-shadow card-interactive">
+            <div className="rounded-full bg-[hsl(var(--success-soft))] p-2.5">
+              <CheckCircle2 className="h-5 w-5 text-[hsl(var(--success-foreground))]" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Total Pago</p>
-              <p className="text-lg font-semibold text-foreground">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Pago</p>
+              <p className="text-xl font-bold text-foreground tabular-nums">
                 R$ {totalApproved.toFixed(2).replace(".", ",")}
               </p>
             </div>
           </div>
-          <div className="rounded-lg border border-border bg-card p-4 flex items-center gap-3">
-            <div className="rounded-full bg-yellow-100 p-2">
-              <Clock className="h-5 w-5 text-yellow-700" />
+          <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3 checkout-shadow card-interactive">
+            <div className="rounded-full bg-[hsl(var(--warning-soft))] p-2.5">
+              <Clock className="h-5 w-5 text-[hsl(var(--warning-foreground))]" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Total Pendente</p>
-              <p className="text-lg font-semibold text-foreground">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Pendente</p>
+              <p className="text-xl font-bold text-foreground tabular-nums">
                 R$ {totalPending.toFixed(2).replace(".", ",")}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-lg border border-border bg-card">
+        <div className="rounded-xl border border-border bg-card overflow-hidden checkout-shadow">
           <Table>
-            <TableHeader>
-              <TableRow>
+            <TableHeader className="bg-muted/40">
+              <TableRow className="hover:bg-transparent">
                 <TableHead>Pedido</TableHead>
                 <TableHead>Cliente</TableHead>
                 <TableHead>Telefone</TableHead>
@@ -362,7 +384,7 @@ const AdminOrders = () => {
                   className: "bg-secondary text-foreground",
                 };
                 return (
-                  <TableRow key={o.id}>
+                  <TableRow key={o.id} className="transition-colors">
                     <TableCell className="font-medium text-foreground whitespace-nowrap">
                       {o.order_number}
                     </TableCell>
@@ -374,12 +396,12 @@ const AdminOrders = () => {
                     <TableCell className="whitespace-nowrap text-muted-foreground">
                       {o.phone || "—"}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-foreground">
+                    <TableCell className="whitespace-nowrap font-medium text-foreground tabular-nums">
                       R$ {Number(o.total).toFixed(2).replace(".", ",")}
                     </TableCell>
                     <TableCell>
                       <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${st.className}`}
+                        className={cn("status-pill", st.className)}
                       >
                         {st.label}
                       </span>
@@ -407,9 +429,13 @@ const AdminOrders = () => {
         </div>
 
         {!loading && filtered.length === 0 && (
-          <p className="text-center text-muted-foreground py-12">
-            Nenhum pedido encontrado.
-          </p>
+          <div className="text-center py-16 rounded-xl border border-dashed border-border bg-card/50">
+            <Search className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
+            <p className="text-sm font-medium text-foreground">Nenhum pedido encontrado</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Ajuste os filtros ou tente uma busca diferente.
+            </p>
+          </div>
         )}
       </div>
     </div>

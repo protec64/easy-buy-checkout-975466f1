@@ -45,10 +45,13 @@ const AdminProofs = () => {
   if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="w-full max-w-sm space-y-4 rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center gap-2 text-foreground">
-            <Lock className="h-5 w-5" />
-            <h1 className="text-lg font-semibold">Acesso restrito</h1>
+        <div className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-8 checkout-shadow-lg">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <Lock className="h-5 w-5 text-primary" />
+            </div>
+            <h1 className="text-lg font-semibold text-foreground">Acesso restrito</h1>
+            <p className="text-xs text-muted-foreground">Informe a senha para continuar.</p>
           </div>
           <Input
             type="password"
@@ -91,11 +94,16 @@ const AdminProofs = () => {
 
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6">
-      <div className="mx-auto max-w-6xl space-y-4">
+      <div className="mx-auto max-w-6xl space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h1 className="text-xl font-semibold text-foreground">
-            Comprovantes recebidos ({filtered.length})
-          </h1>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              Comprovantes
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {filtered.length} {filtered.length === 1 ? "comprovante recebido" : "comprovantes recebidos"}
+            </p>
+          </div>
           <div className="flex gap-2">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -106,7 +114,7 @@ const AdminProofs = () => {
                 className="pl-8 w-64"
               />
             </div>
-            <Button variant="outline" onClick={load} disabled={loading}>
+            <Button variant="outline" size="sm" onClick={load} disabled={loading}>
               {loading ? "..." : "Atualizar"}
             </Button>
           </div>
@@ -118,23 +126,23 @@ const AdminProofs = () => {
             return (
               <div
                 key={p.id}
-                className="rounded-lg border border-border bg-card p-3 space-y-2"
+                className="rounded-xl border border-border bg-card p-3 space-y-2 checkout-shadow card-interactive"
               >
                 <a
                   href={p.file_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="block"
+                  className="block overflow-hidden rounded-lg"
                 >
                   {isImg ? (
                     <img
                       src={p.file_url}
                       alt={p.file_name}
-                      className="h-48 w-full rounded object-cover bg-secondary"
+                      className="h-48 w-full object-cover bg-secondary transition-transform duration-300 hover:scale-[1.02]"
                       loading="lazy"
                     />
                   ) : (
-                    <div className="h-48 w-full rounded bg-secondary flex flex-col items-center justify-center gap-2">
+                    <div className="h-48 w-full bg-secondary flex flex-col items-center justify-center gap-2">
                       <FileText className="h-10 w-10 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground px-2 text-center break-all">
                         {p.file_name}
@@ -161,7 +169,7 @@ const AdminProofs = () => {
                   href={p.file_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center gap-1 text-xs text-primary hover:underline"
+                  className="flex items-center justify-center gap-1 text-xs font-medium text-primary hover:underline transition-colors"
                 >
                   Abrir arquivo <ExternalLink className="h-3 w-3" />
                 </a>
@@ -171,9 +179,13 @@ const AdminProofs = () => {
         </div>
 
         {!loading && filtered.length === 0 && (
-          <p className="text-center text-muted-foreground py-12">
-            Nenhum comprovante encontrado.
-          </p>
+          <div className="text-center py-16 rounded-xl border border-dashed border-border bg-card/50">
+            <FileText className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
+            <p className="text-sm font-medium text-foreground">Nenhum comprovante encontrado</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Assim que o cliente enviar, aparecerá aqui.
+            </p>
+          </div>
         )}
       </div>
     </div>
