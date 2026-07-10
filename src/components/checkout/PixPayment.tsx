@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, Clock, QrCode, RefreshCw, Loader2, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
@@ -46,33 +46,54 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ min: "15", sec: "00" });
   const [expired, setExpired] = useState(false);
-  const [pixGeneratedAt] = useState(() => Date.now());
+  const pixGeneratedAtRef = useRef<number | null>(null);
   const [status, setStatus] = useState(pixData?.status || "");
   const [checking, setChecking] = useState(false);
   const [showAllBanks, setShowAllBanks] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
+  const pixCodeRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!pixData) return;
+    // Marca o instante em que o PIX foi gerado (uma única vez por pixData)
+    if (pixGeneratedAtRef.current === null) {
+      pixGeneratedAtRef.current = Date.now();
+    }
+    const generatedAt = pixGeneratedAtRef.current;
     // Use expires_at from API only if it's in the future; otherwise fallback to 15 min from now
     const apiExpires = pixData.expires_at ? new Date(pixData.expires_at).getTime() : 0;
-    const fallback = pixGeneratedAt + 15 * 60 * 1000;
+    const fallback = generatedAt + 15 * 60 * 1000;
     const expiresAt = apiExpires > Date.now() ? apiExpires : fallback;
 
-    const timer = setInterval(() => {
+    setExpired(false);
+    const update = () => {
       const diff = expiresAt - Date.now();
       if (diff <= 0) {
         setExpired(true);
         setTimeLeft({ min: "00", sec: "00" });
-        clearInterval(timer);
-      } else {
-        const m = Math.floor(diff / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        setTimeLeft({ min: m.toString().padStart(2, "0"), sec: s.toString().padStart(2, "0") });
+        return false;
       }
+      const m = Math.floor(diff / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft({ min: m.toString().padStart(2, "0"), sec: s.toString().padStart(2, "0") });
+      return true;
+    };
+    update();
+
+    const timer = setInterval(() => {
+      if (!update()) clearInterval(timer);
     }, 1000);
     return () => clearInterval(timer);
-  }, [pixData, pixGeneratedAt]);
+  }, [pixData?.payment_id, pixData?.expires_at]);
+
+  // Scroll até o "Código PIX" assim que o PIX é gerado
+  useEffect(() => {
+    if (!pixData) return;
+    const t = setTimeout(() => {
+      pixCodeRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 250);
+    return () => clearTimeout(t);
+  }, [pixData?.payment_id]);
 
   useEffect(() => {
     if (pixData) setStatus(pixData.status);
@@ -381,7 +402,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       </div>
 
       {/* PIX Code + Copy */}
-      <div>
+      <div ref={pixCodeRef} className="scroll-mt-24">
         <p className="mb-2 text-sm font-semibold text-foreground">Código PIX</p>
         <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5">
           <p className="flex-1 truncate text-xs text-muted-foreground font-mono select-all">
