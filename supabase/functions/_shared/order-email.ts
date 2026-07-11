@@ -55,7 +55,7 @@ export async function sendOrderEmailViaGmail(params: {
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const linkified = escapeHtml(params.body).replace(
     /(https?:\/\/[^\s<]+)/g,
-    '<a href="$1" style="color:#111;">$1</a>',
+    '<a href="$1" style="color:#1a73e8;text-decoration:underline;font-weight:600;" target="_blank" rel="noopener">$1</a>',
   );
   const htmlBody =
     `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#111;max-width:560px;">` +
