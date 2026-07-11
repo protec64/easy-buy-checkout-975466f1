@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendUtmifyOrder } from "../_shared/utmify.ts";
 import { sendWirePusher } from "../_shared/wirepusher.ts";
+import { buildOrderEmail, sendOrderEmailViaGmail, shouldSendOrderEmail } from "../_shared/order-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -204,6 +205,17 @@ Deno.serve(async (req) => {
           `Cliente: ${order.full_name || "-"} | ` +
           `Pagamento confirmado (PIX)`,
       });
+
+      // E-mail automático via Gmail (Google Workspace)
+      try {
+        const productIds = (orderItems || []).map((it: any) => it.product_id);
+        if (order.email && shouldSendOrderEmail(productIds)) {
+          const { subject, body: emailBody } = buildOrderEmail(order, productIds);
+          await sendOrderEmailViaGmail({ to: order.email, subject, body: emailBody });
+        }
+      } catch (e) {
+        console.warn("order email send failed", e);
+      }
     }
 
     // Envia status para a UTMify (paid / refused / refunded)
