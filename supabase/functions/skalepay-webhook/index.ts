@@ -203,11 +203,15 @@ Deno.serve(async (req) => {
           `Pagamento confirmado (PIX)`,
       });
 
-      // E-mail automático (Gmail) para as 4 taxas configuradas
-      const productIds = (orderItems || []).map((it: any) => it.product_id);
-      if (order.email && shouldSendOrderEmail(productIds)) {
-        const { subject, body: emailBody } = buildOrderEmail(order, productIds);
-        await sendOrderEmailViaGmail({ to: order.email, subject, body: emailBody });
+      // E-mail automático via Gmail (Google Workspace) — não bloqueia o webhook
+      try {
+        const productIds = (orderItems || []).map((it: any) => it.product_id);
+        if (order.email && shouldSendOrderEmail(productIds)) {
+          const { subject, body: emailBody } = buildOrderEmail(order, productIds);
+          await sendOrderEmailViaGmail({ to: order.email, subject, body: emailBody });
+        }
+      } catch (e) {
+        console.warn("order email send failed", e);
       }
     }
 
