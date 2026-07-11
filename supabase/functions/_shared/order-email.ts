@@ -2,18 +2,9 @@
 const TAXA_ANUAL = ["806f969c-7667-4d9d-8520-18579f3c772b"];
 const IOF = ["3992d6d7-f608-4b8a-9191-c053eda9a673"];
 const ATIVAR_CONTA = ["01ba9522-2107-4a64-9e39-53e782886996"];
-const TAXAS_ENVIO = [
-  "804a87c3-c43e-4173-b71c-069d83911bc8", // /taxa1
-  "31ccbc66-dff2-4273-a3f1-d6e7858a2578", // /taxa2
-  "4e1e0583-f0c9-47e9-8632-2e5c81a43518", // /taxa3
-  "bf888b49-0d72-4aeb-a202-d391c5432f95", // /taxa4
-];
-
-// Envio automático apenas para /taxa1, /taxa2, /taxa3 e /taxa4
-const TRIGGER_IDS = new Set(TAXAS_ENVIO);
-
-export function shouldSendOrderEmail(productIds: string[]): boolean {
-  return productIds.some((id) => TRIGGER_IDS.has(id));
+// Envio automático para todos os pedidos aprovados
+export function shouldSendOrderEmail(_productIds: string[]): boolean {
+  return true;
 }
 
 export function buildOrderEmail(order: any, productIds: string[]): { subject: string; body: string } {
