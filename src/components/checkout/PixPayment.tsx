@@ -356,39 +356,14 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
   return (
     <div className="space-y-5">
-      {/* Hero: total + countdown */}
+      {/* Hero: total */}
       <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary to-[hsl(var(--primary-hover))] p-5 text-primary-foreground checkout-shadow-md">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-wider text-primary-foreground/70">
-              Total do pedido
-            </p>
-            <p className="mt-0.5 text-2xl sm:text-3xl font-bold tabular-nums tracking-tight">
-              {formattedTotal || "—"}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="flex items-center justify-end gap-1 text-[11px] font-medium uppercase tracking-wider text-primary-foreground/70">
-              <Clock className="h-3 w-3" />
-              {expired ? "Expirado" : "Expira em"}
-            </p>
-            <p
-              className={`mt-0.5 text-2xl sm:text-3xl font-bold tabular-nums tracking-tight ${
-                expired || timerCritical ? "text-[hsl(var(--destructive))]" : ""
-              }`}
-            >
-              {timeLeft.min}:{timeLeft.sec}
-            </p>
-          </div>
-        </div>
-        <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-primary-foreground/15">
-          <div
-            className={`h-full rounded-full transition-all duration-1000 ease-linear ${
-              expired || timerCritical ? "bg-[hsl(var(--destructive))]" : "bg-primary-foreground/70"
-            }`}
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+        <p className="text-[11px] font-medium uppercase tracking-wider text-primary-foreground/70">
+          Total do pedido
+        </p>
+        <p className="mt-0.5 text-2xl sm:text-3xl font-bold tabular-nums tracking-tight">
+          {formattedTotal || "—"}
+        </p>
       </div>
 
       {/* PIX Code + Copy CTA */}
