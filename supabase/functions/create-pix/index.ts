@@ -189,7 +189,6 @@ Deno.serve(async (req) => {
         status: "pending",
         order_id: orderData.id,
         order_number: orderData.order_number,
-        event_id: eventId,
         freepay_raw: freepayData,
       }),
       {
