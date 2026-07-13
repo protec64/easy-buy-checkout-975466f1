@@ -16,27 +16,28 @@ export function trackGoogleAdsPurchase(params: {
   value: number;
   transaction_id: string;
   currency?: string;
-  num_items?: number;
+  items?: Array<{ quantity: number; unit_price: number }>;
 }) {
   if (typeof window === "undefined" || typeof window.gtag !== "function") {
     console.warn("[GoogleAds] gtag não carregado");
     return;
   }
-  const quantity = Math.max(1, params.num_items || 1);
+  // Nomes genéricos Produto1, Produto2, Produto3 — nunca o nome real
+  const items = (params.items && params.items.length > 0
+    ? params.items
+    : [{ quantity: 1, unit_price: params.value }]
+  ).slice(0, 3).map((it, idx) => ({
+    id: `Produto${idx + 1}`,
+    google_business_vertical: "retail",
+    quantity: it.quantity,
+    price: it.unit_price,
+  }));
   window.gtag("event", "conversion", {
     send_to: `${CONVERSION_ID}/${PURCHASE_LABEL}`,
     value: params.value,
     currency: params.currency || "BRL",
     transaction_id: params.transaction_id,
-    // Nome genérico — não enviamos o nome real do produto ao Google Ads
-    items: [
-      {
-        id: "produto",
-        google_business_vertical: "retail",
-        quantity,
-        price: params.value / quantity,
-      },
-    ],
+    items,
   });
   console.log("[GoogleAds] conversion enviado", params);
 }
