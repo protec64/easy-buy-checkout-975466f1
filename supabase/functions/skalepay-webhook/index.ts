@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendUtmifyOrder } from "../_shared/utmify.ts";
 import { sendWirePusher } from "../_shared/wirepusher.ts";
 import { buildOrderEmail, sendOrderEmailViaGmail, shouldSendOrderEmail } from "../_shared/order-email.ts";
+import { sendGoogleAdsConversion } from "../_shared/google-ads.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -192,6 +193,17 @@ Deno.serve(async (req) => {
 
     if (paymentStatus === "approved" && order) {
       await sendPurchaseCAPI(order, orderItems || []);
+
+      // Google Ads server-side conversion
+      await sendGoogleAdsConversion({
+        order_id: order.order_number || order.mp_payment_id || order.id,
+        value: Number(order.total),
+        currency: "BRL",
+        email: order.email,
+        phone: order.phone,
+        gclid: order.gclid || null,
+        approved_at: new Date().toISOString(),
+      });
 
       // Notificação push de venda aprovada (WirePusher)
       await sendWirePusher({

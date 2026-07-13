@@ -72,6 +72,7 @@ export type Database = {
           fbclid: string | null
           fbp: string | null
           full_name: string
+          gclid: string | null
           id: string
           installments: number | null
           mp_copia_e_cola: string | null
@@ -116,6 +117,7 @@ export type Database = {
           fbclid?: string | null
           fbp?: string | null
           full_name: string
+          gclid?: string | null
           id?: string
           installments?: number | null
           mp_copia_e_cola?: string | null
@@ -160,6 +162,7 @@ export type Database = {
           fbclid?: string | null
           fbp?: string | null
           full_name?: string
+          gclid?: string | null
           id?: string
           installments?: number | null
           mp_copia_e_cola?: string | null

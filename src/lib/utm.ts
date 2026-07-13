@@ -13,6 +13,7 @@ export type TrackingParams = {
   fbclid?: string;
   fbp?: string;
   fbc?: string;
+  gclid?: string;
 };
 
 const URL_KEYS: (keyof TrackingParams)[] = [
@@ -24,6 +25,7 @@ const URL_KEYS: (keyof TrackingParams)[] = [
   "src",
   "sck",
   "fbclid",
+  "gclid",
 ];
 
 function getCookie(name: string): string | undefined {
