@@ -121,6 +121,7 @@ const Success = () => {
           value: Number(orderData.total),
           transaction_id: orderData.order_number || orderData.mp_payment_id || orderData.id,
           currency: "BRL",
+          num_items: orderItems.reduce((sum, i) => sum + i.quantity, 0),
         });
       } catch (err) {
         console.error("Error loading order:", err);
