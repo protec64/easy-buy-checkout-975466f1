@@ -8,6 +8,7 @@ import { checkPaymentStatus } from "@/lib/checkout-api";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
+import { trackGoogleAdsPurchase } from "@/lib/google-ads";
 import {
   HEADER_TIMER_PRODUCT_IDS,
   ATIVAR_CONTA_PRODUCT_IDS,
@@ -189,6 +190,20 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
             } catch (e) {
               console.error("trackPurchase error:", e);
             }
+          }
+          // Google Ads conversion (dedup pelo transaction_id caso Success também dispare)
+          try {
+            trackGoogleAdsPurchase({
+              value: total || 0,
+              transaction_id: pixData.payment_id,
+              currency: "BRL",
+              items: (orderItems || []).map((i) => ({
+                quantity: i.qty,
+                unit_price: i.price,
+              })),
+            });
+          } catch (e) {
+            console.error("trackGoogleAdsPurchase error:", e);
           }
           toast({
             title: "✅ Pagamento confirmado!",
