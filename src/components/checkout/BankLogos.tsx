@@ -1,4 +1,3 @@
-// Bank data with official logo paths from /public/images/banks/
 const BANKS = [
   { name: "Nubank", logo: "/images/banks/nubank.png" },
   { name: "Banco Inter", logo: "/images/banks/inter.png" },
