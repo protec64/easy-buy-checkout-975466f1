@@ -30,10 +30,7 @@ const CheckoutHeader = ({ checkoutId, showTimerWarning = false }: CheckoutHeader
       }
       const m = Math.floor(diff / 60000);
       const s = Math.floor((diff % 60000) / 1000);
-      setTimeLeft({
-        min: m.toString().padStart(2, "0"),
-        sec: s.toString().padStart(2, "0"),
-      });
+      setTimeLeft({ min: m.toString().padStart(2, "0"), sec: s.toString().padStart(2, "0") });
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -44,16 +41,14 @@ const CheckoutHeader = ({ checkoutId, showTimerWarning = false }: CheckoutHeader
     <header className="sticky top-0 z-50 border-b border-border bg-card checkout-shadow">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
-          <img src={azulLogo.url} alt="Azul" className="h-6" />
+          <img src={azulLogo.url} alt="Azul" className="h-7" />
         </div>
         <div className="flex items-center gap-2 text-checkout-trust">
           <Shield className="h-4 w-4" />
           <Lock className="h-3.5 w-3.5" />
           <div className="hidden sm:block">
             <span className="text-xs font-medium">Ambiente Seguro</span>
-            <p className="text-[10px] text-muted-foreground">
-              Pagamento processado com segurança
-            </p>
+            <p className="text-[10px] text-muted-foreground">Pagamento processado com segurança</p>
           </div>
           <span className="text-xs font-medium sm:hidden">Seguro</span>
         </div>
@@ -62,14 +57,8 @@ const CheckoutHeader = ({ checkoutId, showTimerWarning = false }: CheckoutHeader
         <div className="border-t-2 border-destructive bg-destructive/10 px-4 py-2">
           <div className="mx-auto flex max-w-5xl flex-col items-center gap-1.5">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] sm:text-xs font-semibold text-destructive">
-                ⚠️ Tempo restante:
-              </span>
-              <span
-                className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs sm:text-sm font-bold tabular-nums text-primary-foreground ${
-                  expired ? "bg-destructive" : "bg-destructive"
-                }`}
-              >
+              <span className="text-[11px] sm:text-xs font-semibold text-destructive">⚠️ Tempo restante:</span>
+              <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs sm:text-sm font-bold tabular-nums text-primary-foreground ${expired ? "bg-destructive" : "bg-destructive"}`}>
                 {timeLeft.min}:{timeLeft.sec}
               </span>
             </div>
