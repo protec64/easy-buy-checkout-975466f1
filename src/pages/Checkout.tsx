@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import CheckoutHeader from "@/components/checkout/CheckoutHeader";
-import { initMetaPixel, trackInitiateCheckout, trackAddPaymentInfo, trackViewContent } from "@/lib/meta-pixel";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import CustomerForm from "@/components/checkout/CustomerForm";
 import ShippingForm from "@/components/checkout/ShippingForm";
@@ -83,9 +82,8 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
   const [items, setItems] = useState<Array<{id: string; name: string; variation?: string; qty: number; price: number; image?: string}>>([]);
   const [step, setStep] = useState(1);
 
-  // Init Meta Pixel + captura UTMs
+  // Captura UTMs
   useEffect(() => {
-    initMetaPixel();
     captureTrackingFromUrl();
   }, []);
 
@@ -115,48 +113,10 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
     fetchProduct();
   }, [productId]);
 
-  // Track InitiateCheckout when items load
   const initiateTracked = useRef(false);
   useEffect(() => {
     if (items.length > 0 && !initiateTracked.current) {
       initiateTracked.current = true;
-
-      // Dedup em nível de sessão para evitar múltiplos disparos
-      // (remontagens, StrictMode, navegação entre produtos)
-      const dedupKey = `ic_fired_${items.map((i) => `${i.id}:${i.qty}`).join("|")}`;
-      try {
-        if (sessionStorage.getItem(dedupKey)) return;
-        sessionStorage.setItem(dedupKey, "1");
-      } catch {
-        // ignore storage errors
-      }
-
-      // ViewContent — product page view
-      trackViewContent({
-        content_ids: items.map((i) => i.id),
-        contents: items.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
-        content_type: "product",
-        currency: "BRL",
-        num_items: items.reduce((s, i) => s + i.qty, 0),
-        value: items.reduce((s, i) => s + i.price * i.qty, 0),
-      });
-
-      // InitiateCheckout
-      trackInitiateCheckout({
-        content_ids: items.map((i) => i.id),
-        contents: items.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
-        content_type: "product",
-        currency: "BRL",
-        num_items: items.reduce((s, i) => s + i.qty, 0),
-        value: items.reduce((s, i) => s + i.price * i.qty, 0),
-        email: customer.email || undefined,
-        phone: customer.phone || undefined,
-        cpf: customer.cpf || undefined,
-        first_name: customer.fullName || undefined,
-        city: shipping.city || undefined,
-        state: shipping.state || undefined,
-        zip_code: shipping.cep || undefined,
-      });
     }
   }, [items]);
 
@@ -228,24 +188,6 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
   // Track AddPaymentInfo when payment method changes
   const handlePaymentMethodChange = useCallback((method: "pix" | "card") => {
     setPaymentMethod(method);
-    if (items.length > 0) {
-      trackAddPaymentInfo({
-        content_ids: items.map((i) => i.id),
-        contents: items.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
-        content_type: "product",
-        currency: "BRL",
-        num_items: items.reduce((s, i) => s + i.qty, 0),
-        value: total,
-        payment_method: method,
-        email: customer.email || undefined,
-        phone: customer.phone || undefined,
-        cpf: customer.cpf || undefined,
-        first_name: customer.fullName || undefined,
-        city: shipping.city || undefined,
-        state: shipping.state || undefined,
-        zip_code: shipping.cep || undefined,
-      });
-    }
   }, [items, total]);
 
   const validateStep1 = (): boolean => {

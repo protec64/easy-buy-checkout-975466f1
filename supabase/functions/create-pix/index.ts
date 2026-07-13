@@ -7,11 +7,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-/** Generate a unique event_id for Meta Pixel/CAPI deduplication */
-function generateEventId(): string {
-  return `${Date.now()}_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -31,9 +26,6 @@ Deno.serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    // Generate event_id for Purchase dedup (browser pixel + server CAPI)
-    const eventId = generateEventId();
 
     // Create order in database first
     const { data: orderData, error: orderError } = await supabase
@@ -57,7 +49,6 @@ Deno.serve(async (req) => {
         discount: order.discount,
         total: order.total,
         payment_status: "pending",
-        event_id: eventId,
         utm_source: tracking?.utm_source || null,
         utm_medium: tracking?.utm_medium || null,
         utm_campaign: tracking?.utm_campaign || null,
@@ -65,9 +56,6 @@ Deno.serve(async (req) => {
         utm_term: tracking?.utm_term || null,
         utm_src: tracking?.src || null,
         utm_sck: tracking?.sck || null,
-        fbclid: tracking?.fbclid || null,
-        fbp: tracking?.fbp || null,
-        fbc: tracking?.fbc || null,
         gclid: tracking?.gclid || null,
         customer_ip: clientIp,
       })
@@ -201,7 +189,6 @@ Deno.serve(async (req) => {
         status: "pending",
         order_id: orderData.id,
         order_number: orderData.order_number,
-        event_id: eventId,
         freepay_raw: freepayData,
       }),
       {

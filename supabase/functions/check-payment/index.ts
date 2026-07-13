@@ -1,5 +1,5 @@
-// Consulta o status real da transação na FreePay e, se paga, dispara o mesmo
-// fluxo de aprovação do webhook (UTMify "paid" + Meta CAPI + order_number).
+// Consulta o status real da transação na SkalePay e, se paga, dispara o mesmo
+// fluxo de aprovação do webhook (UTMify "paid" + order_number).
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     else if (["refused", "failed", "declined", "cancelled"].includes(rawStatus)) status = "refused";
     else if (["refunded", "chargedback"].includes(rawStatus)) status = "refunded";
 
-    // Encaminha para o webhook interno para processar aprovação (UTMify + CAPI)
+    // Encaminha para o webhook interno para processar aprovação (UTMify)
     if (status !== "pending") {
       const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
       try {

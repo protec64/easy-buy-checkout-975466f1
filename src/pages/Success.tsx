@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import TrustBadges from "@/components/checkout/TrustBadges";
 import { supabase } from "@/integrations/supabase/client";
-import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
 import { trackGoogleAdsPurchase } from "@/lib/google-ads";
 
 interface OrderData {
@@ -60,7 +59,6 @@ const Success = () => {
     fired.current = true;
 
     (async () => {
-      initMetaPixel();
       try {
         const { data: orderData } = await supabase
           .from("orders")
@@ -85,37 +83,14 @@ const Success = () => {
         setItems(orderItems);
         setLoading(false);
 
-        // Só dispara Purchase quando o pagamento estiver realmente confirmado
+        // Só dispara conversão quando o pagamento estiver realmente confirmado
         const isPaid =
           (orderData as { payment_status?: string }).payment_status === "approved" ||
           (orderData as { mp_status?: string }).mp_status === "paid";
         if (!isPaid) {
-          console.warn("[Success] Purchase não disparado: pagamento não confirmado", paymentId);
+          console.warn("[Success] Conversão não disparada: pagamento não confirmado", paymentId);
           return;
         }
-
-        trackPurchase({
-          content_ids: itemsData?.map((i) => i.product_id) || [],
-          contents: orderItems.map((i) => ({
-            id: i.product_name,
-            quantity: i.quantity,
-            item_price: Number(i.unit_price),
-          })),
-          content_type: "product",
-          currency: "BRL",
-          num_items: orderItems.reduce((sum, i) => sum + i.quantity, 0),
-          value: Number(orderData.total),
-          email: orderData.email,
-          phone: orderData.phone || undefined,
-          cpf: orderData.cpf,
-          first_name: orderData.full_name,
-          city: orderData.city,
-          state: orderData.state,
-          zip_code: orderData.cep,
-          order_id: orderData.mp_payment_id || orderData.id,
-          payment_method: orderData.payment_method,
-          event_id: orderData.event_id || undefined,
-        });
 
         trackGoogleAdsPurchase({
           value: Number(orderData.total),
