@@ -1,20 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  CheckCircle2,
-  Package,
-  Mail,
-  User,
-  MapPin,
-  CreditCard,
-  ShoppingBag,
-  Truck,
-  Calendar,
-  Shield,
+  CheckCircle2, Package, Mail, User, MapPin, CreditCard,
+  ShoppingBag, Truck, Calendar, Shield,
 } from "lucide-react";
 import TrustBadges from "@/components/checkout/TrustBadges";
 import { supabase } from "@/integrations/supabase/client";
-import { trackGoogleAdsPurchase } from "@/lib/google-ads";
 
 interface OrderData {
   order_number: string;
@@ -35,6 +26,8 @@ interface OrderData {
   discount: number;
   total: number;
   created_at: string;
+  mp_payment_id?: string | null;
+  id?: string;
 }
 
 interface OrderItem {
@@ -67,7 +60,6 @@ const Success = () => {
           .maybeSingle();
 
         if (!orderData) {
-          console.warn("Order not found:", paymentId);
           setLoading(false);
           return;
         }
@@ -79,28 +71,8 @@ const Success = () => {
           .select("*")
           .eq("order_id", orderData.id);
 
-        const orderItems = (itemsData || []) as OrderItem[];
-        setItems(orderItems);
+        setItems((itemsData || []) as OrderItem[]);
         setLoading(false);
-
-        // Só dispara conversão quando o pagamento estiver realmente confirmado
-        const isPaid =
-          (orderData as { payment_status?: string }).payment_status === "approved" ||
-          (orderData as { mp_status?: string }).mp_status === "paid";
-        if (!isPaid) {
-          console.warn("[Success] Conversão não disparada: pagamento não confirmado", paymentId);
-          return;
-        }
-
-        trackGoogleAdsPurchase({
-          value: Number(orderData.total),
-          transaction_id: orderData.order_number || orderData.mp_payment_id || orderData.id,
-          currency: "BRL",
-          items: orderItems.map((i) => ({
-            quantity: i.quantity,
-            unit_price: Number(i.unit_price),
-          })),
-        });
       } catch (err) {
         console.error("Error loading order:", err);
         setLoading(false);
@@ -125,9 +97,7 @@ const Success = () => {
         <div className="text-center">
           <Package className="mx-auto mb-3 h-12 w-12 text-muted-foreground/40" />
           <h1 className="text-lg font-bold text-foreground">Pedido não encontrado</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Não foi possível localizar este pedido.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Não foi possível localizar este pedido.</p>
         </div>
       </div>
     );
@@ -135,11 +105,7 @@ const Success = () => {
 
   const orderDate = new Date(order.created_at);
   const formattedDate = orderDate.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
   });
 
   const address = [
@@ -148,21 +114,16 @@ const Success = () => {
     order.neighborhood,
     `${order.city} - ${order.state}`,
     order.cep.replace(/(\d{5})(\d{3})/, "$1-$2"),
-  ]
-    .filter(Boolean)
-    .join(", ");
+  ].filter(Boolean).join(", ");
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Success banner */}
       <div className="bg-accent/10 border-b border-accent/20">
         <div className="mx-auto flex max-w-lg flex-col items-center px-4 py-8 text-center animate-fade-in">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/20 animate-scale-in">
             <CheckCircle2 className="h-9 w-9 text-accent" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Pagamento confirmado!
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground">Pagamento confirmado!</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Obrigado pela sua compra. Seu pedido foi processado com sucesso.
           </p>
@@ -170,16 +131,13 @@ const Success = () => {
       </div>
 
       <div className="mx-auto max-w-lg px-4 py-6 space-y-4">
-        {/* Order number + date */}
         <div className="rounded-xl border border-border bg-card p-4 space-y-3 animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Package className="h-4 w-4" />
               Número do pedido
             </div>
-            <span className="font-mono text-sm font-bold text-foreground">
-              {order.order_number}
-            </span>
+            <span className="font-mono text-sm font-bold text-foreground">{order.order_number}</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -200,7 +158,6 @@ const Success = () => {
           </div>
         </div>
 
-        {/* Products */}
         <div className="rounded-xl border border-border bg-card p-4 animate-fade-in" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
           <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
             <ShoppingBag className="h-4 w-4 text-primary" />
@@ -210,17 +167,9 @@ const Success = () => {
             {items.map((item, i) => (
               <div key={i} className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {item.product_name}
-                  </p>
-                  {item.variation && (
-                    <p className="text-xs text-muted-foreground">
-                      {item.variation}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Qtd: {item.quantity}
-                  </p>
+                  <p className="text-sm font-medium text-foreground">{item.product_name}</p>
+                  {item.variation && <p className="text-xs text-muted-foreground">{item.variation}</p>}
+                  <p className="text-xs text-muted-foreground">Qtd: {item.quantity}</p>
                 </div>
                 <span className="text-sm font-semibold text-foreground">
                   {fmt(Number(item.unit_price) * item.quantity)}
@@ -239,11 +188,7 @@ const Success = () => {
                 <Truck className="h-3 w-3" />
                 Frete
               </span>
-              <span>
-                {Number(order.shipping_cost) === 0
-                  ? "Grátis"
-                  : fmt(Number(order.shipping_cost))}
-              </span>
+              <span>{Number(order.shipping_cost) === 0 ? "Grátis" : fmt(Number(order.shipping_cost))}</span>
             </div>
             {Number(order.discount) > 0 && (
               <div className="flex justify-between text-xs text-accent">
@@ -258,37 +203,19 @@ const Success = () => {
           </div>
         </div>
 
-        {/* Customer info */}
         <div className="rounded-xl border border-border bg-card p-4 animate-fade-in" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
           <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
             <User className="h-4 w-4 text-primary" />
             Dados do cliente
           </div>
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Nome</span>
-              <span className="text-foreground font-medium">{order.full_name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">E-mail</span>
-              <span className="text-foreground font-medium">{order.email}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">CPF</span>
-              <span className="text-foreground font-medium">
-                {order.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")}
-              </span>
-            </div>
-            {order.phone && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Telefone</span>
-                <span className="text-foreground font-medium">{order.phone}</span>
-              </div>
-            )}
+            <div className="flex justify-between"><span className="text-muted-foreground">Nome</span><span className="text-foreground font-medium">{order.full_name}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">E-mail</span><span className="text-foreground font-medium">{order.email}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">CPF</span><span className="text-foreground font-medium">{order.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")}</span></div>
+            {order.phone && (<div className="flex justify-between"><span className="text-muted-foreground">Telefone</span><span className="text-foreground font-medium">{order.phone}</span></div>)}
           </div>
         </div>
 
-        {/* Shipping address */}
         <div className="rounded-xl border border-border bg-card p-4 animate-fade-in" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
           <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
             <MapPin className="h-4 w-4 text-primary" />
@@ -297,22 +224,16 @@ const Success = () => {
           <p className="text-sm text-foreground">{address}</p>
         </div>
 
-        {/* Email notice */}
         <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 p-4 animate-fade-in" style={{ animationDelay: "500ms", animationFillMode: "both" }}>
           <Mail className="h-5 w-5 shrink-0 text-primary" />
           <p className="text-xs text-muted-foreground">
-            Um e-mail de confirmação foi enviado para{" "}
-            <strong className="text-foreground">{order.email}</strong> com todos
-            os detalhes do seu pedido.
+            Um e-mail de confirmação foi enviado para <strong className="text-foreground">{order.email}</strong> com todos os detalhes do seu pedido.
           </p>
         </div>
 
-        {/* Security badge */}
         <div className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card p-3 animate-fade-in" style={{ animationDelay: "600ms", animationFillMode: "both" }}>
           <Shield className="h-4 w-4 text-accent" />
-          <span className="text-xs text-muted-foreground">
-            Compra 100% segura e protegida
-          </span>
+          <span className="text-xs text-muted-foreground">Compra 100% segura e protegida</span>
         </div>
 
         <TrustBadges />
