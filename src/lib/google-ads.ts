@@ -5,8 +5,8 @@ declare global {
   }
 }
 
-const CONVERSION_ID = "AW-18080913516";
-const PURCHASE_LABEL = "U7akCPD5-64cEOyw061D";
+const CONVERSION_ID = "AW-18320168920";
+const PURCHASE_LABEL = "SFozCNXiv88cENiv3p9E";
 
 /**
  * Dispara conversão de compra no Google Ads.
