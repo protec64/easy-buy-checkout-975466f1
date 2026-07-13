@@ -7,26 +7,30 @@ import ShippingForm from "@/components/checkout/ShippingForm";
 import PaymentSection from "@/components/checkout/PaymentSection";
 import TrustBadges from "@/components/checkout/TrustBadges";
 import ShippingOptions, { SHIPPING_OPTIONS } from "@/components/checkout/ShippingOptions";
-import CheckoutStepper from "@/components/checkout/CheckoutStepper";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { customerSchema, shippingSchema, cardSchema } from "@/lib/validators";
 import {
   createPixPayment,
-  createCardPayment,
   type PixPaymentResult,
   type OrderPayload,
 } from "@/lib/checkout-api";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft, ArrowRight, User, MapPin, AlertTriangle } from "lucide-react";
-import { shouldShowHeaderTimer, shouldShowIofWarning, shouldShowAtivarContaWarning, shouldShowTaxaAnualWarning, shouldShowDepositoWarning } from "@/config/warningProducts";
+import {
+  shouldShowHeaderTimer,
+  shouldShowIofWarning,
+  shouldShowAtivarContaWarning,
+  shouldShowTaxaAnualWarning,
+  shouldShowDepositoWarning,
+} from "@/config/warningProducts";
 import { captureTrackingFromUrl, loadTracking } from "@/lib/utm";
 
 const DISCOUNT = 0;
 
 const STORAGE_KEY = "checkout_form_draft";
-const RESET_STORAGE_KEYS = [STORAGE_KEY, "checkout_deadline_ts"] as const;
+const OID_STORAGE_KEY = "checkout_oid";
+const RESET_STORAGE_KEYS = [STORAGE_KEY, "checkout_deadline_ts", OID_STORAGE_KEY] as const;
 const STEPS = ["Dados", "Endereço", "Pagamento"];
 
 const EMPTY_CUSTOMER = { email: "", fullName: "", cpf: "", phone: "" };
@@ -34,9 +38,7 @@ const EMPTY_SHIPPING = { cep: "", street: "", number: "", complement: "", neighb
 const EMPTY_CARD = { cardNumber: "", cardName: "", expiry: "", cvv: "", installments: "1" };
 
 function resetCheckoutStorage() {
-  try {
-    RESET_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
-  } catch {}
+  try { RESET_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key)); } catch {}
 }
 
 function pickDraftFields<T extends Record<string, string>>(emptyValues: T, draft: Record<string, string> | null): T {
@@ -54,15 +56,41 @@ function generateCheckoutId(): string {
   const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
   return `#${ts}${rand}`;
 }
+
+function getOrCreateOrderIdFromUrl(productId?: string): string {
+  if (typeof window === "undefined") return generateCheckoutId();
+  const url = new URL(window.location.href);
+  const fromUrl = url.searchParams.get("oid");
+  const storageKey = productId ? `${OID_STORAGE_KEY}:${productId}` : OID_STORAGE_KEY;
+
+  let raw: string | null = null;
+  if (fromUrl && /^[A-Z0-9]{6,}$/.test(fromUrl)) {
+    raw = fromUrl;
+  } else {
+    try {
+      const stored = sessionStorage.getItem(storageKey);
+      if (stored && /^[A-Z0-9]{6,}$/.test(stored)) raw = stored;
+    } catch {}
+  }
+
+  if (!raw) raw = generateCheckoutId().replace(/^#/, "");
+
+  try { sessionStorage.setItem(storageKey, raw); } catch {}
+
+  if (url.searchParams.get("oid") !== raw) {
+    url.searchParams.set("oid", raw);
+    window.history.replaceState({}, "", url.toString());
+  }
+  return `#${raw}`;
+}
+
 function loadDraft(productId?: string) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     return parsed?.productId === productId ? parsed : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 const Checkout = ({ productId, digital = false, overrideImage }: { productId?: string; digital?: boolean; overrideImage?: string }) => {
@@ -70,7 +98,6 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
   const location = useLocation();
   const isMobile = useIsMobile();
 
-  // Se chegou via redirect pós-pagamento, limpa rascunho ANTES de inicializar o estado
   const shouldReset = (location.state as { reset?: boolean } | null)?.reset === true;
   if (shouldReset) {
     resetCheckoutStorage();
@@ -78,11 +105,10 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
   }
   const draft = shouldReset ? null : loadDraft(productId);
 
-  const [checkoutId] = useState(() => generateCheckoutId());
+  const [checkoutId] = useState(() => getOrCreateOrderIdFromUrl(productId));
   const [items, setItems] = useState<Array<{id: string; name: string; variation?: string; qty: number; price: number; image?: string}>>([]);
   const [step, setStep] = useState(1);
 
-  // Captura UTMs
   useEffect(() => {
     captureTrackingFromUrl();
   }, []);
@@ -93,11 +119,7 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
         .from("products")
         .select("id, name, price, images, variations")
         .eq("active", true);
-
-      if (productId) {
-        query = query.eq("id", productId);
-      }
-
+      if (productId) query = query.eq("id", productId);
       const { data } = await query;
       if (data && data.length > 0) {
         setItems(data.map((p: any) => ({
@@ -111,28 +133,17 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
       }
     };
     fetchProduct();
-  }, [productId]);
-
-  const initiateTracked = useRef(false);
-  useEffect(() => {
-    if (items.length > 0 && !initiateTracked.current) {
-      initiateTracked.current = true;
-    }
-  }, [items]);
+  }, [productId, overrideImage]);
 
   const [customer, setCustomer] = useState(() => pickDraftFields(EMPTY_CUSTOMER, draft));
-
   const [shipping, setShipping] = useState(() => pickDraftFields(EMPTY_SHIPPING, draft));
-
   const [shippingOption, setShippingOption] = useState("free");
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card">("pix");
   const [cardValues, setCardValues] = useState(() => EMPTY_CARD);
 
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const [customerErrors, setCustomerErrors] = useState<Record<string, string>>({});
   const [shippingErrors, setShippingErrors] = useState<Record<string, string>>({});
   const [cardErrors, setCardErrors] = useState<Record<string, string>>({});
-  const [termsError, setTermsError] = useState("");
   const [pixData, setPixData] = useState<PixPaymentResult | null>(null);
   const [pixLoading, setPixLoading] = useState(false);
   const [cardLoading, setCardLoading] = useState(false);
@@ -147,11 +158,9 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
     setShippingOption("free");
     setPaymentMethod("pix");
     setCardValues(EMPTY_CARD);
-    setTermsAccepted(false);
     setCustomerErrors({});
     setShippingErrors({});
     setCardErrors({});
-    setTermsError("");
     setPixData(null);
     setPixLoading(false);
     setCardLoading(false);
@@ -185,18 +194,15 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
   const shippingCost = digital ? 0 : selectedShipping.price;
   const total = subtotal + shippingCost - DISCOUNT;
 
-  // Track AddPaymentInfo when payment method changes
   const handlePaymentMethodChange = useCallback((method: "pix" | "card") => {
     setPaymentMethod(method);
-  }, [items, total]);
+  }, []);
 
   const validateStep1 = (): boolean => {
     const cResult = customerSchema.safeParse(customer);
     if (!cResult.success) {
       const errs: Record<string, string> = {};
-      cResult.error.errors.forEach((e) => {
-        errs[e.path[0] as string] = e.message;
-      });
+      cResult.error.errors.forEach((e) => { errs[e.path[0] as string] = e.message; });
       setCustomerErrors(errs);
       setTimeout(() => {
         document.querySelector(".border-destructive")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -211,9 +217,7 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
     const sResult = shippingSchema.safeParse(shipping);
     if (!sResult.success) {
       const errs: Record<string, string> = {};
-      sResult.error.errors.forEach((e) => {
-        errs[e.path[0] as string] = e.message;
-      });
+      sResult.error.errors.forEach((e) => { errs[e.path[0] as string] = e.message; });
       setShippingErrors(errs);
       setTimeout(() => {
         document.querySelector(".border-destructive")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -221,10 +225,6 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
       return false;
     }
     setShippingErrors({});
-    return true;
-  };
-
-  const validateStep3 = (): boolean => {
     return true;
   };
 
@@ -237,13 +237,8 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
     }, 50);
   };
 
-  const handleNextFromStep1 = () => {
-    if (validateStep1()) goToStep(digital ? 3 : 2);
-  };
-
-  const handleNextFromStep2 = () => {
-    if (validateStep2()) goToStep(3);
-  };
+  const handleNextFromStep1 = () => { if (validateStep1()) goToStep(digital ? 3 : 2); };
+  const handleNextFromStep2 = () => { if (validateStep2()) goToStep(3); };
 
   const buildPayload = (method: "pix" | "card"): OrderPayload => ({
     customer: {
@@ -262,21 +257,12 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
       state: digital ? "BR" : shipping.state,
       reference: shipping.reference || undefined,
     },
-    order: {
-      items,
-      shipping_cost: shippingCost,
-      discount: DISCOUNT,
-      total,
-    },
-    payment: {
-      method,
-      installments: method === "card" ? parseInt(cardValues.installments) : undefined,
-    },
+    order: { items, shipping_cost: shippingCost, discount: DISCOUNT, total },
+    payment: { method, installments: method === "card" ? parseInt(cardValues.installments) : undefined },
     tracking: loadTracking(),
   });
 
   const handleGeneratePix = async () => {
-    if (!validateStep3()) return;
     setPixLoading(true);
     try {
       const result = await createPixPayment(buildPayload("pix"));
@@ -289,13 +275,10 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
   };
 
   const handleCardSubmit = async () => {
-    if (!validateStep3()) return;
     const cResult = cardSchema.safeParse(cardValues);
     if (!cResult.success) {
       const errs: Record<string, string> = {};
-      cResult.error.errors.forEach((e) => {
-        errs[e.path[0] as string] = e.message;
-      });
+      cResult.error.errors.forEach((e) => { errs[e.path[0] as string] = e.message; });
       setCardErrors(errs);
       return;
     }
@@ -316,8 +299,6 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
         total,
         method: "card",
       });
-
-      // Show message to redirect to PIX
       setShowCardToPixMessage(true);
       setPaymentMethod("pix");
     } catch {
@@ -326,12 +307,8 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
     setCardLoading(false);
   };
 
-  // Summary card for completed steps
   const StepSummaryCard = ({ icon: Icon, title, lines, onEdit }: {
-    icon: React.ElementType;
-    title: string;
-    lines: string[];
-    onEdit: () => void;
+    icon: React.ElementType; title: string; lines: string[]; onEdit: () => void;
   }) => (
     <div className="rounded-xl border border-border bg-card p-4 checkout-shadow">
       <div className="flex items-start justify-between">
@@ -339,9 +316,7 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
           <Icon className="h-4 w-4 mt-0.5 text-primary" />
           <div>
             <p className="text-sm font-medium text-foreground">{title}</p>
-            {lines.map((line, i) => (
-              <p key={i} className="text-xs text-muted-foreground">{line}</p>
-            ))}
+            {lines.map((line, i) => (<p key={i} className="text-xs text-muted-foreground">{line}</p>))}
           </div>
         </div>
         <Button variant="ghost" size="sm" onClick={onEdit} className="text-xs text-primary gap-1">
@@ -356,28 +331,6 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
     <div className="min-h-screen bg-background">
       <CheckoutHeader checkoutId={checkoutId} showTimerWarning={shouldShowHeaderTimer(items)} />
 
-      {/* Tela única e fixa quando o PIX já foi gerado */}
-      {pixData ? (
-        <main className="mx-auto max-w-xl px-3 sm:px-4 py-4 sm:py-6">
-          <div className="rounded-xl border border-border bg-card p-4 sm:p-6 checkout-shadow">
-            <PaymentSection
-              method="pix"
-              pixData={pixData}
-              pixLoading={pixLoading}
-              onGeneratePix={handleGeneratePix}
-              total={total}
-              email={customer.email}
-              cpf={customer.cpf}
-              fullName={customer.fullName}
-              phone={customer.phone}
-              city={shipping.city}
-              state={shipping.state}
-              zipCode={shipping.cep}
-              items={items}
-            />
-          </div>
-        </main>
-      ) : (
       <main className="mx-auto max-w-5xl px-3 sm:px-4 py-4 sm:py-6">
         {shouldShowIofWarning(items) && (
           <div className="mb-4 rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
@@ -443,8 +396,6 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
           </div>
         )}
 
-        
-
         {isMobile && (
           <div className="mb-4">
             <OrderSummary
@@ -460,7 +411,6 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
 
         <div className="flex flex-col gap-6 lg:flex-row">
           <div ref={stepRef} className="flex-1 space-y-5 scroll-mt-20">
-            {/* STEP 1 */}
             {step === 1 && (
               <div className="animate-fade-in space-y-5">
                 <CustomerForm values={customer} errors={customerErrors} onChange={handleCustomerChange} />
@@ -471,15 +421,9 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
               </div>
             )}
 
-            {/* STEP 2 */}
             {step === 2 && !digital && (
               <div className="animate-fade-in space-y-5">
-                <StepSummaryCard
-                  icon={User}
-                  title={customer.fullName}
-                  lines={[customer.email, customer.cpf]}
-                  onEdit={() => goToStep(1)}
-                />
+                <StepSummaryCard icon={User} title={customer.fullName} lines={[customer.email, customer.cpf]} onEdit={() => goToStep(1)} />
                 <ShippingForm values={shipping} errors={shippingErrors} onChange={handleShippingChange} />
                 {shipping.cep.replace(/\D/g, "").length === 8 &&
                   shipping.street && shipping.number && shipping.neighborhood && shipping.city && shipping.state && (
@@ -494,15 +438,9 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
               </div>
             )}
 
-            {/* STEP 3 */}
             {step === 3 && (
               <div className="animate-fade-in space-y-5">
-                <StepSummaryCard
-                  icon={User}
-                  title={customer.fullName}
-                  lines={[customer.email]}
-                  onEdit={() => goToStep(1)}
-                />
+                <StepSummaryCard icon={User} title={customer.fullName} lines={[customer.email]} onEdit={() => goToStep(1)} />
                 {!digital && (
                   <StepSummaryCard
                     icon={MapPin}
@@ -523,7 +461,7 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
                           Pagamento via cartão indisponível no momento
                         </p>
                         <p className="mt-1 text-xs text-amber-700">
-                          Nosso sistema de cartão está temporariamente fora do ar. 
+                          Nosso sistema de cartão está temporariamente fora do ar.
                           Por favor, finalize seu pedido via <strong>PIX</strong> — é rápido, seguro e com aprovação instantânea!
                         </p>
                       </div>
@@ -554,9 +492,6 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
                   items={items}
                 />
 
-
-
-
                 <p className="text-center text-xs text-muted-foreground">
                   Você receberá atualizações do pedido no email.
                 </p>
@@ -579,7 +514,6 @@ const Checkout = ({ productId, digital = false, overrideImage }: { productId?: s
 
         <TrustBadges />
       </main>
-      )}
     </div>
   );
 };
