@@ -67,11 +67,8 @@ export type Database = {
           customer_ip: string | null
           discount: number
           email: string
-          event_id: string | null
-          fbc: string | null
-          fbclid: string | null
-          fbp: string | null
           full_name: string
+          gclid: string | null
           id: string
           installments: number | null
           mp_copia_e_cola: string | null
@@ -111,11 +108,8 @@ export type Database = {
           customer_ip?: string | null
           discount?: number
           email: string
-          event_id?: string | null
-          fbc?: string | null
-          fbclid?: string | null
-          fbp?: string | null
           full_name: string
+          gclid?: string | null
           id?: string
           installments?: number | null
           mp_copia_e_cola?: string | null
@@ -155,11 +149,8 @@ export type Database = {
           customer_ip?: string | null
           discount?: number
           email?: string
-          event_id?: string | null
-          fbc?: string | null
-          fbclid?: string | null
-          fbp?: string | null
           full_name?: string
+          gclid?: string | null
           id?: string
           installments?: number | null
           mp_copia_e_cola?: string | null
