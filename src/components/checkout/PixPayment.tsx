@@ -349,99 +349,46 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
   const pixCode = pixData.copia_e_cola || pixData.qr_code_base64;
   const formattedTotal = total ? `R$ ${total.toFixed(2).replace(".", ",")}` : "";
-  const totalSeconds = Number(timeLeft.min) * 60 + Number(timeLeft.sec);
-  const progressPct = Math.max(0, Math.min(100, ((900 - totalSeconds) / 900) * 100));
-  const timerCritical = totalSeconds > 0 && totalSeconds <= 120;
 
   return (
-    <div className="space-y-5">
-      {/* Hero: total + countdown */}
-      <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary to-[hsl(var(--primary-hover))] p-5 text-primary-foreground checkout-shadow-md">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-wider text-primary-foreground/70">
-              Total do pedido
-            </p>
-            <p className="mt-0.5 text-2xl sm:text-3xl font-bold tabular-nums tracking-tight">
-              {formattedTotal || "—"}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="flex items-center justify-end gap-1 text-[11px] font-medium uppercase tracking-wider text-primary-foreground/70">
-              <Clock className="h-3 w-3" />
-              {expired ? "Expirado" : "Expira em"}
-            </p>
-            <p
-              className={`mt-0.5 text-2xl sm:text-3xl font-bold tabular-nums tracking-tight ${
-                expired || timerCritical ? "text-[hsl(var(--destructive))]" : ""
-              }`}
-            >
-              {timeLeft.min}:{timeLeft.sec}
-            </p>
-          </div>
-        </div>
-        <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-primary-foreground/15">
-          <div
-            className={`h-full rounded-full transition-all duration-1000 ease-linear ${
-              expired || timerCritical ? "bg-[hsl(var(--destructive))]" : "bg-primary-foreground/70"
-            }`}
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+    <div className="space-y-4 sm:space-y-5">
+      {/* Header */}
+      <div className="text-center">
+        <h3 className="text-lg sm:text-xl font-bold text-foreground">Já é quase seu...</h3>
+        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+          Pague seu pix dentro de{" "}
+          <span className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold text-primary-foreground ${expired ? "bg-destructive" : "bg-primary"}`}>
+            {timeLeft.min}:{timeLeft.sec}
+          </span>
+          {" "}para garantir sua compra.
+        </p>
       </div>
 
-      {/* PIX Code + Copy CTA */}
-      <div ref={pixCodeRef} className="scroll-mt-32 sm:scroll-mt-24 space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-foreground">Código PIX (copia e cola)</p>
-          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
-            Rápido
-          </span>
+      {/* Total */}
+      {formattedTotal && (
+        <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
+          <span className="text-sm text-muted-foreground">Total do pedido:</span>
+          <span className="text-lg font-bold text-foreground">{formattedTotal}</span>
         </div>
-        <div className="rounded-xl border border-dashed border-border bg-muted/40 px-3 py-2.5">
-          <p className="truncate text-xs text-muted-foreground font-mono select-all" title={pixCode}>
-            {pixCode}
-          </p>
-        </div>
-        <Button
-          onClick={handleCopy}
-          className={`h-12 w-full gap-2 text-base font-semibold transition-all ${
-            copied
-              ? "bg-accent text-accent-foreground hover:bg-accent/90"
-              : "bg-primary text-primary-foreground hover:bg-primary/90"
-          }`}
-        >
-          {copied ? (
-            <>
-              <Check className="h-5 w-5" />
-              Código copiado!
-            </>
-          ) : (
-            <>
-              <Copy className="h-5 w-5" />
-              Copiar código PIX
-            </>
-          )}
-        </Button>
-      </div>
+      )}
 
       {/* QR Code (collapsible) */}
       <div>
         <button
           onClick={() => setShowQrCode(!showQrCode)}
-          className="flex w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50"
+          className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50"
         >
           <div className="flex items-center gap-2">
             <QrCode className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-foreground">
-              {showQrCode ? "Ocultar QR Code" : "Ou pague com QR Code"}
+              {showQrCode ? "Ocultar QR Code" : "Mostrar QR Code"}
             </span>
           </div>
           {showQrCode ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </button>
         {showQrCode && (
-          <div className="mt-3 flex flex-col items-center gap-2 animate-fade-in">
-            <div className="rounded-2xl border border-border p-3 bg-card checkout-shadow">
+          <div className="mt-3 flex flex-col items-center gap-2">
+            <div className="rounded-xl border border-border p-3 bg-card">
               {pixCode ? (
                 <QRCodeSVG
                   value={pixCode}
@@ -460,9 +407,37 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         )}
       </div>
 
+      {/* PIX Code + Copy */}
+      <div ref={pixCodeRef} className="scroll-mt-32 sm:scroll-mt-24">
+        <p className="mb-2 text-sm font-semibold text-foreground">Código PIX</p>
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5">
+          <p className="flex-1 truncate text-xs text-muted-foreground font-mono select-all">
+            {pixCode}
+          </p>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleCopy}
+            className="shrink-0 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            {copied ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                Copiado!
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" />
+                Copiar
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
       {/* Security Warning */}
       {!orderItems?.some((i) => i.id === "3992d6d7-f608-4b8a-9191-c053eda9a673") && (
-        <div className="rounded-xl border border-[hsl(var(--checkout-warning))]/40 bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
+        <div className="rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
           <div className="flex items-start gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--checkout-warning))]">
               <AlertTriangle className="h-4 w-4 text-primary-foreground" />
@@ -478,20 +453,21 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-card p-4 checkout-shadow">
-        <p className="mb-3 text-sm font-semibold text-foreground">Como pagar em 30 segundos</p>
+      <div>
+        <p className="mb-3 text-sm font-semibold text-foreground">Como pagar o pix:</p>
         <div className="space-y-3">
           {[
-            "Toque em Copiar código PIX acima",
+            "Clique em copiar o código PIX logo acima",
             "Acesse o app do seu banco",
-            "Vá em PIX › Pix Copia e Cola",
-            "Cole o código e confirme o pagamento",
+            "Vá até a opção PIX",
+            'Escolha a opção "COPIA E COLA"',
+            "Insira o código copiado e finalize seu pagamento",
           ].map((text, i) => (
             <div key={i} className="flex items-start gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                 {i + 1}
               </span>
-              <p className="text-sm text-foreground leading-relaxed">{text}</p>
+              <p className="text-sm text-foreground">{text}</p>
             </div>
           ))}
         </div>
