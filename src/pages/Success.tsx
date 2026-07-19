@@ -113,7 +113,7 @@ const Success = () => {
           zip_code: orderData.cep,
           order_id: orderData.mp_payment_id || orderData.id,
           payment_method: orderData.payment_method,
-          event_id: orderData.event_id || undefined,
+          event_id: (orderData as { event_id?: string }).event_id || undefined,
         });
       } catch (err) {
         console.error("Error loading order:", err);
