@@ -10,20 +10,24 @@ const CheckoutStepper = ({ currentStep, steps }: CheckoutStepperProps) => {
 
   return (
     <div className="mb-4 sm:mb-6 space-y-2 sm:space-y-3">
+      {/* Progress bar */}
       <div className="relative h-1.5 w-full rounded-full bg-muted overflow-hidden">
         <div
           className="absolute inset-y-0 left-0 rounded-full bg-primary transition-all duration-500 ease-out"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
+
+      {/* Steps */}
       <div className="flex items-center justify-between">
         {steps.map((label, index) => {
           const stepNum = index + 1;
           const isCompleted = currentStep > stepNum;
           const isCurrent = currentStep === stepNum;
+
           return (
             <div key={label} className="flex flex-col items-center gap-1.5">
-              <div
+                <div
                 className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-[11px] sm:text-xs font-semibold transition-all duration-300 ${
                   isCompleted
                     ? "bg-primary text-primary-foreground"

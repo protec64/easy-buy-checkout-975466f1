@@ -57,7 +57,6 @@ export interface OrderPayload {
     fbclid?: string;
     fbp?: string;
     fbc?: string;
-    gclid?: string;
   };
 }
 

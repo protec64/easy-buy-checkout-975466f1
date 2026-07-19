@@ -1,16 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, QrCode, Loader2, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { Copy, Check, Clock, QrCode, RefreshCw, Loader2, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-
 import BANKS from "./BankLogos";
 import { checkPaymentStatus } from "@/lib/checkout-api";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { trackGoogleAdsPurchase } from "@/lib/google-ads";
-import RedirectLoader from "./RedirectLoader";
+import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
 import {
+  HEADER_TIMER_PRODUCT_IDS,
   ATIVAR_CONTA_PRODUCT_IDS,
   IOF_WARNING_PRODUCT_IDS,
   TAXA_ANUAL_PRODUCT_IDS,
@@ -23,6 +22,7 @@ interface PixPaymentProps {
     copia_e_cola: string;
     expires_at: string;
     status: string;
+    event_id?: string;
   } | null;
   loading: boolean;
   onGeneratePix: () => void;
@@ -37,65 +37,89 @@ interface PixPaymentProps {
   items?: Array<{ id: string; name: string; qty: number; price: number }>;
 }
 
+
+
+
 const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullName, phone, city, state, zipCode, items: orderItems }: PixPaymentProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ min: "15", sec: "00" });
   const [expired, setExpired] = useState(false);
-  const [pixGeneratedAt] = useState(() => Date.now());
+  const pixGeneratedAtRef = useRef<number | null>(null);
   const [status, setStatus] = useState(pixData?.status || "");
   const [checking, setChecking] = useState(false);
   const [showAllBanks, setShowAllBanks] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
-
-  const performRedirect = useCallback((ids: string[]) => {
-    let url = "https://azulspace.online/liberado/ativacao/";
-    if (ids.some((id) => TAXA_ANUAL_PRODUCT_IDS.includes(id))) {
-      url = "https://azulspace.online/liberado/banking";
-    } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
-      url = "https://azulspace.online/liberado/up3";
-    } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
-      url = "https://azulspace.online/liberado/imposto";
-    }
-    setRedirecting(true);
-    try {
-      localStorage.removeItem("checkout_form_draft");
-      localStorage.removeItem("checkout_deadline_ts");
-    } catch {}
-    setTimeout(() => { window.location.href = url; }, 2000);
-  }, []);
+  const pixCodeRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!pixData) return;
-    const expiresAt = pixGeneratedAt + 15 * 60 * 1000;
-    const timer = setInterval(() => {
+    // Marca o instante em que o PIX foi gerado (uma única vez por pixData)
+    if (pixGeneratedAtRef.current === null) {
+      pixGeneratedAtRef.current = Date.now();
+    }
+    const generatedAt = pixGeneratedAtRef.current;
+    // Timer fixo de 15 minutos a partir da geração (ignora expires_at da API,
+    // que pode vir com 24h e quebrar a exibição).
+    const expiresAt = generatedAt + 15 * 60 * 1000;
+
+    setExpired(false);
+    const update = () => {
       const diff = expiresAt - Date.now();
       if (diff <= 0) {
         setExpired(true);
         setTimeLeft({ min: "00", sec: "00" });
-        clearInterval(timer);
-      } else {
-        const m = Math.floor(diff / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        setTimeLeft({ min: m.toString().padStart(2, "0"), sec: s.toString().padStart(2, "0") });
+        return false;
       }
+      const m = Math.floor(diff / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft({ min: m.toString().padStart(2, "0"), sec: s.toString().padStart(2, "0") });
+      return true;
+    };
+    update();
+
+    const timer = setInterval(() => {
+      if (!update()) clearInterval(timer);
     }, 1000);
     return () => clearInterval(timer);
-  }, [pixData, pixGeneratedAt]);
+  }, [pixData?.payment_id, pixData?.expires_at]);
+
+  // Scroll até o "Código PIX" assim que o PIX é gerado — respeita header sticky
+  useEffect(() => {
+    if (!pixData) return;
+    const scrollToPix = () => {
+      const el = pixCodeRef.current;
+      if (!el) return;
+      const header = document.querySelector("header");
+      const headerHeight = header instanceof HTMLElement ? header.offsetHeight : 0;
+      const offset = headerHeight + 16; // respiro extra
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    };
+    // Dois frames para garantir layout final (mobile + header sticky com warning)
+    const t = setTimeout(() => requestAnimationFrame(scrollToPix), 300);
+    return () => clearTimeout(t);
+  }, [pixData?.payment_id]);
 
   useEffect(() => {
     if (pixData) setStatus(pixData.status);
   }, [pixData]);
 
+  // Auto-poll payment status every 5 seconds + check on tab focus (mobile)
   useEffect(() => {
     if (!pixData?.payment_id || status === "approved") return;
 
+    console.log("Starting payment polling for:", pixData.payment_id);
+
     const doRedirect = async (opts: { requireApproved: boolean }) => {
       const pid = pixData?.payment_id;
-      if (!pid) return;
+      if (!pid) {
+        console.warn("[guard] redirect bloqueado: payment_id ausente");
+        return;
+      }
 
+      // GUARD: valida o pedido no banco antes de limpar estado e avançar
       const { data: order, error } = await supabase
         .from("orders")
         .select("id, mp_payment_id, payment_status")
@@ -103,6 +127,7 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         .maybeSingle();
 
       if (error || !order) {
+        console.warn("[guard] redirect bloqueado: pedido não encontrado", { pid, error });
         toast({
           title: "Aguardando confirmação",
           description: "Não foi possível validar o pedido. Tente novamente em instantes.",
@@ -111,28 +136,64 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         return;
       }
 
-      if (opts.requireApproved && order.payment_status !== "approved") return;
+      if (opts.requireApproved && order.payment_status !== "approved") {
+        console.warn("[guard] redirect bloqueado: status != approved", order.payment_status);
+        return;
+      }
 
+      // Validação OK — agora sim, limpa rascunho/timer e redireciona
       const ids = (orderItems || []).map((i) => i.id);
-      performRedirect(ids);
+      try {
+        localStorage.removeItem("checkout_form_draft");
+        localStorage.removeItem("checkout_deadline_ts");
+      } catch {}
+      if (ids.some((id) => TAXA_ANUAL_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://shein-brasilup.netlify.app/banking";
+      } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://shein-brasilup.netlify.app/up3";
+      } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://shein-brasilup.netlify.app/imposto";
+      } else {
+        window.location.href = "https://shein-brasilup.netlify.app/ativacao/";
+      }
     };
 
     const poll = async () => {
       try {
         const res = await checkPaymentStatus(pixData.payment_id);
+        console.log("Poll result:", res.status);
         if (res.status === "approved") {
           setStatus("approved");
-          try {
-            trackGoogleAdsPurchase({
-              value: total || 0,
-              transaction_id: pixData.payment_id,
-              currency: "BRL",
-              items: (orderItems || []).map((i) => ({ quantity: i.qty, unit_price: i.price })),
-            });
-          } catch (e) {
-            console.error("trackGoogleAdsPurchase error:", e);
+          // Dispara Purchase no Meta Pixel apenas na confirmação real
+          if (orderItems?.length) {
+            try {
+              initMetaPixel();
+              trackPurchase({
+                content_ids: orderItems.map((i) => i.id),
+                contents: orderItems.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
+                content_type: "product",
+                currency: "BRL",
+                num_items: orderItems.reduce((s, i) => s + i.qty, 0),
+                value: total || 0,
+                email,
+                phone,
+                cpf,
+                first_name: fullName,
+                city,
+                state,
+                zip_code: zipCode,
+                order_id: pixData.payment_id,
+                payment_method: "pix",
+                event_id: pixData.event_id,
+              });
+            } catch (e) {
+              console.error("trackPurchase error:", e);
+            }
           }
-          toast({ title: "✅ Pagamento confirmado!", description: "Redirecionando..." });
+          toast({
+            title: "✅ Pagamento confirmado!",
+            description: "Redirecionando...",
+          });
           await doRedirect({ requireApproved: true });
         }
       } catch (err) {
@@ -140,15 +201,28 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
       }
     };
 
+
+
+    // Check immediately when user returns to the tab (critical for mobile)
     const handleVisibility = () => {
-      if (document.visibilityState === "visible") poll();
+      if (document.visibilityState === "visible") {
+        console.log("Tab became visible, checking payment...");
+        poll();
+      }
     };
-    const handleFocus = () => poll();
+
+    // Also check on window focus (some browsers use this instead)
+    const handleFocus = () => {
+      console.log("Window focused, checking payment...");
+      poll();
+    };
 
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("focus", handleFocus);
 
+    // Initial check immediately
     poll();
+
     const interval = setInterval(poll, 5000);
     return () => {
       clearInterval(interval);
@@ -169,22 +243,105 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
     setTimeout(() => setCopied(false), 2500);
   }, [pixData]);
 
+  const handleCheckStatus = useCallback(async () => {
+    if (!pixData) return;
+    setChecking(true);
+    const res = await checkPaymentStatus(pixData.payment_id);
+    setStatus(res.status);
+    setChecking(false);
+  }, [pixData]);
+
+  const handleProofUploaded = useCallback(() => {
+    if (!pixData || !orderItems?.length) return;
+    // Dispara Purchase quando o cliente envia o comprovante pelo WhatsApp.
+    initMetaPixel();
+    trackPurchase({
+      content_ids: orderItems.map((i) => i.id),
+      contents: orderItems.map((i) => ({ id: i.id, quantity: i.qty, item_price: i.price })),
+      content_type: "product",
+      currency: "BRL",
+      num_items: orderItems.reduce((s, i) => s + i.qty, 0),
+      value: total || 0,
+      email,
+      phone,
+      cpf,
+      first_name: fullName,
+      city,
+      state,
+      zip_code: zipCode,
+      order_id: pixData.payment_id,
+      payment_method: "pix",
+      event_id: pixData.event_id,
+    });
+
+    // Redireciona após envio do comprovante, com guard de validação no banco
+    setTimeout(async () => {
+      const pid = pixData.payment_id;
+
+      // GUARD: garante que o pedido existe antes de limpar o estado
+      const { data: order, error } = await supabase
+        .from("orders")
+        .select("id, mp_payment_id")
+        .eq("mp_payment_id", pid)
+        .maybeSingle();
+
+      if (error || !order) {
+        console.warn("[guard] redirect (comprovante) bloqueado: pedido não encontrado", { pid, error });
+        toast({
+          title: "Comprovante enviado",
+          description: "Aguardando validação do pedido. Mantenha esta tela aberta.",
+        });
+        return;
+      }
+
+      try {
+        localStorage.removeItem("checkout_form_draft");
+        localStorage.removeItem("checkout_deadline_ts");
+      } catch {}
+      const ids = (orderItems || []).map((i) => i.id);
+      if (ids.some((id) => TAXA_ANUAL_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://shein-brasilup.netlify.app/banking";
+      } else if (ids.some((id) => IOF_WARNING_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://shein-brasilup.netlify.app/up3";
+      } else if (ids.some((id) => ATIVAR_CONTA_PRODUCT_IDS.includes(id))) {
+        window.location.href = "https://shein-brasilup.netlify.app/imposto";
+      } else {
+        window.location.href = "https://shein-brasilup.netlify.app/ativacao/";
+      }
+    }, 1500);
+  }, [pixData, orderItems, total, email, phone, cpf, fullName, city, state, zipCode, navigate]);
+
+  // Pre-generation state
   if (!pixData) {
     return (
       <div className="space-y-4">
         <div className="rounded-xl border border-dashed border-border bg-checkout-highlight p-6 text-center">
           <QrCode className="mx-auto mb-3 h-12 w-12 text-primary opacity-40" />
-          <p className="mb-1 text-sm font-medium text-foreground">Pague instantaneamente com PIX</p>
-          <p className="mb-4 text-xs text-muted-foreground">O QR Code será gerado após confirmar seus dados</p>
+          <p className="mb-1 text-sm font-medium text-foreground">
+            Pague instantaneamente com PIX
+          </p>
+          <p className="mb-4 text-xs text-muted-foreground">
+            O QR Code será gerado após confirmar seus dados
+          </p>
           <div className="space-y-2 text-left text-xs text-muted-foreground">
             <p><strong>1.</strong> Clique em "Gerar PIX"</p>
             <p><strong>2.</strong> Copie o código ou escaneie o QR Code</p>
             <p><strong>3.</strong> Pague no app do seu banco</p>
           </div>
         </div>
-        <Button onClick={onGeneratePix} disabled={loading}
-          className="w-full bg-accent text-accent-foreground hover:bg-accent/90 h-12 text-base font-semibold">
-          {loading ? (<span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Gerando PIX...</span>) : "Gerar PIX"}
+        <Button
+          onClick={onGeneratePix}
+          disabled={loading}
+          className="w-full bg-accent text-accent-foreground hover:bg-accent/90 h-12 text-base font-semibold"
+        >
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Gerando PIX...
+            </span>
+          ) : (
+            "Gerar PIX"
+          )}
         </Button>
       </div>
     );
@@ -192,48 +349,106 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
 
   const pixCode = pixData.copia_e_cola || pixData.qr_code_base64;
   const formattedTotal = total ? `R$ ${total.toFixed(2).replace(".", ",")}` : "";
+  const totalSeconds = Number(timeLeft.min) * 60 + Number(timeLeft.sec);
+  const progressPct = Math.max(0, Math.min(100, ((900 - totalSeconds) / 900) * 100));
+  const timerCritical = totalSeconds > 0 && totalSeconds <= 120;
 
   return (
-    <div className="space-y-4 sm:space-y-5">
-      {redirecting && <RedirectLoader />}
-
-      {/* Header */}
-      <div className="text-center">
-        <h3 className="text-lg sm:text-xl font-bold text-foreground">Já é quase seu...</h3>
-        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-          Pague seu pix dentro de{" "}
-          <span className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold text-primary-foreground ${expired ? "bg-destructive" : "bg-primary"}`}>
-            {timeLeft.min}:{timeLeft.sec}
-          </span>
-          {" "}para garantir sua compra.
-        </p>
+    <div className="space-y-5">
+      {/* Hero: total + countdown */}
+      <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary to-[hsl(var(--primary-hover))] p-5 text-primary-foreground checkout-shadow-md">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-primary-foreground/70">
+              Total do pedido
+            </p>
+            <p className="mt-0.5 text-2xl sm:text-3xl font-bold tabular-nums tracking-tight">
+              {formattedTotal || "—"}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="flex items-center justify-end gap-1 text-[11px] font-medium uppercase tracking-wider text-primary-foreground/70">
+              <Clock className="h-3 w-3" />
+              {expired ? "Expirado" : "Expira em"}
+            </p>
+            <p
+              className={`mt-0.5 text-2xl sm:text-3xl font-bold tabular-nums tracking-tight ${
+                expired || timerCritical ? "text-[hsl(var(--destructive))]" : ""
+              }`}
+            >
+              {timeLeft.min}:{timeLeft.sec}
+            </p>
+          </div>
+        </div>
+        <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-primary-foreground/15">
+          <div
+            className={`h-full rounded-full transition-all duration-1000 ease-linear ${
+              expired || timerCritical ? "bg-[hsl(var(--destructive))]" : "bg-primary-foreground/70"
+            }`}
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
       </div>
 
-      {/* Total */}
-      {formattedTotal && (
-        <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
-          <span className="text-sm text-muted-foreground">Total do pedido:</span>
-          <span className="text-lg font-bold text-foreground">{formattedTotal}</span>
+      {/* PIX Code + Copy CTA */}
+      <div ref={pixCodeRef} className="scroll-mt-32 sm:scroll-mt-24 space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-foreground">Código PIX (copia e cola)</p>
+          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+            Rápido
+          </span>
         </div>
-      )}
+        <div className="rounded-xl border border-dashed border-border bg-muted/40 px-3 py-2.5">
+          <p className="truncate text-xs text-muted-foreground font-mono select-all" title={pixCode}>
+            {pixCode}
+          </p>
+        </div>
+        <Button
+          onClick={handleCopy}
+          className={`h-12 w-full gap-2 text-base font-semibold transition-all ${
+            copied
+              ? "bg-accent text-accent-foreground hover:bg-accent/90"
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
+          }`}
+        >
+          {copied ? (
+            <>
+              <Check className="h-5 w-5" />
+              Código copiado!
+            </>
+          ) : (
+            <>
+              <Copy className="h-5 w-5" />
+              Copiar código PIX
+            </>
+          )}
+        </Button>
+      </div>
 
       {/* QR Code (collapsible) */}
       <div>
-        <button onClick={() => setShowQrCode(!showQrCode)}
-          className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50">
+        <button
+          onClick={() => setShowQrCode(!showQrCode)}
+          className="flex w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50"
+        >
           <div className="flex items-center gap-2">
             <QrCode className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-foreground">
-              {showQrCode ? "Ocultar QR Code" : "Mostrar QR Code"}
+              {showQrCode ? "Ocultar QR Code" : "Ou pague com QR Code"}
             </span>
           </div>
           {showQrCode ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </button>
         {showQrCode && (
-          <div className="mt-3 flex flex-col items-center gap-2">
-            <div className="rounded-xl border border-border p-3 bg-card">
+          <div className="mt-3 flex flex-col items-center gap-2 animate-fade-in">
+            <div className="rounded-2xl border border-border p-3 bg-card checkout-shadow">
               {pixCode ? (
-                <QRCodeSVG value={pixCode} size={200} level="M" includeMargin />
+                <QRCodeSVG
+                  value={pixCode}
+                  size={200}
+                  level="M"
+                  includeMargin
+                />
               ) : (
                 <div className="flex h-[200px] w-[200px] items-center justify-center">
                   <QrCode className="h-20 w-20 text-muted-foreground/30" />
@@ -245,21 +460,9 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         )}
       </div>
 
-      {/* PIX Code + Copy */}
-      <div>
-        <p className="mb-2 text-sm font-semibold text-foreground">Código PIX</p>
-        <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5">
-          <p className="flex-1 truncate text-xs text-muted-foreground font-mono select-all">{pixCode}</p>
-          <Button variant="default" size="sm" onClick={handleCopy}
-            className="shrink-0 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
-            {copied ? (<><Check className="h-3.5 w-3.5" />Copiado!</>) : (<><Copy className="h-3.5 w-3.5" />Copiar</>)}
-          </Button>
-        </div>
-      </div>
-
       {/* Security Warning */}
       {!orderItems?.some((i) => i.id === "3992d6d7-f608-4b8a-9191-c053eda9a673") && (
-        <div className="rounded-xl border-2 border-[hsl(var(--checkout-warning))] bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
+        <div className="rounded-xl border border-[hsl(var(--checkout-warning))]/40 bg-[hsl(var(--checkout-warning))]/10 p-3 sm:p-4">
           <div className="flex items-start gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--checkout-warning))]">
               <AlertTriangle className="h-4 w-4 text-primary-foreground" />
@@ -275,34 +478,43 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
         </div>
       )}
 
-      <div>
-        <p className="mb-3 text-sm font-semibold text-foreground">Como pagar o pix:</p>
+      <div className="rounded-xl border border-border bg-card p-4 checkout-shadow">
+        <p className="mb-3 text-sm font-semibold text-foreground">Como pagar em 30 segundos</p>
         <div className="space-y-3">
           {[
-            "Clique em copiar o código PIX logo acima",
+            "Toque em Copiar código PIX acima",
             "Acesse o app do seu banco",
-            "Vá até a opção PIX",
-            'Escolha a opção "COPIA E COLA"',
-            "Insira o código copiado e finalize seu pagamento",
+            "Vá em PIX › Pix Copia e Cola",
+            "Cole o código e confirme o pagamento",
           ].map((text, i) => (
             <div key={i} className="flex items-start gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                 {i + 1}
               </span>
-              <p className="text-sm text-foreground">{text}</p>
+              <p className="text-sm text-foreground leading-relaxed">{text}</p>
             </div>
           ))}
         </div>
       </div>
+
+
+
 
       {/* Bank logos */}
       <div>
         <p className="mb-3 text-sm font-semibold text-foreground">Pague com seu banco:</p>
         <div className="space-y-2">
           {BANKS.slice(0, showAllBanks ? BANKS.length : 4).map((bank) => (
-            <button key={bank.name} onClick={handleCopy}
-              className="flex w-full items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50 active:bg-muted">
-              <img src={bank.logo} alt={bank.name} className="h-8 w-auto max-w-[80px] shrink-0 object-contain" />
+            <button
+              key={bank.name}
+              onClick={handleCopy}
+              className="flex w-full items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-muted/50 active:bg-muted"
+            >
+              <img
+                src={bank.logo}
+                alt={bank.name}
+                className="h-8 w-auto max-w-[80px] shrink-0 object-contain"
+              />
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">{bank.name}</p>
                 <p className="text-[10px] text-muted-foreground">Pode precisar colar manualmente</p>
@@ -311,9 +523,15 @@ const PixPayment = ({ pixData, loading, onGeneratePix, email, cpf, total, fullNa
             </button>
           ))}
         </div>
-        <button onClick={() => setShowAllBanks(!showAllBanks)}
-          className="mt-2 flex w-full items-center justify-center gap-1 text-xs font-medium text-primary hover:underline">
-          {showAllBanks ? (<>Ver menos <ChevronUp className="h-3 w-3" /></>) : (<>Ver todos os bancos <ChevronDown className="h-3 w-3" /></>)}
+        <button
+          onClick={() => setShowAllBanks(!showAllBanks)}
+          className="mt-2 flex w-full items-center justify-center gap-1 text-xs font-medium text-primary hover:underline"
+        >
+          {showAllBanks ? (
+            <>Ver menos <ChevronUp className="h-3 w-3" /></>
+          ) : (
+            <>Ver todos os bancos <ChevronDown className="h-3 w-3" /></>
+          )}
         </button>
       </div>
 
