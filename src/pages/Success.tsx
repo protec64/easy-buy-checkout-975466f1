@@ -15,6 +15,7 @@ import {
 import TrustBadges from "@/components/checkout/TrustBadges";
 import { supabase } from "@/integrations/supabase/client";
 import { initMetaPixel, trackPurchase } from "@/lib/meta-pixel";
+import { trackGoogleAdsPurchase } from "@/lib/google-ads";
 
 interface OrderData {
   order_number: string;
@@ -114,6 +115,12 @@ const Success = () => {
           order_id: orderData.mp_payment_id || orderData.id,
           payment_method: orderData.payment_method,
           event_id: orderData.event_id || undefined,
+        });
+
+        trackGoogleAdsPurchase({
+          value: Number(orderData.total),
+          transaction_id: orderData.order_number || orderData.mp_payment_id || orderData.id,
+          currency: "BRL",
         });
       } catch (err) {
         console.error("Error loading order:", err);
