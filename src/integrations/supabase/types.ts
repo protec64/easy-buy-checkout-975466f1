@@ -67,6 +67,7 @@ export type Database = {
           customer_ip: string | null
           discount: number
           email: string
+          event_id: string | null
           full_name: string
           gclid: string | null
           id: string
@@ -108,6 +109,7 @@ export type Database = {
           customer_ip?: string | null
           discount?: number
           email: string
+          event_id?: string | null
           full_name: string
           gclid?: string | null
           id?: string
@@ -149,6 +151,7 @@ export type Database = {
           customer_ip?: string | null
           discount?: number
           email?: string
+          event_id?: string | null
           full_name?: string
           gclid?: string | null
           id?: string
