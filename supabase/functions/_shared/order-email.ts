@@ -25,7 +25,7 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
         `Olá, ${firstName}! 😊\n\n` +
         "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
         "Para concluir o processo e liberar o acesso, acesse agora:\n\n" +
-        "https://azul-acesso.netlify.app/ativacao\n\n" +
+        "https://azulspace.online/liberado/ativacao\n\n" +
         "A ativação leva apenas alguns minutos e, após a confirmação, seu cartão ficará disponível para uso.\n\n" +
         "Qualquer dúvida, estou à disposição.",
     };
@@ -37,7 +37,7 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
         `Olá, ${firstName}! 📋\n\n` +
         "Seu cadastro recebeu uma atualização e uma nova etapa já está disponível para conclusão.\n\n" +
         "Acesse o link abaixo para verificar os detalhes e dar continuidade ao processo:\n\n" +
-        "https://azul-acesso.netlify.app/imposto\n\n" +
+        "https://azulspace.online/liberado/imposto\n\n" +
         "Recomendamos concluir esta etapa o quanto antes para evitar atrasos nas próximas atualizações.\n\n" +
         "Fico à disposição.",
     };
@@ -49,7 +49,7 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
         `Olá, ${firstName}! 💳\n\n` +
         "Temos uma atualização importante sobre o seu Cartão Azul.\n\n" +
         "Para consultar as informações mais recentes e dar continuidade ao processo de liberação, acesse o link abaixo:\n\n" +
-        "https://azul-acesso.netlify.app/up3\n\n" +
+        "https://azulspace.online/liberado/up3\n\n" +
         "Após concluir esta etapa, você poderá acompanhar as próximas atualizações diretamente pelo sistema.\n\n" +
         "Qualquer dúvida, estou à disposição.",
     };
@@ -61,7 +61,7 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
         `Olá, ${firstName}! 🎉\n\n` +
         "O acesso à sua conta e ao seu Cartão Azul já está disponível.\n\n" +
         "Para visualizar os dados da sua conta, acompanhar o status do cartão e acessar as funcionalidades liberadas, acesse o link abaixo:\n\n" +
-        "https://azul-acesso.netlify.app/banking\n\n" +
+        "https://azulspace.online/liberado/banking\n\n" +
         "Recomendamos que realize o acesso o quanto antes para conferir todas as informações disponíveis em seu cadastro.\n\n" +
         "Caso precise de ajuda, estou à disposição.",
     };
