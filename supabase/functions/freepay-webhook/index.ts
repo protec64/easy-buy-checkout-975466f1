@@ -28,7 +28,7 @@ async function sendPurchaseCAPI(order: any, orderItems: any[]) {
     return;
   }
 
-  const PIXEL_ID = "1687575215693095";
+  const PIXEL_ID = "1624056312383683";
 
   const userData: Record<string, any> = {};
 
@@ -68,7 +68,7 @@ async function sendPurchaseCAPI(order: any, orderItems: any[]) {
     action_source: "website",
     user_data: userData,
     custom_data: {
-      value: order.total,
+      value: Number(order.total),
       currency: "BRL",
       content_ids: orderItems.map((item: any) => item.product_id),
       contents,
