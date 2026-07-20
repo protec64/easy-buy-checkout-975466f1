@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-const PIXEL_ID = "1409206931250088";
+const PIXEL_ID = "1624056312383683";
 
 let initialized = false;
 
