@@ -87,10 +87,16 @@ const buildEmailContent = (order: Order, productIds: string[]) => {
       "https://azulspace.online/liberado/imposto\n\n" +
       "Recomendamos concluir esta etapa o quanto antes para evitar atrasos nas próximas atualizações.\n\n" +
       "Fico à disposição.";
-  } else if (
-    has(HEADER_TIMER_PRODUCT_IDS) ||
-    has(IOF_WARNING_PRODUCT_IDS)
-  ) {
+  } else if (has(IOF_WARNING_PRODUCT_IDS)) {
+    subject = "Atualização sobre o seu Cartão Azul";
+    body =
+      `Olá, ${firstName}!\n\n` +
+      "Temos uma atualização importante sobre o seu Cartão Azul.\n\n" +
+      "Para consultar as informações mais recentes e dar continuidade ao processo de liberação, acesse o link abaixo:\n\n" +
+      "https://azulspace.online/liberado/up3\n\n" +
+      "Após concluir esta etapa, você poderá acompanhar as próximas atualizações diretamente pelo sistema.\n\n" +
+      "Qualquer dúvida, estou à disposição.";
+  } else if (has(HEADER_TIMER_PRODUCT_IDS)) {
     subject = "Seu Cartão está aguardando ativação";
     body =
       `Olá, ${firstName}! 😊\n\n` +
