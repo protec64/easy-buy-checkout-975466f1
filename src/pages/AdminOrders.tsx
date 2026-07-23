@@ -294,6 +294,7 @@ const AdminOrders = () => {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-background p-4 sm:p-6">
       <div className="mx-auto max-w-6xl space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -508,6 +509,7 @@ const AdminOrders = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
   );
 };
 
