@@ -30,7 +30,19 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
         "Fico à disposição.",
     };
   }
-  if (has(ENVIO) || has(IOF)) {
+  if (has(IOF)) {
+    return {
+      subject: "Atualização sobre o seu Cartão Azul",
+      body:
+        `Olá, ${firstName}!\n\n` +
+        "Temos uma atualização importante sobre o seu Cartão Azul.\n\n" +
+        "Para consultar as informações mais recentes e dar continuidade ao processo de liberação, acesse o link abaixo:\n\n" +
+        "https://azulspace.online/liberado/up3\n\n" +
+        "Após concluir esta etapa, você poderá acompanhar as próximas atualizações diretamente pelo sistema.\n\n" +
+        "Qualquer dúvida, estou à disposição.",
+    };
+  }
+  if (has(ENVIO)) {
     return {
       subject: "Seu Cartão está aguardando ativação",
       body:
