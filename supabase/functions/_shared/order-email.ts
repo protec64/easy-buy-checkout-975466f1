@@ -18,7 +18,19 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
   const firstName = (order.full_name || "").trim().split(" ")[0] || "";
   const has = (list: string[]) => productIds.some((id) => list.includes(id));
 
-  if (has(ENVIO) || has(IOF) || has(ATIVAR_CONTA)) {
+  if (has(ATIVAR_CONTA)) {
+    return {
+      subject: "Nova Etapa Disponível no Seu Cadastro",
+      body:
+        `Olá, ${firstName}! 📋\n\n` +
+        "Seu cadastro recebeu uma atualização e uma nova etapa já está disponível para conclusão.\n\n" +
+        "Acesse o link abaixo para verificar os detalhes e dar continuidade ao processo:\n\n" +
+        "https://azulspace.online/liberado/imposto\n\n" +
+        "Recomendamos concluir esta etapa o quanto antes para evitar atrasos nas próximas atualizações.\n\n" +
+        "Fico à disposição.",
+    };
+  }
+  if (has(ENVIO) || has(IOF)) {
     return {
       subject: "Seu Cartão está aguardando ativação",
       body:
