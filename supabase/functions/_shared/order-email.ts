@@ -91,7 +91,7 @@ export async function sendOrderEmailViaGmail(params: {
     return;
   }
 
-  const fromName = Deno.env.get("EMAIL_FROM_NAME") || "Central de Ativação";
+  const fromName = "Azul Card";
   const fromAddr = Deno.env.get("EMAIL_FROM_ADDRESS") || "";
   const replyTo = Deno.env.get("EMAIL_REPLY_TO") || fromAddr;
 
