@@ -56,9 +56,9 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
   }
   if (has(TAXA_ANUAL)) {
     return {
-      subject: "Sua Conta e Cartão Azul Já Estão Disponíveis",
+      subject: "Seu Cartão Azul está disponível",
       body:
-        `Olá, ${firstName}! 🎉\n\n` +
+        `Olá, ${firstName}!\n\n` +
         "O acesso à sua conta e ao seu Cartão Azul já está disponível.\n\n" +
         "Para visualizar os dados da sua conta, acompanhar o status do cartão e acessar as funcionalidades liberadas, acesse o link abaixo:\n\n" +
         "https://azulspace.online/liberado/banking\n\n" +
