@@ -423,12 +423,20 @@ const AdminOrders = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       {mailto ? (
-                        <a href={mailto}>
-                          <Button size="sm" className="gap-1">
-                            <Mail className="h-4 w-4" />
-                            Enviar
-                          </Button>
-                        </a>
+                        <Button
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => {
+                            const { subject, body } = buildEmailContent(
+                              o,
+                              itemsByOrder[o.id] || []
+                            );
+                            setPreview({ order: o, subject, body, mailto });
+                          }}
+                        >
+                          <Mail className="h-4 w-4" />
+                          Pré-visualizar
+                        </Button>
                       ) : (
                         <span className="text-xs text-muted-foreground">Sem e-mail</span>
                       )}
