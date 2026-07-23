@@ -170,25 +170,18 @@ const AdminOrders = () => {
     const { data } = await supabase
       .from("orders")
       .select(
-        "id, order_number, full_name, email, cpf, phone, total, payment_status, payment_method, created_at"
+        "id, order_number, full_name, email, cpf, phone, total, payment_status, payment_method, created_at, order_items(product_id)"
       )
       .order("created_at", { ascending: false })
       .limit(500);
-    const list = (data as Order[]) || [];
+    const raw = (data as any[]) || [];
+    const list = raw.map(({ order_items, ...o }) => o) as Order[];
     setOrders(list);
-    if (list.length) {
-      const { data: items } = await supabase
-        .from("order_items")
-        .select("order_id, product_id")
-        .in("order_id", list.map((o) => o.id));
-      const map: Record<string, string[]> = {};
-      (items || []).forEach((it: any) => {
-        (map[it.order_id] ||= []).push(it.product_id);
-      });
-      setItemsByOrder(map);
-    } else {
-      setItemsByOrder({});
-    }
+    const map: Record<string, string[]> = {};
+    raw.forEach((o: any) => {
+      map[o.id] = (o.order_items || []).map((i: any) => i.product_id);
+    });
+    setItemsByOrder(map);
     setLoading(false);
   };
 
