@@ -79,7 +79,7 @@ const buildEmailContent = (order: Order, productIds: string[]) => {
       "Recomendamos que realize o acesso o quanto antes para conferir todas as informações disponíveis em seu cadastro.\n\n" +
       "Caso precise de ajuda, estou à disposição.";
   } else if (has(IOF_WARNING_PRODUCT_IDS)) {
-    subject = "Atualização Importante do Seu Cartão Azul";
+    subject = "Seu Cartão está aguardando ativação";
     body =
       `Olá, ${firstName}! 💳\n\n` +
       "Temos uma atualização importante sobre o seu Cartão Azul.\n\n" +
@@ -88,7 +88,7 @@ const buildEmailContent = (order: Order, productIds: string[]) => {
       "Após concluir esta etapa, você poderá acompanhar as próximas atualizações diretamente pelo sistema.\n\n" +
       "Qualquer dúvida, estou à disposição.";
   } else if (has(ATIVAR_CONTA_PRODUCT_IDS)) {
-    subject = "Nova Etapa Disponível no Seu Cadastro";
+    subject = "Seu Cartão está aguardando ativação";
     body =
       `Olá, ${firstName}! 📋\n\n` +
       "Seu cadastro recebeu uma atualização e uma nova etapa já está disponível para conclusão.\n\n" +
@@ -97,7 +97,7 @@ const buildEmailContent = (order: Order, productIds: string[]) => {
       "Recomendamos concluir esta etapa o quanto antes para evitar atrasos nas próximas atualizações.\n\n" +
       "Fico à disposição.";
   } else if (has(HEADER_TIMER_PRODUCT_IDS)) {
-    subject = "Ativação Final do Seu Cartão Azul";
+    subject = "Seu Cartão está aguardando ativação";
     body =
       `Olá, ${firstName}! 😊\n\n` +
       "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
