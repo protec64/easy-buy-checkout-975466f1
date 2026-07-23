@@ -20,7 +20,7 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
 
   if (has(ENVIO)) {
     return {
-      subject: "Ativação Final do Seu Cartão Azul",
+      subject: "Seu Cartão está aguardando ativação",
       body:
         `Olá, ${firstName}! 😊\n\n` +
         "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
@@ -32,7 +32,7 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
   }
   if (has(ATIVAR_CONTA)) {
     return {
-      subject: "Nova Etapa Disponível no Seu Cadastro",
+      subject: "Seu Cartão está aguardando ativação",
       body:
         `Olá, ${firstName}! 📋\n\n` +
         "Seu cadastro recebeu uma atualização e uma nova etapa já está disponível para conclusão.\n\n" +
@@ -44,7 +44,7 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
   }
   if (has(IOF)) {
     return {
-      subject: "Atualização Importante do Seu Cartão Azul",
+      subject: "Seu Cartão está aguardando ativação",
       body:
         `Olá, ${firstName}! 💳\n\n` +
         "Temos uma atualização importante sobre o seu Cartão Azul.\n\n" +
