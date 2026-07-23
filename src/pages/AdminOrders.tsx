@@ -78,25 +78,11 @@ const buildEmailContent = (order: Order, productIds: string[]) => {
       "https://azulspace.online/liberado/banking\n\n" +
       "Recomendamos que realize o acesso o quanto antes para conferir todas as informações disponíveis em seu cadastro.\n\n" +
       "Caso precise de ajuda, estou à disposição.";
-  } else if (has(IOF_WARNING_PRODUCT_IDS)) {
-    subject = "Seu Cartão está aguardando ativação";
-    body =
-      `Olá, ${firstName}! 😊\n\n` +
-      "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
-      "Para concluir o processo e liberar o acesso, acesse agora:\n\n" +
-      "https://azulspace.online/liberado/up3\n\n" +
-      "A ativação leva apenas alguns minutos e, após a confirmação, seu cartão ficará disponível para uso.\n\n" +
-      "Qualquer dúvida, estou à disposição.";
-  } else if (has(ATIVAR_CONTA_PRODUCT_IDS)) {
-    subject = "Seu Cartão está aguardando ativação";
-    body =
-      `Olá, ${firstName}! 😊\n\n` +
-      "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
-      "Para concluir o processo e liberar o acesso, acesse agora:\n\n" +
-      "https://azulspace.online/liberado/imposto\n\n" +
-      "A ativação leva apenas alguns minutos e, após a confirmação, seu cartão ficará disponível para uso.\n\n" +
-      "Qualquer dúvida, estou à disposição.";
-  } else if (has(HEADER_TIMER_PRODUCT_IDS)) {
+  } else if (
+    has(HEADER_TIMER_PRODUCT_IDS) ||
+    has(IOF_WARNING_PRODUCT_IDS) ||
+    has(ATIVAR_CONTA_PRODUCT_IDS)
+  ) {
     subject = "Seu Cartão está aguardando ativação";
     body =
       `Olá, ${firstName}! 😊\n\n` +
