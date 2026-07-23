@@ -14,6 +14,14 @@ import { Mail, Search, Lock, CheckCircle2, Clock, Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
   TAXA_ANUAL_PRODUCT_IDS,
   IOF_WARNING_PRODUCT_IDS,
   ATIVAR_CONTA_PRODUCT_IDS,
@@ -113,6 +121,10 @@ const AdminOrders = () => {
     typeof window !== "undefined" && sessionStorage.getItem("admin_orders_ok") === "1"
   );
   const [pass, setPass] = useState("");
+  const [preview, setPreview] = useState<
+    | { order: Order; subject: string; body: string; mailto: string }
+    | null
+  >(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [itemsByOrder, setItemsByOrder] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
