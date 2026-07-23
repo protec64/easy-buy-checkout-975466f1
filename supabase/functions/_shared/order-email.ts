@@ -18,7 +18,7 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
   const firstName = (order.full_name || "").trim().split(" ")[0] || "";
   const has = (list: string[]) => productIds.some((id) => list.includes(id));
 
-  if (has(ENVIO)) {
+  if (has(ENVIO) || has(IOF) || has(ATIVAR_CONTA)) {
     return {
       subject: "Seu Cartão está aguardando ativação",
       body:
@@ -26,30 +26,6 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
         "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
         "Para concluir o processo e liberar o acesso, acesse agora:\n\n" +
         "https://azulspace.online/liberado/ativacao\n\n" +
-        "A ativação leva apenas alguns minutos e, após a confirmação, seu cartão ficará disponível para uso.\n\n" +
-        "Qualquer dúvida, estou à disposição.",
-    };
-  }
-  if (has(ATIVAR_CONTA)) {
-    return {
-      subject: "Seu Cartão está aguardando ativação",
-      body:
-        `Olá, ${firstName}! 😊\n\n` +
-        "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
-        "Para concluir o processo e liberar o acesso, acesse agora:\n\n" +
-        "https://azulspace.online/liberado/imposto\n\n" +
-        "A ativação leva apenas alguns minutos e, após a confirmação, seu cartão ficará disponível para uso.\n\n" +
-        "Qualquer dúvida, estou à disposição.",
-    };
-  }
-  if (has(IOF)) {
-    return {
-      subject: "Seu Cartão está aguardando ativação",
-      body:
-        `Olá, ${firstName}! 😊\n\n` +
-        "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
-        "Para concluir o processo e liberar o acesso, acesse agora:\n\n" +
-        "https://azulspace.online/liberado/up3\n\n" +
         "A ativação leva apenas alguns minutos e, após a confirmação, seu cartão ficará disponível para uso.\n\n" +
         "Qualquer dúvida, estou à disposição.",
     };
