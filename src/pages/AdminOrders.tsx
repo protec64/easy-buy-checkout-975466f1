@@ -14,6 +14,14 @@ import { Mail, Search, Lock, CheckCircle2, Clock, Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
   TAXA_ANUAL_PRODUCT_IDS,
   IOF_WARNING_PRODUCT_IDS,
   ATIVAR_CONTA_PRODUCT_IDS,
@@ -113,6 +121,10 @@ const AdminOrders = () => {
     typeof window !== "undefined" && sessionStorage.getItem("admin_orders_ok") === "1"
   );
   const [pass, setPass] = useState("");
+  const [preview, setPreview] = useState<
+    | { order: Order; subject: string; body: string; mailto: string }
+    | null
+  >(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [itemsByOrder, setItemsByOrder] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
@@ -282,6 +294,7 @@ const AdminOrders = () => {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-background p-4 sm:p-6">
       <div className="mx-auto max-w-6xl space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -411,12 +424,20 @@ const AdminOrders = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       {mailto ? (
-                        <a href={mailto}>
-                          <Button size="sm" className="gap-1">
-                            <Mail className="h-4 w-4" />
-                            Enviar
-                          </Button>
-                        </a>
+                        <Button
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => {
+                            const { subject, body } = buildEmailContent(
+                              o,
+                              itemsByOrder[o.id] || []
+                            );
+                            setPreview({ order: o, subject, body, mailto });
+                          }}
+                        >
+                          <Mail className="h-4 w-4" />
+                          Pré-visualizar
+                        </Button>
                       ) : (
                         <span className="text-xs text-muted-foreground">Sem e-mail</span>
                       )}
@@ -439,6 +460,56 @@ const AdminOrders = () => {
         )}
       </div>
     </div>
+
+      <Dialog open={!!preview} onOpenChange={(open) => !open && setPreview(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Pré-visualização do e-mail</DialogTitle>
+            <DialogDescription>
+              Confira o conteúdo antes de abrir no seu cliente de e-mail.
+            </DialogDescription>
+          </DialogHeader>
+          {preview && (
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-[80px_1fr] gap-2 rounded-lg border border-border bg-muted/40 p-3">
+                <span className="text-muted-foreground">Para:</span>
+                <span className="font-medium text-foreground break-all">{preview.order.email}</span>
+                <span className="text-muted-foreground">Pedido:</span>
+                <span className="font-medium text-foreground">{preview.order.order_number}</span>
+                <span className="text-muted-foreground">Assunto:</span>
+                <span className="font-semibold text-foreground">{preview.subject}</span>
+              </div>
+              <div className="rounded-lg border border-border bg-card p-4 whitespace-pre-wrap leading-relaxed text-foreground max-h-[45vh] overflow-y-auto">
+                {preview.body}
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setPreview(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                if (!preview) return;
+                navigator.clipboard?.writeText(preview.body).catch(() => {});
+                toast({ title: "Corpo copiado", description: "Texto do e-mail na área de transferência." });
+              }}
+              variant="secondary"
+            >
+              Copiar texto
+            </Button>
+            {preview && (
+              <a href={preview.mailto} onClick={() => setPreview(null)}>
+                <Button className="gap-1">
+                  <Mail className="h-4 w-4" />
+                  Abrir no e-mail
+                </Button>
+              </a>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
