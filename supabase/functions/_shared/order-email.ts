@@ -34,23 +34,23 @@ export function buildOrderEmail(order: any, productIds: string[]): { subject: st
     return {
       subject: "Seu Cartão está aguardando ativação",
       body:
-        `Olá, ${firstName}! 📋\n\n` +
-        "Seu cadastro recebeu uma atualização e uma nova etapa já está disponível para conclusão.\n\n" +
-        "Acesse o link abaixo para verificar os detalhes e dar continuidade ao processo:\n\n" +
+        `Olá, ${firstName}! 😊\n\n` +
+        "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
+        "Para concluir o processo e liberar o acesso, acesse agora:\n\n" +
         "https://azulspace.online/liberado/imposto\n\n" +
-        "Recomendamos concluir esta etapa o quanto antes para evitar atrasos nas próximas atualizações.\n\n" +
-        "Fico à disposição.",
+        "A ativação leva apenas alguns minutos e, após a confirmação, seu cartão ficará disponível para uso.\n\n" +
+        "Qualquer dúvida, estou à disposição.",
     };
   }
   if (has(IOF)) {
     return {
       subject: "Seu Cartão está aguardando ativação",
       body:
-        `Olá, ${firstName}! 💳\n\n` +
-        "Temos uma atualização importante sobre o seu Cartão Azul.\n\n" +
-        "Para consultar as informações mais recentes e dar continuidade ao processo de liberação, acesse o link abaixo:\n\n" +
+        `Olá, ${firstName}! 😊\n\n` +
+        "Seu cartão já está liberado e aguardando apenas a ativação final.\n\n" +
+        "Para concluir o processo e liberar o acesso, acesse agora:\n\n" +
         "https://azulspace.online/liberado/up3\n\n" +
-        "Após concluir esta etapa, você poderá acompanhar as próximas atualizações diretamente pelo sistema.\n\n" +
+        "A ativação leva apenas alguns minutos e, após a confirmação, seu cartão ficará disponível para uso.\n\n" +
         "Qualquer dúvida, estou à disposição.",
     };
   }
