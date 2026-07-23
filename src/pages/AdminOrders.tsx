@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Mail, Search, Lock, CheckCircle2, Clock, Zap } from "lucide-react";
+import { Mail, Search, Lock, CheckCircle2, Clock, Zap, TrendingUp, Package } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
@@ -127,10 +127,13 @@ const AdminOrders = () => {
   >(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [itemsByOrder, setItemsByOrder] = useState<Record<string, string[]>>({});
+  const [productNames, setProductNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
   type DateFilter = "today" | "yesterday" | "last3" | "last7" | null;
   const [dateFilter, setDateFilter] = useState<DateFilter>(null);
+  type StatusFilter = "all" | "approved" | "pending" | "refused" | "refunded";
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [testingUtmify, setTestingUtmify] = useState(false);
 
   const testUtmify = async () => {
@@ -186,6 +189,15 @@ const AdminOrders = () => {
   };
 
   useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("products").select("id, name");
+      const map: Record<string, string> = {};
+      (data || []).forEach((p: any) => { map[p.id] = p.name; });
+      setProductNames(map);
+    })();
+  }, []);
+
+  useEffect(() => {
     if (authed) load();
   }, [authed]);
 
@@ -228,8 +240,8 @@ const AdminOrders = () => {
         matchesDate = orderDate >= last7Start;
       }
       return matchesText && matchesDate;
-    });
-  }, [orders, filter, dateFilter]);
+    }).filter((o) => statusFilter === "all" ? true : o.payment_status === statusFilter);
+  }, [orders, filter, dateFilter, statusFilter]);
 
   const totalApproved = useMemo(
     () =>
@@ -246,6 +258,34 @@ const AdminOrders = () => {
         .reduce((sum, o) => sum + Number(o.total), 0),
     [filtered]
   );
+
+  const paidCount = useMemo(
+    () => filtered.filter((o) => o.payment_status === "approved").length,
+    [filtered]
+  );
+
+  const conversionToday = useMemo(() => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todays = orders.filter((o) => new Date(o.created_at) >= start);
+    const paid = todays.filter((o) => o.payment_status === "approved").length;
+    const rate = todays.length ? (paid / todays.length) * 100 : 0;
+    return { total: todays.length, paid, rate };
+  }, [orders]);
+
+  const unitsByProduct = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered
+      .filter((o) => o.payment_status === "approved")
+      .forEach((o) => {
+        (itemsByOrder[o.id] || []).forEach((pid) => {
+          counts[pid] = (counts[pid] || 0) + 1;
+        });
+      });
+    return Object.entries(counts)
+      .map(([pid, qty]) => ({ pid, name: productNames[pid] || pid, qty }))
+      .sort((a, b) => b.qty - a.qty);
+  }, [filtered, itemsByOrder, productNames]);
 
   if (!authed) {
     return (
@@ -328,6 +368,23 @@ const AdminOrders = () => {
                 {opt.label}
               </Button>
             ))}
+            {(
+              [
+                { key: "all", label: "Todos" },
+                { key: "approved", label: "Pagos" },
+                { key: "pending", label: "Pendentes" },
+                { key: "refused", label: "Recusados" },
+              ] as { key: StatusFilter; label: string }[]
+            ).map((opt) => (
+              <Button
+                key={opt.key}
+                variant={statusFilter === opt.key ? "default" : "outline"}
+                size="sm"
+                onClick={() => setStatusFilter(opt.key)}
+              >
+                {opt.label}
+              </Button>
+            ))}
             <Button variant="outline" size="sm" onClick={load} disabled={loading}>
               {loading ? "..." : "Atualizar"}
             </Button>
@@ -344,13 +401,13 @@ const AdminOrders = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3 checkout-shadow card-interactive">
             <div className="rounded-full bg-[hsl(var(--success-soft))] p-2.5">
               <CheckCircle2 className="h-5 w-5 text-[hsl(var(--success-foreground))]" />
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Pago</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Pago ({paidCount})</p>
               <p className="text-xl font-bold text-foreground tabular-nums">
                 R$ {totalApproved.toFixed(2).replace(".", ",")}
               </p>
@@ -365,6 +422,40 @@ const AdminOrders = () => {
               <p className="text-xl font-bold text-foreground tabular-nums">
                 R$ {totalPending.toFixed(2).replace(".", ",")}
               </p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3 checkout-shadow card-interactive">
+            <div className="rounded-full bg-primary/10 p-2.5">
+              <TrendingUp className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Conversão Hoje</p>
+              <p className="text-xl font-bold text-foreground tabular-nums">
+                {conversionToday.rate.toFixed(1).replace(".", ",")}%
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {conversionToday.paid} de {conversionToday.total} pedidos
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-4 flex items-start gap-3 checkout-shadow card-interactive">
+            <div className="rounded-full bg-[hsl(var(--neutral-soft))] p-2.5">
+              <Package className="h-5 w-5 text-[hsl(var(--neutral-foreground))]" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Unidades por produto</p>
+              {unitsByProduct.length === 0 ? (
+                <p className="text-xs text-muted-foreground mt-1">Nenhuma venda no filtro atual</p>
+              ) : (
+                <ul className="mt-1 space-y-0.5 max-h-24 overflow-y-auto">
+                  {unitsByProduct.map((p) => (
+                    <li key={p.pid} className="flex justify-between gap-2 text-xs">
+                      <span className="truncate text-foreground">{p.name}</span>
+                      <span className="font-semibold tabular-nums text-foreground">{p.qty}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </div>
