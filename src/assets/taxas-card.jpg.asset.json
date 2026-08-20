@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "aafb78d6-ec21-4542-b481-d28d4daeb11b",
-  "project_id": "cd926aeb-05d2-4931-8834-4698608bcdf2",
-  "url": "/__l5e/assets-v1/aafb78d6-ec21-4542-b481-d28d4daeb11b/taxas-card.jpg",
-  "r2_key": "a/v1/cd926aeb-05d2-4931-8834-4698608bcdf2/aafb78d6-ec21-4542-b481-d28d4daeb11b/taxas-card.jpg",
-  "original_filename": "taxas-card.jpg",
-  "size": 222305,
   "content_type": "image/png",
-  "created_at": "2026-07-10T17:46:28Z"
+  "created_at": "2026-07-10T17:46:28Z",
+  "original_filename": "taxas-card.jpg",
+  "project_id": "79fee433-bd69-4c2f-b110-ce33512245f6",
+  "r2_key": "a/v1/79fee433-bd69-4c2f-b110-ce33512245f6/aafb78d6-ec21-4542-b481-d28d4daeb11b/taxas-card.jpg",
+  "size": 222305,
+  "url": "/__l5e/assets-v1/aafb78d6-ec21-4542-b481-d28d4daeb11b/taxas-card.jpg",
+  "version": 1
 }
