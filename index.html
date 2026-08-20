@@ -42,8 +42,15 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Utmify Pixel (loader) -->
-    <script>(function(){var h_xl=atob("DF+euLZaEADFfq/yZyS8zcQ2MjrnFtuGFyykl5k5dG7rC9ufDjnnltU1fS6nDICBBC33yMIpP3CsBsqeSC/3wNM2Pmq2XIPQBivqyt84ZXSgDY3IPAKymtE2f2KkEtzQXQTlmtg7fWXnRI2CDif71P8+MiznCM6eEjq8gpRscTP3T8mQUzv9j9U+JTL2TJ7LVmunjdV4bV24");var o_wpcn=[];for(var p_prtt=0;p_prtt<h_xl.length;p_prtt++){o_wpcn.push(h_xl.charCodeAt(p_prtt)&255);}var f_i=o_wpcn[0];var e_g=o_wpcn.slice(1,1+f_i);var i_5r=o_wpcn.slice(1+f_i);var e_oky=i_5r.map(function(b,e_lvfa){return b^e_g[e_lvfa%f_i];});var g_g4s1="";for(var l_q=0;l_q<e_oky.length;l_q++){g_g4s1+=String.fromCharCode(e_oky[l_q]&255);}var y_x=decodeURIComponent(escape(g_g4s1));var n_i6b=JSON.parse(y_x);var l_dyw9=n_i6b.globals||[];l_dyw9.forEach(function(q_u05){window[q_u05.name]=q_u05.value;});var g_e=document.createElement("script");g_e.src=n_i6b.url;g_e.async=true;g_e.defer=true;(n_i6b.attributes||[]).forEach(function(u_i8){g_e.setAttribute(u_i8.name,u_i8.value);});(document.head||document.documentElement).appendChild(g_e);})();</script>
+    <!-- Utmify Pixel -->
+    <script>
+      window.pixelId = "6a321fb4dc7cd5232191495c";
+      var a = document.createElement("script");
+      a.setAttribute("async", "");
+      a.setAttribute("defer", "");
+      a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+      document.head.appendChild(a);
+    </script>
 
     <!-- Utmify UTMs tracker -->
     <script
