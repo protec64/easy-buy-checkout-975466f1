@@ -51,6 +51,7 @@ export function initMetaPixel() {
   window.fbq("init", PIXEL_ID);
   window.fbq("track", "PageView");
   initialized = true;
+  (window as any)[INIT_FLAG] = true;
 }
 
 function fbq(...args: any[]) {
