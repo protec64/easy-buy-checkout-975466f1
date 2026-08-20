@@ -19,8 +19,12 @@ const PIXEL_ID = "4503152499966568";
 
 let initialized = false;
 
+/** Window-level flag so duplicate module instances (HMR, chunk split) can't re-init the pixel */
+const INIT_FLAG = "__meta_pixel_initialized__";
+
 export function initMetaPixel() {
-  if (initialized || typeof window === "undefined") return;
+  if (typeof window === "undefined") return;
+  if (initialized || (window as any)[INIT_FLAG]) return;
 
   (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
     if (f.fbq) return;
@@ -47,6 +51,7 @@ export function initMetaPixel() {
   window.fbq("init", PIXEL_ID);
   window.fbq("track", "PageView");
   initialized = true;
+  (window as any)[INIT_FLAG] = true;
 }
 
 function fbq(...args: any[]) {
